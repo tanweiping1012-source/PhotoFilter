@@ -1,0 +1,16 @@
+{
+  "%@，已丢弃本次评分。": "%1$@. This scoring result was discarded.",
+  "AI评分结果未覆盖全部候选照片，已停止应用结果。": "AI scoring did not cover every candidate photo, so the result was not applied.",
+  "AI评分包含照片间的相对比较，已要求模型重新独立评分。": "AI scoring compared photos with each other, so the model was asked to score them independently again.",
+  "AI评分进行中，不能同时发起另一项评分。": "AI scoring is active. Another scoring task cannot start at the same time.",
+  "主体、层次和旅途氛围均衡，画面完成度高。": "The subject, depth, and travel atmosphere are balanced, with a high level of visual completion.",
+  "全局第 %lld 名": "Global rank %1$lld",
+  "全局第 %lld 名 · 评分优先": "Global rank %1$lld · Top Score",
+  "叙事表达仍可加强": "The visual story could be stronger",
+  "将仅在内存中生成并发送 %lld 张%@无元数据 JPEG 预览到 %@，交由%@逐张独立评分。不会发送原始文件、文件名、本地路径或 EXIF/GPS。更大的预览可能增加上传量、等待时间和供应商费用；AI评分不会替你保留或淘汰照片。": "%1$lld metadata-free JPEG previews at %2$@ will be created in memory and sent to %3$@ for independent scoring by %4$@. Original files, filenames, local paths, and EXIF/GPS are not sent. Larger previews may increase upload size, wait time, and provider charges. AI scoring never keeps or rejects photos for you.",
+  "将使用%@和%@预览，通过 %@ 独立评估 %lld 张候选照片；全部完成后按统一分数全局排序，取前 %lld 张。每次请求只发送 2–5 张无元数据 JPEG，不发送原图、文件名、路径或 EXIF/GPS；请求至少间隔 60 秒，预计最短约 %lld 分钟。更大的预览可能增加上传量、等待时间和供应商费用；格式异常会自动重试 1 次，仍失败时会停在当前照片范围供你重试或放弃。结果不会自动标记为保留。": "Using %1$@ with %2$@ previews through %3$@, the app will independently score %4$lld candidate photos. After every photo is scored, it will rank all scores globally and select the top %5$lld. Each request sends 2–5 metadata-free JPEG previews, never originals, filenames, paths, or EXIF/GPS. Requests are at least 60 seconds apart and take at least about %6$lld minutes. Larger previews may increase upload size, wait time, and provider charges. Invalid output is retried once; if it still fails, scoring stops at the current photo range for retry or cancellation. Results are not marked Keep automatically.",
+  "已载入 %lld 张照片的 AI评分。最终取舍仍由你决定。": "AI scores were loaded for %1$lld photos. You still make the final choices.",
+  "待评分照片不足以支持当前保留目标，请减少保留数量。": "There are not enough photos to support the current keep target. Reduce the keep target.",
+  "独立评分": "Independent Score",
+  "画面技术表现可用，但瞬间和叙事张力仍可加强。": "The technical quality is usable, but the moment and visual story could be stronger."
+}

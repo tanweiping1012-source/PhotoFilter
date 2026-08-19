@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Travel Photo Filter Categorized Independent Aesthetic Score v3",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "requestID", "scope", "reviews"],
+  "properties": {
+    "version": { "const": "v3" },
+    "requestID": { "type": "string", "minLength": 1 },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "groupID", "category"],
+      "properties": {
+        "kind": { "enum": ["burst", "similarity", "curation", "finalSelection"] },
+        "groupID": { "type": "string", "minLength": 1 },
+        "category": { "enum": ["people", "scenery"] }
+      }
+    },
+    "reviews": {
+      "type": "array",
+      "minItems": 2,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "photo_id",
+          "score",
+          "dimensions",
+          "reasons",
+          "summary"
+        ],
+        "properties": {
+          "photo_id": { "type": "string", "pattern": "^photo_[0-9]{3}$" },
+          "score": { "type": "integer", "minimum": 0, "maximum": 100 },
+          "dimensions": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "moment",
+              "composition",
+              "subject",
+              "lighting",
+              "storytelling"
+            ],
+            "properties": {
+              "moment": { "type": "integer", "minimum": 0, "maximum": 100 },
+              "composition": { "type": "integer", "minimum": 0, "maximum": 100 },
+              "subject": { "type": "integer", "minimum": 0, "maximum": 100 },
+              "lighting": { "type": "integer", "minimum": 0, "maximum": 100 },
+              "storytelling": { "type": "integer", "minimum": 0, "maximum": 100 }
+            }
+          },
+          "reasons": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 3,
+            "items": { "type": "string", "minLength": 2, "maxLength": 80 }
+          },
+          "summary": { "type": "string", "minLength": 4, "maxLength": 120 }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "保存兼容配置": "Save Compatible Configuration",
+  "兼容配置有效；首次 AI评分会验证服务实际是否支持图片和 JSON 输出。": "The compatible configuration is valid. The first AI scoring request will verify whether the service actually supports images and JSON output.",
+  "可随时在 AI评分设置中分别删除各供应商保存在此 Mac Keychain 中的 Key。": "You can delete each provider key from this Mac's Keychain at any time in AI Scoring Settings.",
+  "完整 Chat Completions endpoint": "Full Chat Completions endpoint",
+  "将仅在内存中生成并发送 %lld 张%@无元数据 JPEG 预览到 %@，交由%@比较。不会发送原始文件、文件名、本地路径或 EXIF/GPS。更大的预览可能增加上传量、等待时间和供应商费用；AI 结果只作为组内建议，不会替你保留或淘汰照片。": "%1$lld metadata-free JPEG previews at %2$@ will be created in memory and sent to %3$@ for comparison by %4$@. Original files, filenames, local paths, and EXIF/GPS are not sent. Larger previews may increase upload size, wait time, and provider charges. AI results are group recommendations and never keep or reject photos for you.",
+  "将使用%@和%@预览，通过 %@ 把 %lld 张候选分成 %lld 批，每张恰好参与一次比较，最终收敛到 %lld 张。每批只发送无元数据 JPEG，不发送原图、文件名、路径或 EXIF/GPS；批次至少间隔 60 秒，预计最短约 %lld 分钟。更大的预览可能增加上传量、等待时间和供应商费用；格式异常会自动重试 1 次，仍失败时会停在当前批次供你重试或放弃。结果不会自动标记为保留。": "Using %1$@ with %2$@ previews through %3$@, %4$lld candidates will be split into %5$lld batches. Each photo is compared once, producing %6$lld final results. Each batch sends only metadata-free JPEG previews, never originals, filenames, paths, or EXIF/GPS. Batches are at least 60 seconds apart and take at least about %7$lld minutes. Larger previews may increase upload size, wait time, and provider charges. Invalid output is retried once; if it still fails, the run stops at that batch for retry or cancellation. Results are not marked Keep automatically.",
+  "已保存自定义兼容接口和模型 ID。": "Saved the custom compatible endpoint and model ID.",
+  "当前 AI 模型配置不完整，未发送请求。": "The current AI model configuration is incomplete. No request was sent.",
+  "接口": "Endpoint",
+  "显示名称": "Display Name",
+  "每个供应商的 Key 独立保存在此 Mac 的 Keychain，不写入项目状态、日志或导出文件；发起 AI 请求时只用于所选供应商的鉴权请求头。": "Each provider key is stored separately in this Mac's Keychain. Keys are not written to project state, logs, or exports and are used only in the selected provider's authentication header.",
+  "自定义 OpenAI-compatible": "Custom OpenAI-compatible",
+  "自定义兼容接口": "Custom Compatible Endpoint",
+  "自定义兼容配置无效，未保存。": "The custom compatible configuration is invalid and was not saved.",
+  "评分图片只发送给本次选择的火山方舟、MiniMax、OpenAI、Anthropic、Google、阿里云百炼、xAI 或自定义兼容接口。供应商可通过你的 API Key 将调用关联到对应账号；同一批不会同时发送给多个服务。": "Scoring images are sent only to the selected Volcengine Ark, MiniMax, OpenAI, Anthropic, Google, Alibaba Cloud Model Studio, xAI, or custom compatible endpoint. The service may associate calls with your account through the API key; the same batch is never sent to multiple services.",
+  "请先在 AI评分设置中完成自定义接口和模型 ID 配置。": "Complete the custom endpoint and model ID in AI Scoring Settings first.",
+  "请输入完整的 /chat/completions 地址和模型 ID。远程地址必须使用 HTTPS；HTTP 仅允许本机回环地址。": "Enter a full /chat/completions URL and model ID. Remote endpoints must use HTTPS; HTTP is allowed only for local loopback addresses.",
+  "阿里云百炼": "Alibaba Cloud Model Studio"
+}

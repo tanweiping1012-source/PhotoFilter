@@ -1,0 +1,365 @@
+import Foundation
+
+struct AestheticReviewCandidateGroup: Equatable {
+    let scope: AestheticReviewScope
+    let localPhotoIDs: [String]
+
+    var photoCount: Int {
+        localPhotoIDs.count
+    }
+}
+
+struct AIFinalSelectionRunPlan: Equatable {
+    let groups: [AestheticReviewCandidateGroup]
+    let candidatePhotoCount: Int
+    let targetWinnerCount: Int
+
+    var requestCount: Int { groups.count }
+
+    var transmittedPhotoCount: Int {
+        groups.reduce(0) { $0 + $1.photoCount }
+    }
+
+    var coveredPhotoIDs: Set<String> {
+        Set(groups.flatMap(\.localPhotoIDs))
+    }
+
+    var estimatedMinimumDuration: TimeInterval {
+        TimeInterval(max(0, requestCount - 1)) * AIReviewConfiguration.minimumReviewInterval
+    }
+
+    var estimatedMinimumMinutes: Int {
+        Int(ceil(estimatedMinimumDuration / 60))
+    }
+
+    func photoRange(forGroupAt index: Int) -> ClosedRange<Int>? {
+        guard groups.indices.contains(index) else { return nil }
+        let completedBefore = groups[..<index].reduce(0) {
+            $0 + $1.photoCount
+        }
+        let start = completedBefore + 1
+        return start...(completedBefore + groups[index].photoCount)
+    }
+}
+
+enum AIFinalSelectionRunPlanError: LocalizedError, Equatable {
+    case emptyTarget
+    case duplicateCandidateID
+    case insufficientCandidates
+    case tooManyCandidates
+
+    var errorDescription: String? {
+        switch self {
+        case .emptyTarget: String(localized: "保留目标必须至少为 1 张。")
+        case .duplicateCandidateID: String(localized: "待评分照片包含重复项，无法开始评分。")
+        case .insufficientCandidates: String(localized: "待评分照片不足以支持当前保留目标，请减少保留数量。")
+        case .tooManyCandidates: String(localized: "待评分照片超过当前评分流程可安全处理的上限。")
+        }
+    }
+}
+
+/// 把候选池切成 2–5 张的传输窗口。窗口不代表比较组，也不产生局部胜者。
+enum AIFinalSelectionRunPlanner {
+    static func makePlan(
+        candidateLocalPhotoIDs: [String],
+        targetWinnerCount: Int,
+        category: PhotoCurationCategory? = nil,
+        maximumPhotosPerReview: Int = AIReviewConfiguration.maximumPhotosPerReview
+    ) throws -> AIFinalSelectionRunPlan {
+        guard targetWinnerCount > 0 else {
+            throw AIFinalSelectionRunPlanError.emptyTarget
+        }
+        guard Set(candidateLocalPhotoIDs).count == candidateLocalPhotoIDs.count else {
+            throw AIFinalSelectionRunPlanError.duplicateCandidateID
+        }
+        guard candidateLocalPhotoIDs.count >= targetWinnerCount * 2 else {
+            throw AIFinalSelectionRunPlanError.insufficientCandidates
+        }
+        guard candidateLocalPhotoIDs.count <= targetWinnerCount * maximumPhotosPerReview else {
+            throw AIFinalSelectionRunPlanError.tooManyCandidates
+        }
+
+        var cursor = 0
+        var groups: [AestheticReviewCandidateGroup] = []
+        while candidateLocalPhotoIDs.count - cursor > maximumPhotosPerReview {
+            let remainingAfterFullWindow =
+                candidateLocalPhotoIDs.count - (cursor + maximumPhotosPerReview)
+            let windowSize = remainingAfterFullWindow == 1
+                ? maximumPhotosPerReview - 1
+                : maximumPhotosPerReview
+            let ids = Array(
+                candidateLocalPhotoIDs[cursor..<(cursor + windowSize)]
+            )
+            groups.append(
+                AestheticReviewCandidateGroup(
+                    scope: AestheticReviewScope(
+                        kind: .finalSelection,
+                        groupID: String(
+                            format: "ai-score-window-%03d",
+                            groups.count + 1
+                        ),
+                        category: category
+                    ),
+                    localPhotoIDs: ids
+                )
+            )
+            cursor += windowSize
+        }
+        let remainingIDs = Array(candidateLocalPhotoIDs[cursor...])
+        if !remainingIDs.isEmpty {
+            groups.append(
+                AestheticReviewCandidateGroup(
+                    scope: AestheticReviewScope(
+                        kind: .finalSelection,
+                        groupID: String(
+                            format: "ai-score-window-%03d",
+                            groups.count + 1
+                        ),
+                        category: category
+                    ),
+                    localPhotoIDs: remainingIDs
+                )
+            )
+        }
+
+        return AIFinalSelectionRunPlan(
+            groups: groups,
+            candidatePhotoCount: candidateLocalPhotoIDs.count,
+            targetWinnerCount: targetWinnerCount
+        )
+    }
+}
+
+struct AIFinalSelectionScore: Equatable {
+    let photoID: String
+    let score: Int
+    let dimensions: AestheticScoreDimensions
+}
+
+enum AestheticScoreRanking {
+    static func precedes(
+        score lhsScore: Int,
+        dimensions lhs: AestheticScoreDimensions,
+        photoID lhsID: String,
+        score rhsScore: Int,
+        dimensions rhs: AestheticScoreDimensions,
+        photoID rhsID: String
+    ) -> Bool {
+        if lhsScore != rhsScore { return lhsScore > rhsScore }
+
+        let lhsDimensionTotal = lhs.scores.reduce(0, +)
+        let rhsDimensionTotal = rhs.scores.reduce(0, +)
+        if lhsDimensionTotal != rhsDimensionTotal {
+            return lhsDimensionTotal > rhsDimensionTotal
+        }
+
+        let lhsTieBreak = [
+            lhs.storytelling,
+            lhs.moment,
+            lhs.composition,
+            lhs.subject,
+            lhs.lighting,
+        ]
+        let rhsTieBreak = [
+            rhs.storytelling,
+            rhs.moment,
+            rhs.composition,
+            rhs.subject,
+            rhs.lighting,
+        ]
+        for (left, right) in zip(lhsTieBreak, rhsTieBreak) where left != right {
+            return left > right
+        }
+        return lhsID.localizedStandardCompare(rhsID) == .orderedAscending
+    }
+
+    static func precedes(
+        _ lhs: AestheticRecommendation,
+        photoID lhsID: String,
+        _ rhs: AestheticRecommendation,
+        photoID rhsID: String
+    ) -> Bool {
+        precedes(
+            score: lhs.score,
+            dimensions: lhs.dimensions,
+            photoID: lhsID,
+            score: rhs.score,
+            dimensions: rhs.dimensions,
+            photoID: rhsID
+        )
+    }
+}
+
+enum AIFinalSelectionRunValidationError: LocalizedError, Equatable {
+    case duplicateScore
+    case scoreOutsideCandidatePool
+    case incompleteCandidateScores
+    case finalCountMismatch
+    case duplicateCandidateFamily
+
+    var errorDescription: String? {
+        switch self {
+        case .duplicateScore: String(localized: "AI评分结果包含重复照片，已停止应用结果。")
+        case .scoreOutsideCandidatePool: String(localized: "AI评分结果包含待评分范围外的照片，已停止应用结果。")
+        case .incompleteCandidateScores: String(localized: "AI评分结果未覆盖全部候选照片，已停止应用结果。")
+        case .finalCountMismatch: String(localized: "AI评分结果数量与保留目标不一致，已停止应用结果。")
+        case .duplicateCandidateFamily: String(localized: "AI评分结果仍包含多张画面相似照片，结果未生效。")
+        }
+    }
+}
+
+enum AIFinalSelectionRetryPolicy {
+    static let maximumAutomaticRetryCount = 1
+
+    static func shouldRetry(_ error: Error, completedRetryCount: Int) -> Bool {
+        guard completedRetryCount < maximumAutomaticRetryCount else { return false }
+
+        if let clientError = error as? AestheticReviewClientError,
+           case .invalidResponse = clientError {
+            return true
+        }
+        guard let validationError = error as? AestheticReviewValidationError else {
+            return false
+        }
+        switch validationError {
+        case .duplicatePhotoID,
+             .photoIDMismatch,
+             .invalidScore,
+             .invalidDimensions,
+             .invalidReasons,
+             .invalidSummary,
+             .relativeComparison:
+            return true
+        case .unsupportedVersion, .requestIDMismatch, .scopeMismatch, .emptyRequest:
+            return false
+        }
+    }
+}
+
+enum AIFinalSelectionRunValidator {
+    static func scoredPhotos(
+        from response: AestheticReviewResponse,
+        request: AestheticReviewRequest,
+        localPhotoIDs: [String]
+    ) throws -> [AIFinalSelectionScore] {
+        try AestheticReviewValidator.validate(response, for: request)
+        guard localPhotoIDs.count == request.photos.count else {
+            throw AIFinalSelectionRunValidationError.incompleteCandidateScores
+        }
+
+        let entryByOpaqueID = Dictionary(
+            uniqueKeysWithValues: response.reviews.map { ($0.photoID, $0) }
+        )
+        return try zip(request.photos, localPhotoIDs).map { input, localID in
+            guard let entry = entryByOpaqueID[input.photoID] else {
+                throw AIFinalSelectionRunValidationError.incompleteCandidateScores
+            }
+            return AIFinalSelectionScore(
+                photoID: localID,
+                score: entry.score,
+                dimensions: entry.dimensions
+            )
+        }
+    }
+
+    static func rankedCandidatePhotoIDs(
+        scores: [AIFinalSelectionScore],
+        candidatePhotoIDs: Set<String>
+    ) throws -> [String] {
+        let returnedPhotoIDs = scores.map(\.photoID)
+        guard Set(returnedPhotoIDs).count == returnedPhotoIDs.count else {
+            throw AIFinalSelectionRunValidationError.duplicateScore
+        }
+        guard Set(returnedPhotoIDs).isSubset(of: candidatePhotoIDs) else {
+            throw AIFinalSelectionRunValidationError.scoreOutsideCandidatePool
+        }
+        guard Set(returnedPhotoIDs) == candidatePhotoIDs else {
+            throw AIFinalSelectionRunValidationError.incompleteCandidateScores
+        }
+
+        return scores.sorted { lhs, rhs in
+            AestheticScoreRanking.precedes(
+                score: lhs.score,
+                dimensions: lhs.dimensions,
+                photoID: lhs.photoID,
+                score: rhs.score,
+                dimensions: rhs.dimensions,
+                photoID: rhs.photoID
+            )
+        }.map(\.photoID)
+    }
+
+    static func finalSelectionIDs(
+        rankedCandidatePhotoIDs: [String],
+        lockedKeeperPhotoIDs: [String],
+        candidatePhotoIDs: Set<String>,
+        targetSelectionCount: Int
+    ) throws -> Set<String> {
+        guard Set(rankedCandidatePhotoIDs).count
+                == rankedCandidatePhotoIDs.count else {
+            throw AIFinalSelectionRunValidationError.duplicateScore
+        }
+        guard Set(rankedCandidatePhotoIDs) == candidatePhotoIDs else {
+            throw AIFinalSelectionRunValidationError.incompleteCandidateScores
+        }
+
+        let lockedKeeperIDs = Set(lockedKeeperPhotoIDs)
+        let remainingSelectionCount =
+            targetSelectionCount - lockedKeeperIDs.count
+        guard remainingSelectionCount >= 0,
+              rankedCandidatePhotoIDs.count >= remainingSelectionCount else {
+            throw AIFinalSelectionRunValidationError.finalCountMismatch
+        }
+        let selectedCandidateIDs = Set(
+            rankedCandidatePhotoIDs.prefix(remainingSelectionCount)
+        )
+        let finalIDs = selectedCandidateIDs.union(lockedKeeperIDs)
+        guard finalIDs.count == targetSelectionCount else {
+            throw AIFinalSelectionRunValidationError.finalCountMismatch
+        }
+        return finalIDs
+    }
+}
+
+enum AIFinalSelectionRunPhase: Equatable {
+    case idle
+    case running
+    case paused
+    case failed
+    case stopped
+    case completed
+
+    var title: String {
+        switch self {
+        case .idle: String(localized: "尚未开始")
+        case .running: String(localized: "正在评估")
+        case .paused: String(localized: "已暂停")
+        case .failed: String(localized: "失败并停止")
+        case .stopped: String(localized: "已停止")
+        case .completed: String(localized: "已完成")
+        }
+    }
+}
+
+struct AIFinalSelectionRunProgress: Equatable {
+    var phase: AIFinalSelectionRunPhase = .idle
+    var completedBatchCount = 0
+    var totalBatchCount = 0
+    var completedPhotoCount = 0
+    var candidatePhotoCount = 0
+    var targetWinnerCount = 0
+    var inputTokens = 0
+    var outputTokens = 0
+    var waitingSeconds = 0
+    var failureMessage: String?
+
+    var fractionCompleted: Double {
+        guard candidatePhotoCount > 0 else { return 0 }
+        return Double(completedPhotoCount) / Double(candidatePhotoCount)
+    }
+
+    var usageSummary: String? {
+        guard inputTokens > 0 || outputTokens > 0 else { return nil }
+        return String(localized: "累计：输入 \(inputTokens) tokens，输出 \(outputTokens) tokens。费用以所选供应商账单为准。")
+    }
+}

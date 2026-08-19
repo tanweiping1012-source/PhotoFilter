@@ -1,0 +1,14 @@
+{
+  "AI评分结果不属于当前这批照片。": "The AI scoring result does not belong to the current batch.",
+  "AI评分结果仍包含多张画面相似照片，结果未生效。": "The AI scoring result still contains multiple visually similar photos and was not applied.",
+  "分析完成：发现 %lld 组相似照片和 %lld 张技术风险提示。": "Analysis complete: found %1$lld sets of similar photos and %2$lld technical warnings.",
+  "已有 %lld 组相似照片被同时保留；请先确认是否都要保留。": "%lld sets of similar photos contain multiple kept photos. Confirm that you want to keep all of them.",
+  "正在识别相似照片…": "Finding similar photos…",
+  "第 %lld / %lld 张": "Photo %1$lld of %2$lld",
+  "相似照片": "Similar Photos",
+  "相似照片 %lld/%lld": "Similar photo %1$lld/%2$lld",
+  "相似照片：第 %lld / %lld 张": "Similar photos: %1$lld of %2$lld",
+  "请先选中一张相似照片。": "Select a similar photo first.",
+  "这批相似照片有 %lld 张，当前每次最多评分 %lld 张；请先缩小范围。": "This set contains %1$lld similar photos. Up to %2$lld can be scored at once; narrow the set first.",
+  "适合旅行结束后，整理同一天或同一段行程中的相似照片和普通照片。App 负责整理与评分，你决定最后保留哪些照片。": "Use it after a trip to organize similar and regular photos from one day or one part of the journey. The app organizes and scores; you decide what to keep."
+}

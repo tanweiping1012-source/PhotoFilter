@@ -1,0 +1,46 @@
+{
+  "%@连接成功；图片输入和评分结果均已验证。": "%1$@ connected successfully. Image input and scoring output were both verified.",
+  "从账号模型选择": "Choose Account Model",
+  "使用此模型 ID": "Use This Model ID",
+  "其他 API 模型 ID": "Other API Model ID",
+  "其他模型 ID…": "Other Model ID…",
+  "先选择品牌，再选择支持图片输入的模型；每个品牌的 Key 独立保存在本机 Keychain。": "Choose a provider first, then an image-capable model. Each provider key is stored separately in this Mac's Keychain.",
+  "内置连接测试图片不可用，未发送请求。": "The built-in connection test image is unavailable. No request was sent.",
+  "只有你点击“验证并保存”或“验证已保存的 Key”时，App 才会向所选模型发送 1 张内置测试图，验证鉴权、图片输入和评分结果。测试图不来自你的照片。": "Only when you click Verify and Save or Verify Saved Key does the app send one built-in test image to the selected model to verify authentication, image input, and scoring output. The test image is not one of your photos.",
+  "品牌": "Provider",
+  "此品牌的 Key 已保存，但当前模型尚未验证。": "A key is saved for this provider, but the current model has not been verified.",
+  "此品牌的 Key 已保存，当前模型连接已验证。": "A key is saved for this provider, and the current model connection is verified.",
+  "智谱 GLM": "Zhipu GLM",
+  "最后更新：2026 年 8 月 18 日": "Last updated: August 18, 2026",
+  "模型返回了响应，但未通过照片评分契约校验。": "The model responded, but its output did not pass the photo scoring contract.",
+  "正在验证": "Verifying",
+  "正在验证%@…": "Verifying %1$@…",
+  "刷新模型失败：%@": "Failed to refresh models: %1$@",
+  "刷新账号模型": "Refresh Account Models",
+  "发现 %lld 个候选模型；选择后仍需图片验证。": "Found %1$lld candidate models. Image verification is still required after selection.",
+  "只有你点击“刷新账号模型”时，App 才会使用当前输入或已保存的 OpenAI / Anthropic Key 读取账号可见模型 ID；不会发送图片，也不会保存模型列表。": "Only when you click Refresh Account Models does the app use the currently entered or saved OpenAI / Anthropic key to read model IDs visible to your account. No images are sent, and the model list is not saved.",
+  "已保存%@其他模型 ID；请继续验证图片评分。": "Saved the other model ID for %1$@. Continue with image scoring verification.",
+  "已选择%@；请继续验证图片评分。": "Selected %1$@. Continue with image scoring verification.",
+  "当前品牌不支持账号模型刷新。": "The current provider does not support account model refresh.",
+  "显示名称（可选）": "Display Name (Optional)",
+  "更多模型": "More Models",
+  "模型列表响应无法识别。": "The model list response could not be recognized.",
+  "模型列表请求未成功（HTTP %lld%@）。": "The model list request failed (HTTP %1$lld%2$@).",
+  "正在刷新": "Refreshing",
+  "正在刷新%@账号模型…": "Refreshing %1$@ account models…",
+  "腾讯混元": "Tencent Hunyuan",
+  "设置并验证%@": "Set Up and Verify %1$@",
+  "自定义兼容配置无效，未发送请求。": "The custom compatible configuration is invalid. No request was sent.",
+  "评分图片只发送给本次选择的火山方舟、MiniMax、OpenAI、Anthropic、Google、阿里云百炼、xAI、Kimi、智谱、腾讯混元或自定义兼容接口。供应商可通过你的 API Key 将调用关联到对应账号；同一组照片不会同时发送给多个服务。": "Scoring images are sent only to the selected Volcano Ark, MiniMax, OpenAI, Anthropic, Google, Alibaba Model Studio, xAI, Kimi, Zhipu, Tencent Hunyuan, or custom compatible endpoint. The provider can associate requests with your account through your API key. The same photos are never sent to multiple services at once.",
+  "连接验证": "Connection Verification",
+  "连接验证失败：%@": "Connection verification failed: %1$@",
+  "请先在 AI评分设置中验证%@及其 API Key。": "Verify %1$@ and its API key in AI Scoring Settings first.",
+  "验证会使用 1 张内置测试图调用当前模型，可能产生少量供应商费用；验证成功后才保存新 Key。": "Verification calls the current model with one built-in test image and may incur a small provider charge. A new key is saved only after verification succeeds.",
+  "验证已保存的 Key": "Verify Saved Key",
+  "验证并保存": "Verify and Save"
+  ,"请输入 API Key，或先保存该品牌的 Key。": "Enter an API key or save a key for this provider first."
+  ,"请输入要使用的 API 模型 ID。": "Enter the API model ID to use."
+  ,"账号未返回可用于通用图片理解的候选模型。": "The account returned no candidate models suitable for general image understanding."
+  ,"账号模型列表只用于选择候选；图片输入和评分格式仍需点击验证后确认。": "The account model list only provides candidates. Image input and scoring format still require verification."
+  ,"账号模型刷新": "Account Model Refresh"
+}

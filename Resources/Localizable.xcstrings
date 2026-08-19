@@ -1,0 +1,4764 @@
+{
+  "sourceLanguage": "zh-Hans",
+  "strings": {
+    "": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": ""
+          }
+        }
+      }
+    },
+    "%@ AI评分": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ AI Scoring"
+          }
+        }
+      }
+    },
+    "%@ AI评分完成：已得到 %lld 张评分优先照片。请在“评分优先”筛选中人工确认。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ AI Scoring is complete with %2$lld preferred photos. Review them under Scoring Picks."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$@ AI评分完成：已得到 %2$lld 张评分优先照片。请在“评分优先”筛选中人工确认。"
+          }
+        }
+      }
+    },
+    "%@ AI评分已完成，可用“评分优先”查看结果。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ AI Scoring is complete. View the results under Scoring Picks."
+          }
+        }
+      }
+    },
+    "%@ AI评分已开始：共 %lld 张；格式异常会自动重试 1 次，仍失败则停止。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ AI Scoring has started for %2$lld photos. Invalid output is retried once, then scoring stops if it still fails."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$@ AI评分已开始：共 %2$lld 张；格式异常会自动重试 1 次，仍失败则停止。"
+          }
+        }
+      }
+    },
+    "%@ API Key": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ API Key"
+          }
+        }
+      }
+    },
+    "%@ · %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ · %2$@"
+          }
+        }
+      }
+    },
+    "%@ · %lld 张": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ · %2$lld photos"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$@ · %2$lld 张"
+          }
+        }
+      }
+    },
+    "%@ · %lld/%lld 张": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ · %2$lld/%3$lld photos"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$@ · %2$lld/%3$lld 张"
+          }
+        }
+      }
+    },
+    "%@ · %lldpx": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ · %2$lldpx"
+          }
+        }
+      }
+    },
+    "%@中已有 %lld 组相似照片被同时保留；请先确认是否都要保留。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ already has %2$lld sets of similar photos kept together. Confirm whether all of them should be kept."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$@中已有 %2$lld 组相似照片被同时保留；请先确认是否都要保留。"
+          }
+        }
+      }
+    },
+    "%@保留进度": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ keep progress"
+          }
+        }
+      }
+    },
+    "%@导出需要恰好 %lld 张，当前为 %lld 张。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ export requires exactly %2$lld photos; there are currently %3$lld."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$@导出需要恰好 %2$lld 张，当前为 %3$lld 张。"
+          }
+        }
+      }
+    },
+    "%@第 %lld 名": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ rank %2$lld"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$@第 %2$lld 名"
+          }
+        }
+      }
+    },
+    "%@第 %lld 名 · 评分优先": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ rank %2$lld · Scoring Pick"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$@第 %2$lld 名 · 评分优先"
+          }
+        }
+      }
+    },
+    "%@连接成功；图片输入和评分结果均已验证。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ connected successfully. Image input and scoring output were both verified."
+          }
+        }
+      }
+    },
+    "%@，已丢弃本次评分。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@. This scoring result was discarded."
+          }
+        }
+      }
+    },
+    "%lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld"
+          }
+        }
+      }
+    },
+    "%lld / %lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld / %lld"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$lld / %2$lld"
+          }
+        }
+      }
+    },
+    "%lld / 100": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld / 100"
+          }
+        }
+      }
+    },
+    "%lld 张": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld photos"
+          }
+        }
+      }
+    },
+    "%lld 张 · %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld photos · %2$@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$lld 张 · %2$@"
+          }
+        }
+      }
+    },
+    "/ 100": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "/ 100"
+          }
+        }
+      }
+    },
+    "8 张 · 示例筛选": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "8 photos · Example curation"
+          }
+        }
+      }
+    },
+    "AI %lld 分": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI %lld"
+          }
+        }
+      }
+    },
+    "AI 供应商 API Key": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI Provider API Keys"
+          }
+        }
+      }
+    },
+    "AI 服务当前已限流或账户资源暂不可用（HTTP %lld%@）。请检查供应商的套餐额度或余额，并至少等待 1 分钟后重试。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The AI service is rate-limiting requests or account resources are temporarily unavailable (HTTP %1$lld%2$@). Check the provider plan quota or balance, and wait at least one minute before retrying."
+          }
+        }
+      }
+    },
+    "AI 服务未返回要求的工具调用或 JSON 结果": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The AI service did not return the required tool call or JSON result"
+          }
+        }
+      }
+    },
+    "AI 服务请求未成功（HTTP %lld%@）。请检查供应商、模型权限、模型 ID 或稍后重试。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI service request failed (HTTP %1$lld%2$@). Check the provider, model access, and model ID, or try again later."
+          }
+        }
+      }
+    },
+    "AI 服务返回的响应外层结构无法识别": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The AI service response envelope could not be recognized"
+          }
+        }
+      }
+    },
+    "AI 服务返回的审美字段不完整或类型不符": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The AI service aesthetic fields are incomplete or have invalid types"
+          }
+        }
+      }
+    },
+    "AI 服务返回的网络响应无法识别": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The AI service network response could not be recognized"
+          }
+        }
+      }
+    },
+    "AI总结": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI Summary"
+          }
+        }
+      }
+    },
+    "AI评分": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI Scoring"
+          }
+        }
+      }
+    },
+    "AI评分包含照片间的相对比较，已要求模型重新独立评分。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI scoring compared photos with each other, so the model was asked to score them independently again."
+          }
+        }
+      }
+    },
+    "AI评分失败并停止：%@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI scoring failed and stopped: %1$@"
+          }
+        }
+      }
+    },
+    "AI评分已停止；不会形成不完整的评分结果。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI scoring stopped. No incomplete results will be created."
+          }
+        }
+      }
+    },
+    "AI评分已停止；已完成照片的评分仍保留，但不会形成最终结果。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI scoring stopped. Scores for completed photos remain, but no final result will be created."
+          }
+        }
+      }
+    },
+    "AI评分已完成": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI scoring complete"
+          }
+        }
+      }
+    },
+    "AI评分已暂停；不会继续评估后面的照片。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI scoring is paused. Later photos will not be evaluated."
+          }
+        }
+      }
+    },
+    "AI评分已继续。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI scoring resumed."
+          }
+        }
+      }
+    },
+    "AI评分已评估 %lld / %lld 张。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI scoring evaluated %1$lld of %2$lld photos."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "new",
+            "value": "AI评分已评估 %1$lld / %2$lld 张。"
+          }
+        }
+      }
+    },
+    "AI评分未生效：%@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI scoring was not applied: %1$@"
+          }
+        }
+      }
+    },
+    "AI评分结果不属于当前请求。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The AI scoring result does not belong to the current request."
+          }
+        }
+      }
+    },
+    "AI评分结果不属于当前这些照片。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The AI scoring result does not belong to the current photos."
+          }
+        }
+      }
+    },
+    "AI评分结果与当前候选照片不一致。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The AI scoring result does not match the current candidate photos."
+          }
+        }
+      }
+    },
+    "AI评分结果仍包含多张画面相似照片，结果未生效。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The AI scoring result still contains multiple visually similar photos and was not applied."
+          }
+        }
+      }
+    },
+    "AI评分结果包含不合法的维度分数。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The AI scoring result contains an invalid dimension score."
+          }
+        }
+      }
+    },
+    "AI评分结果包含待评分范围外的照片，已停止应用结果。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI scoring results contain a photo outside the scoring set. The results were not applied."
+          }
+        }
+      }
+    },
+    "AI评分结果包含重复照片。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The AI scoring result contains duplicate photos."
+          }
+        }
+      }
+    },
+    "AI评分结果包含重复照片，已停止应用结果。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI scoring results contain duplicate photos. The results were not applied."
+          }
+        }
+      }
+    },
+    "AI评分结果数量与保留目标不一致，已停止应用结果。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The AI scoring result count does not match the keep target. The results were not applied."
+          }
+        }
+      }
+    },
+    "AI评分结果未覆盖全部候选照片，已停止应用结果。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI scoring did not cover every candidate photo, so the result was not applied."
+          }
+        }
+      }
+    },
+    "AI评分结果版本不受支持。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The AI scoring result version is not supported."
+          }
+        }
+      }
+    },
+    "AI评分结果的总分不在 0–100 范围内。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The AI total score is outside the 0–100 range."
+          }
+        }
+      }
+    },
+    "AI评分结果缺少可读的具体评价。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The AI scoring result is missing readable feedback."
+          }
+        }
+      }
+    },
+    "AI评分结果缺少可读的总结。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The AI scoring result is missing a readable summary."
+          }
+        }
+      }
+    },
+    "AI评分设置": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI Scoring Settings"
+          }
+        }
+      }
+    },
+    "AI评分详情": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI Score Details"
+          }
+        }
+      }
+    },
+    "AI评分请求中没有候选照片。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The AI scoring request contains no candidate photos."
+          }
+        }
+      }
+    },
+    "AI评分进行中，不能同时发起另一项评分。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI scoring is active. Another scoring task cannot start at the same time."
+          }
+        }
+      }
+    },
+    "AI评分进行中；请先停止本轮任务再修改人工决定。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI scoring is active. Stop it before changing manual decisions."
+          }
+        }
+      }
+    },
+    "AI评分进行中；请先停止本轮任务再撤销人工决定。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI scoring is active. Stop it before undoing manual decisions."
+          }
+        }
+      }
+    },
+    "API Key": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "API Key"
+          }
+        }
+      }
+    },
+    "API 模型 ID": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "API Model ID"
+          }
+        }
+      }
+    },
+    "App 不建立用户账号，不收集位置、联系人或设备广告标识，不做跨 App 或网站跟踪。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The app does not create user accounts, collect location, contacts, or advertising identifiers, or track across apps or websites."
+          }
+        }
+      }
+    },
+    "App 将复制人物 %lld 张、风景 %lld 张，并分别放入两个子目录；不会移动或删除原图。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The app will copy %1$lld People photos and %2$lld Scenery photos into separate folders. Originals will not be moved or deleted."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "new",
+            "value": "App 将复制人物 %1$lld 张、风景 %2$lld 张，并分别放入两个子目录；不会移动或删除原图。"
+          }
+        }
+      }
+    },
+    "MiniMax Token Plan 当前未接受请求（HTTP %lld）。这通常表示 5 小时额度、周额度或动态限流；请在 MiniMax 套餐用量中检查可用资源，或至少等待 1 分钟后重试。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MiniMax Token Plan is not accepting this request (HTTP %lld). This usually means the five-hour quota, weekly quota, or dynamic rate limit is active. Check available resources in MiniMax plan usage, or wait at least one minute before retrying."
+          }
+        }
+      }
+    },
+    "上一张": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Previous Photo"
+          }
+        }
+      }
+    },
+    "下一张": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Next Photo"
+          }
+        }
+      }
+    },
+    "下一次请求约 %lld 秒后发送": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Next request in about %lld seconds"
+          }
+        }
+      }
+    },
+    "不联网，不读取 Keychain，不消耗 API 额度。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No network access, no Keychain access, and no API usage."
+          }
+        }
+      }
+    },
+    "不跟踪": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No Tracking"
+          }
+        }
+      }
+    },
+    "严重欠曝": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Severe underexposure"
+          }
+        }
+      }
+    },
+    "严重过曝": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Severe overexposure"
+          }
+        }
+      }
+    },
+    "中": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Medium"
+          }
+        }
+      }
+    },
+    "为控制请求频率，请在 %lld 秒后再发起下一组复核。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "To control request frequency, wait %1$lld seconds before reviewing another group."
+          }
+        }
+      }
+    },
+    "为控制请求频率，请稍后重试。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Please try again later to control request frequency."
+          }
+        }
+      }
+    },
+    "主体": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Subject"
+          }
+        }
+      }
+    },
+    "主体、层次和旅途氛围均衡，画面完成度高。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The subject, depth, and travel atmosphere are balanced, with a high level of visual completion."
+          }
+        }
+      }
+    },
+    "主体清楚，层次关系完整": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The subject is clear with complete visual depth"
+          }
+        }
+      }
+    },
+    "人工决定已保留；下一步运行不联网的 AI评分演示。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your decision was kept. Next, run the offline AI scoring demo."
+          }
+        }
+      }
+    },
+    "人物": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "People"
+          }
+        }
+      }
+    },
+    "人物 %lld/%lld，风景 %lld/%lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "People %1$lld/%2$lld, Scenery %3$lld/%4$lld"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "new",
+            "value": "人物 %1$lld/%2$lld，风景 %3$lld/%4$lld"
+          }
+        }
+      }
+    },
+    "人物照片已单独显示。现在打开任意一张人物照片检查大图。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "People photos are now shown separately. Open any People photo to inspect the large preview."
+          }
+        }
+      }
+    },
+    "仍有照片未完成人物或风景分类，无法导出。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Some photos have not been classified as People or Scenery and cannot be exported."
+          }
+        }
+      }
+    },
+    "从一段旅程中，选出真正值得保留的照片": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose the photos truly worth keeping from one trip"
+          }
+        }
+      }
+    },
+    "从账号模型选择": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose Account Model"
+          }
+        }
+      }
+    },
+    "低反差": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Low contrast"
+          }
+        }
+      }
+    },
+    "体验一次完整筛选": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Try a Complete Curation"
+          }
+        }
+      }
+    },
+    "你已经完成检查、AI评分、人工确认和复制导出。点击“结束新手引导”返回。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You completed review, AI scoring, confirmation, and copy export. Click Finish Tutorial to return."
+          }
+        }
+      }
+    },
+    "你的控制": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your Controls"
+          }
+        }
+      }
+    },
+    "你选择的照片文件夹": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Photo folders you choose"
+          }
+        }
+      }
+    },
+    "使用帮助": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Using Travel Photo Filter"
+          }
+        }
+      }
+    },
+    "使用此模型 ID": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Use This Model ID"
+          }
+        }
+      }
+    },
+    "保存兼容配置": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save Compatible Configuration"
+          }
+        }
+      }
+    },
+    "保留": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keep"
+          }
+        }
+      }
+    },
+    "保留 %lld · 淘汰 %lld · 待定 %lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keep %1$lld · Reject %2$lld · Undecided %3$lld"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "new",
+            "value": "保留 %1$lld · 淘汰 %2$lld · 待定 %3$lld"
+          }
+        }
+      }
+    },
+    "保留目标": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keep Target"
+          }
+        }
+      }
+    },
+    "保留目标必须至少为 1 张。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The keep target must be at least one photo."
+          }
+        }
+      }
+    },
+    "候选缩略图不完整，未发送请求。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Candidate previews are incomplete. No request was sent."
+          }
+        }
+      }
+    },
+    "停止": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stop"
+          }
+        }
+      }
+    },
+    "先保留这张照片": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keep This Photo First"
+          }
+        }
+      }
+    },
+    "先在照片类型中选择人物或风景，再运行该类型的 AI评分。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Select People or Scenery under Photo Type before running AI Scoring for that type."
+          }
+        }
+      }
+    },
+    "先查看人物照片": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start with People"
+          }
+        }
+      }
+    },
+    "先选择品牌，再选择支持图片输入的模型；每个品牌的 Key 独立保存在本机 Keychain。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose a provider first, then an image-capable model. Each provider key is stored separately in this Mac's Keychain."
+          }
+        }
+      }
+    },
+    "光线": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lighting"
+          }
+        }
+      }
+    },
+    "全部": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All"
+          }
+        }
+      }
+    },
+    "全部照片": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All Photos"
+          }
+        }
+      }
+    },
+    "其他 API 模型 ID": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Other API Model ID"
+          }
+        }
+      }
+    },
+    "其他模型 ID…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Other Model ID…"
+          }
+        }
+      }
+    },
+    "具体评价": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Detailed Feedback"
+          }
+        }
+      }
+    },
+    "兼容配置有效；首次 AI评分会验证服务实际是否支持图片和 JSON 输出。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The compatible configuration is valid. The first AI scoring request will verify whether the service actually supports images and JSON output."
+          }
+        }
+      }
+    },
+    "内置样例结果不完整。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The built-in sample results are incomplete."
+          }
+        }
+      }
+    },
+    "内置样例资源不可用。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The built-in sample resources are unavailable."
+          }
+        }
+      }
+    },
+    "内置连接测试图片不可用，未发送请求。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The built-in connection test image is unavailable. No request was sent."
+          }
+        }
+      }
+    },
+    "切换到风景照片": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Switch to Scenery"
+          }
+        }
+      }
+    },
+    "决定": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Decision"
+          }
+        }
+      }
+    },
+    "决定：%@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Decision: %1$@"
+          }
+        }
+      }
+    },
+    "分开类型": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Separate types"
+          }
+        }
+      }
+    },
+    "分析中": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Analyzing"
+          }
+        }
+      }
+    },
+    "分析完成": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Analysis complete"
+          }
+        }
+      }
+    },
+    "分析完成并解决重复保留冲突后，即可开始 AI评分。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI scoring becomes available after analysis is complete and duplicate keep conflicts are resolved."
+          }
+        }
+      }
+    },
+    "分析完成：发现 %lld 组相似照片和 %lld 张技术风险提示。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Analysis complete: found %1$lld sets of similar photos and %2$lld technical warnings."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "new",
+            "value": "分析完成：发现 %1$lld 组相似照片和 %2$lld 张技术风险提示。"
+          }
+        }
+      }
+    },
+    "分类": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Category"
+          }
+        }
+      }
+    },
+    "切换到“全部照片”查看完整照片集。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Switch to All Photos to view the complete set."
+          }
+        }
+      }
+    },
+    "切换到此项目": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Switch to this project"
+          }
+        }
+      }
+    },
+    "删除 API Key": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete API Key"
+          }
+        }
+      }
+    },
+    "删除此供应商的 Key": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete This Provider Key"
+          }
+        }
+      }
+    },
+    "删除筛选项目？": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete curation project?"
+          }
+        }
+      }
+    },
+    "删除项目": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete Project"
+          }
+        }
+      }
+    },
+    "删除项目 %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete project %1$@"
+          }
+        }
+      }
+    },
+    "删除项目会移除 App 内的项目状态并释放缩略图缓存，不会删除、移动或修改原照片。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deleting a project removes its app state and thumbnail cache without deleting, moving, or modifying original photos."
+          }
+        }
+      }
+    },
+    "刷新模型失败：%@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Failed to refresh models: %1$@"
+          }
+        }
+      }
+    },
+    "刷新账号模型": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Refresh Account Models"
+          }
+        }
+      }
+    },
+    "原照片只读。缩略图、人物主题判断、相似度指纹与技术质量分析都在本机完成，不会写回原文件。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Originals are read-only. Thumbnails, people-subject classification, similarity fingerprints, and technical quality analysis stay on this Mac and are never written back to the originals."
+          }
+        }
+      }
+    },
+    "双击任意人物照片，或选中后点击“预览”。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Double-click any People photo, or select one and click Preview."
+          }
+        }
+      }
+    },
+    "双击可查看大图": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Double-click to preview"
+          }
+        }
+      }
+    },
+    "发现 %lld 个候选模型；选择后仍需图片验证。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Found %1$lld candidate models. Image verification is still required after selection."
+          }
+        }
+      }
+    },
+    "发送 %lld 张并开始": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Send %lld photos and start"
+          }
+        }
+      }
+    },
+    "发送候选缩略图给%@？": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Send candidate previews to %1$@?"
+          }
+        }
+      }
+    },
+    "发送的数据": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Data Sent"
+          }
+        }
+      }
+    },
+    "取消": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancel"
+          }
+        }
+      }
+    },
+    "叙事表现": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Storytelling"
+          }
+        }
+      }
+    },
+    "叙事表达仍可加强": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The visual story could be stronger"
+          }
+        }
+      }
+    },
+    "只会删除 App 内的项目状态并释放缩略图缓存，不会删除、移动或修改文件夹中的任何照片。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Only app project state and the thumbnail cache will be removed. No photos in the folder will be deleted, moved, or modified."
+          }
+        }
+      }
+    },
+    "只有你点击“刷新账号模型”时，App 才会使用当前输入或已保存的 OpenAI / Anthropic Key 读取账号可见模型 ID；不会发送图片，也不会保存模型列表。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Only when you click Refresh Account Models does the app use the currently entered or saved OpenAI / Anthropic key to read model IDs visible to your account. No images are sent, and the model list is not saved."
+          }
+        }
+      }
+    },
+    "只有你点击“验证并保存”或“验证已保存的 Key”时，App 才会向所选模型发送 1 张内置测试图，验证鉴权、图片输入和评分结果。测试图不来自你的照片。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Only when you click Verify and Save or Verify Saved Key does the app send one built-in test image to the selected model to verify authentication, image input, and scoring output. The test image is not one of your photos."
+          }
+        }
+      }
+    },
+    "只有你确认供应商、模型、预览尺寸和照片数量后，App 才会发送评分照片。未配置 Key 时，本地筛选和导出仍可使用。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The app sends scoring photos only after you confirm the provider, model, preview size, and photo count. Local curation and export work without a key."
+          }
+        }
+      }
+    },
+    "可选 AI评分": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Optional AI Scoring"
+          }
+        }
+      }
+    },
+    "可随时在 AI评分设置中分别删除各供应商保存在此 Mac Keychain 中的 Key。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You can delete each provider key from this Mac's Keychain at any time in AI Scoring Settings."
+          }
+        }
+      }
+    },
+    "品牌": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Provider"
+          }
+        }
+      }
+    },
+    "点击“显示评分优先照片”，检查后再采纳人物和风景结果。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Click Show Scoring Picks, review them, then accept the People and Scenery results."
+          }
+        }
+      }
+    },
+    "在“照片类型”中选择“人物”。人物和风景会分开整理。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose People under Photo Type. People and Scenery are curated separately."
+          }
+        }
+      }
+    },
+    "在“照片类型”中选择“风景”，查看独立的风景结果。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose Scenery under Photo Type to view its separate results."
+          }
+        }
+      }
+    },
+    "在大图中点击“保留”。最终决定始终由你完成。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Click Keep in the large preview. You always make the final decision."
+          }
+        }
+      }
+    },
+    "复制人物与风景精选": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copy People and Scenery Picks"
+          }
+        }
+      }
+    },
+    "复制导出": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copy Export"
+          }
+        }
+      }
+    },
+    "复制诊断信息": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copy Diagnostic Information"
+          }
+        }
+      }
+    },
+    "大": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Large"
+          }
+        }
+      }
+    },
+    "大图用于检查细节；现在将这张照片标记为保留。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Use the large preview to inspect details. Now mark this photo as Keep."
+          }
+        }
+      }
+    },
+    "失败并停止": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Failed and stopped"
+          }
+        }
+      }
+    },
+    "失败并停止 · 已评估 %lld/%lld 张": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Failed and stopped · evaluated %1$lld/%2$lld photos"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "new",
+            "value": "失败并停止 · 已评估 %1$lld/%2$lld 张"
+          }
+        }
+      }
+    },
+    "存在%@，排在技术更稳妥的候选之后": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ detected; ranked after technically safer candidates"
+          }
+        }
+      }
+    },
+    "完成": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Done"
+          }
+        }
+      }
+    },
+    "完成任一组 AI评分后，每张有效评分照片都会显示在这里。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Every photo with a valid score appears here after any AI scoring group finishes."
+          }
+        }
+      }
+    },
+    "完成整轮 AI评分后，最终胜出照片会显示在这里。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Final winners appear here after a complete AI scoring run."
+          }
+        }
+      }
+    },
+    "完整 Chat Completions endpoint": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Full Chat Completions endpoint"
+          }
+        }
+      }
+    },
+    "完整体验使用 4 张人物、4 张风景和离线固定评分，不读取你的照片、Keychain 或网络。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The full walkthrough uses four People photos, four Scenery photos, and fixed offline scores. It does not access your photos, Keychain, or the network."
+          }
+        }
+      }
+    },
+    "导出 4 张后会得到“人物”和“风景”两个目录。原照片不会改变。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Export four photos into separate People and Scenery folders. Originals stay unchanged."
+          }
+        }
+      }
+    },
+    "导出人物 %lld 张、风景 %lld 张": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Export %1$lld People and %2$lld Scenery photos"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "new",
+            "value": "导出人物 %1$lld 张、风景 %2$lld 张"
+          }
+        }
+      }
+    },
+    "导出人物与风景 %lld 张": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Export %lld People and Scenery photos"
+          }
+        }
+      }
+    },
+    "导出保留照片的副本": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Export Copies of Kept Photos"
+          }
+        }
+      }
+    },
+    "导出副本": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Export Copies"
+          }
+        }
+      }
+    },
+    "导出失败：%@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Export failed: %1$@"
+          }
+        }
+      }
+    },
+    "导出完成：%@。原图未被修改。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Export complete: %1$@. Original photos were not modified."
+          }
+        }
+      }
+    },
+    "导出目录由你选择；人物和风景照片分别复制到两个子目录，并生成 selection.json、selection.csv。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You choose the export location. People and Scenery photos are copied into separate folders with selection.json and selection.csv."
+          }
+        }
+      }
+    },
+    "导出需要恰好 %lld 张保留照片，当前为 %lld 张。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Export requires exactly %1$lld kept photos; there are currently %2$lld."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "new",
+            "value": "导出需要恰好 %1$lld 张保留照片，当前为 %2$lld 张。"
+          }
+        }
+      }
+    },
+    "将仅在内存中生成并发送 %lld 张%@无元数据 JPEG 预览到 %@，交由%@逐张独立评分。不会发送原始文件、文件名、本地路径或 EXIF/GPS。更大的预览可能增加上传量、等待时间和供应商费用；AI评分不会替你保留或淘汰照片。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld metadata-free JPEG previews at %2$@ will be created in memory and sent to %3$@ for independent scoring by %4$@. Original files, filenames, local paths, and EXIF/GPS are not sent. Larger previews may increase upload size, wait time, and provider charges. AI scoring never keeps or rejects photos for you."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "new",
+            "value": "将仅在内存中生成并发送 %1$lld 张%2$@无元数据 JPEG 预览到 %3$@，交由%4$@逐张独立评分。不会发送原始文件、文件名、本地路径或 EXIF/GPS。更大的预览可能增加上传量、等待时间和供应商费用；AI评分不会替你保留或淘汰照片。"
+          }
+        }
+      }
+    },
+    "将使用%@和%@预览，通过 %@ 独立评估 %lld 张%@照片；全部完成后只在%@内按统一分数排序，取前 %lld 张。每次请求只发送 2–5 张同类型、无元数据 JPEG，不发送原图、文件名、路径或 EXIF/GPS；请求至少间隔 60 秒，预计最短约 %lld 分钟。更大的预览可能增加上传量、等待时间和供应商费用；格式异常会自动重试 1 次，仍失败时会停在当前照片范围供你重试或放弃。结果不会自动标记为保留。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Using %1$@ with %2$@ previews through %3$@, the app will independently score %4$lld %5$@ photos, rank only within %6$@, and select the top %7$lld. Each request sends 2–5 metadata-free JPEG previews of the same type, never originals, filenames, paths, or EXIF/GPS. Requests are at least 60 seconds apart and take at least about %8$lld minutes. Larger previews may increase upload size, wait time, and provider charges. Invalid output is retried once; if it still fails, scoring stops at the current photo range for retry or cancellation. Results are not marked Keep automatically."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "new",
+            "value": "将使用%1$@和%2$@预览，通过 %3$@ 独立评估 %4$lld 张%5$@照片；全部完成后只在%6$@内按统一分数排序，取前 %7$lld 张。每次请求只发送 2–5 张同类型、无元数据 JPEG，不发送原图、文件名、路径或 EXIF/GPS；请求至少间隔 60 秒，预计最短约 %8$lld 分钟。更大的预览可能增加上传量、等待时间和供应商费用；格式异常会自动重试 1 次，仍失败时会停在当前照片范围供你重试或放弃。结果不会自动标记为保留。"
+          }
+        }
+      }
+    },
+    "将复制人物 %lld 张、风景 %lld 张，并放入两个子目录；原照片不会被移动、删除或修改。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The app will copy %1$lld People photos and %2$lld Scenery photos into two folders. Originals will not be moved, deleted, or modified."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "new",
+            "value": "将复制人物 %1$lld 张、风景 %2$lld 张，并放入两个子目录；原照片不会被移动、删除或修改。"
+          }
+        }
+      }
+    },
+    "小": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Small"
+          }
+        }
+      }
+    },
+    "尚不能导出：人物 %lld/%lld，风景 %lld/%lld。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Export is not ready: People %1$lld/%2$lld, Scenery %3$lld/%4$lld."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "new",
+            "value": "尚不能导出：人物 %1$lld/%2$lld，风景 %3$lld/%4$lld。"
+          }
+        }
+      }
+    },
+    "尚不能导出：人物和风景都必须达到各自保留目标。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Export is not ready. People and Scenery must each meet their own keep target."
+          }
+        }
+      }
+    },
+    "尚未开始": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not started"
+          }
+        }
+      }
+    },
+    "尺寸": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Size"
+          }
+        }
+      }
+    },
+    "已AI评分": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI Scored"
+          }
+        }
+      }
+    },
+    "已从此 Mac 的 Keychain 删除%@ API Key。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deleted the %1$@ API key from this Mac's Keychain."
+          }
+        }
+      }
+    },
+    "已保存%@其他模型 ID；请继续验证图片评分。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saved the other model ID for %1$@. Continue with image scoring verification."
+          }
+        }
+      }
+    },
+    "已保存自定义兼容接口和模型 ID。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saved the custom compatible endpoint and model ID."
+          }
+        }
+      }
+    },
+    "已保留 %lld 张，共需 %lld 张": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld kept of %2$lld required"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "new",
+            "value": "已保留 %1$lld 张，共需 %2$lld 张"
+          }
+        }
+      }
+    },
+    "已停止": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stopped"
+          }
+        }
+      }
+    },
+    "已复制不含照片、路径或 API Key 的诊断信息。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copied diagnostic information without photos, paths, or the API key."
+          }
+        }
+      }
+    },
+    "已完成": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Completed"
+          }
+        }
+      }
+    },
+    "已将 %@ 归为%@。人物与风景的评分结果已重新等待确认。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ is now classified as %2$@. People and Scenery scoring results must be confirmed again."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "new",
+            "value": "已将 %1$@ 归为%2$@。人物与风景的评分结果已重新等待确认。"
+          }
+        }
+      }
+    },
+    "已将 %@ 标记为%@。%@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Marked %1$@ as %2$@. %3$@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "new",
+            "value": "已将 %1$@ 标记为%2$@。%3$@"
+          }
+        }
+      }
+    },
+    "已恢复项目列表；需要时点按项目重新授权或继续筛选。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Project list restored. Select a project to reauthorize it or continue curation."
+          }
+        }
+      }
+    },
+    "已撤销上一次标记操作。%@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Undid the last decision. %1$@"
+          }
+        }
+      }
+    },
+    "已显示 %lld 张照片；分析会在后台逐步完成。现在即可开始手动选片。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Showing %1$lld photos. Analysis continues in the background, and manual curation can start now."
+          }
+        }
+      }
+    },
+    "已暂停": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Paused"
+          }
+        }
+      }
+    },
+    "已有 %lld 组重复照片被同时保留，请每组只留一张。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld duplicate groups contain multiple kept photos. Keep only one per group."
+          }
+        }
+      }
+    },
+    "已有 AI评分任务正在运行。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "An AI scoring task is already running."
+          }
+        }
+      }
+    },
+    "已载入 %lld 张照片的 AI评分。最终取舍仍由你决定。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI scores were loaded for %1$lld photos. You still make the final choices."
+          }
+        }
+      }
+    },
+    "已达到目标，可安全导出": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Target reached; ready to export"
+          }
+        }
+      }
+    },
+    "已退出示例筛选。选择一个旅行照片文件夹开始筛选。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Example curation closed. Choose a travel photo folder to begin."
+          }
+        }
+      }
+    },
+    "已选择%@；请继续验证图片评分。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Selected %1$@. Continue with image scoring verification."
+          }
+        }
+      }
+    },
+    "已采纳 %lld 张 AI评分结果。人物 %lld/%lld，风景 %lld/%lld。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Accepted %1$lld AI-scored photos. People %2$lld/%3$lld, Scenery %4$lld/%5$lld."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "new",
+            "value": "已采纳 %1$lld 张 AI评分结果。人物 %2$lld/%3$lld，风景 %4$lld/%5$lld。"
+          }
+        }
+      }
+    },
+    "帮助与支持": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Help & Support"
+          }
+        }
+      }
+    },
+    "常见问题与非敏感诊断信息": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Common issues and non-sensitive diagnostic information"
+          }
+        }
+      }
+    },
+    "开始": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start"
+          }
+        }
+      }
+    },
+    "开始 AI评分？": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start AI Scoring?"
+          }
+        }
+      }
+    },
+    "开始%@ AI评分（%lld 张）": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start %1$@ AI Scoring (%2$lld photos)"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "new",
+            "value": "开始%1$@ AI评分（%2$lld 张）"
+          }
+        }
+      }
+    },
+    "开始整理我的照片": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start with My Photos"
+          }
+        }
+      }
+    },
+    "当前 AI 任务已锁定模型与预览尺寸；停止任务后可调整。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The current AI task has locked the model and preview size. Stop the task before changing them."
+          }
+        }
+      }
+    },
+    "当前 AI 模型配置不完整，未发送请求。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The current AI model configuration is incomplete. No request was sent."
+          }
+        }
+      }
+    },
+    "当前发送尺寸": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Current Send Size"
+          }
+        }
+      }
+    },
+    "当前品牌不支持账号模型刷新。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The current provider does not support account model refresh."
+          }
+        }
+      }
+    },
+    "当前待评分照片无法安全收敛到目标张数；请调整保留目标。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The current scoring set cannot safely converge to the target. Adjust the keep target."
+          }
+        }
+      }
+    },
+    "当前没有待确认的 AI评分结果。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "There are no AI scoring results to confirm."
+          }
+        }
+      }
+    },
+    "当前类型": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "the current type"
+          }
+        }
+      }
+    },
+    "当前项目": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Current project"
+          }
+        }
+      }
+    },
+    "待AI评分": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Awaiting AI Scoring"
+          }
+        }
+      }
+    },
+    "待定": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Undecided"
+          }
+        }
+      }
+    },
+    "待评分": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Awaiting Score"
+          }
+        }
+      }
+    },
+    "待评分 %lld 张": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld awaiting score"
+          }
+        }
+      }
+    },
+    "待评分照片不足以支持当前保留目标，请减少保留数量。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "There are not enough photos to support the current keep target. Reduce the keep target."
+          }
+        }
+      }
+    },
+    "待评分照片包含重复项，无法开始评分。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The scoring set contains duplicate photos, so scoring cannot start."
+          }
+        }
+      }
+    },
+    "待评分照片超过当前评分流程可安全处理的上限。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The scoring set exceeds the safe capacity of the current scoring flow."
+          }
+        }
+      }
+    },
+    "总分": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Total Score"
+          }
+        }
+      }
+    },
+    "恢复待定": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reset to Undecided"
+          }
+        }
+      }
+    },
+    "打开任意一张照片": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open Any Photo"
+          }
+        }
+      }
+    },
+    "技术提示": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Technical Warnings"
+          }
+        }
+      }
+    },
+    "拍摄时间": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Captured"
+          }
+        }
+      }
+    },
+    "接口": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Endpoint"
+          }
+        }
+      }
+    },
+    "撤销": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Undo"
+          }
+        }
+      }
+    },
+    "撤销上一次照片决定": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Undo the last photo decision"
+          }
+        }
+      }
+    },
+    "撤销标记": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Undo Decision"
+          }
+        }
+      }
+    },
+    "放弃": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancel Run"
+          }
+        }
+      }
+    },
+    "文件夹权限": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Folder Access"
+          }
+        }
+      }
+    },
+    "新建筛选项目": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "New Curation Project"
+          }
+        }
+      }
+    },
+    "新手引导": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Getting Started"
+          }
+        }
+      }
+    },
+    "旅行照片筛选器": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Travel Photo Filter"
+          }
+        }
+      }
+    },
+    "无广告与分析 SDK": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No advertising or analytics SDKs"
+          }
+        }
+      }
+    },
+    "无法从 macOS Keychain 删除 API Key。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The API key could not be deleted from macOS Keychain."
+          }
+        }
+      }
+    },
+    "无法从 macOS Keychain 读取 API Key。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The API key could not be read from macOS Keychain."
+          }
+        }
+      }
+    },
+    "无法保存到 macOS Keychain。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The API key could not be saved to macOS Keychain."
+          }
+        }
+      }
+    },
+    "无法保存新的文件夹授权，请重试。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The new folder authorization could not be saved. Try again."
+          }
+        }
+      }
+    },
+    "无法保存该文件夹的安全授权，请重新选择文件夹。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Secure access to this folder could not be saved. Choose the folder again."
+          }
+        }
+      }
+    },
+    "无法恢复项目状态；原照片未受影响。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Project state could not be restored. Original photos were not affected."
+          }
+        }
+      }
+    },
+    "无法生成 AI评分图片，未发送任何照片。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "An AI scoring image could not be created. No photos were sent."
+          }
+        }
+      }
+    },
+    "无法读取%@ API Key，请在 AI 设置中重新保存。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The %1$@ API key could not be read. Save it again in AI Settings."
+          }
+        }
+      }
+    },
+    "无法读取其中一张候选照片，未发送任何照片。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A candidate photo could not be read. No photos were sent."
+          }
+        }
+      }
+    },
+    "无法进入示例筛选：%@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not open example curation: %1$@"
+          }
+        }
+      }
+    },
+    "显示 %lld / %lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Showing %1$lld / %2$lld"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "new",
+            "value": "显示 %1$lld / %2$lld"
+          }
+        }
+      }
+    },
+    "显示名称": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Display Name"
+          }
+        }
+      }
+    },
+    "显示名称（可选）": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Display Name (Optional)"
+          }
+        }
+      }
+    },
+    "显示评分优先照片": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show Scoring Picks"
+          }
+        }
+      }
+    },
+    "显示照片数量": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Number of photos shown"
+          }
+        }
+      }
+    },
+    "智谱 GLM": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zhipu GLM"
+          }
+        }
+      }
+    },
+    "暂停": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pause"
+          }
+        }
+      }
+    },
+    "暂无已评分照片": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No Scored Photos"
+          }
+        }
+      }
+    },
+    "暂无待评分照片": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No Photos Awaiting AI Scoring"
+          }
+        }
+      }
+    },
+    "暂无评分优先照片": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No Top-Scored Photos"
+          }
+        }
+      }
+    },
+    "更多模型": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "More Models"
+          }
+        }
+      }
+    },
+    "更大的预览可能提高细节识别，也会增加上传量、等待时间和供应商费用。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Larger previews may improve detail recognition while increasing upload size, wait time, and provider charges."
+          }
+        }
+      }
+    },
+    "更改照片列表中显示的内容": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Change which photos are shown"
+          }
+        }
+      }
+    },
+    "最后更新：2026 年 8 月 18 日": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Last updated: August 18, 2026"
+          }
+        }
+      }
+    },
+    "未配置 API Key 时，本地筛选与导出仍可使用。AI评分只会在你确认供应商、模型、图片尺寸和照片数量后开始。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Local curation and export still work without an API key. AI scoring starts only after you confirm the provider, model, image size, and photo count."
+          }
+        }
+      }
+    },
+    "本地分析完成后，候选照片会自动出现在这里。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Candidate photos appear here after local analysis completes."
+          }
+        }
+      }
+    },
+    "本地分析进度": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "On-device analysis progress"
+          }
+        }
+      }
+    },
+    "本地处理": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "On-Device Processing"
+          }
+        }
+      }
+    },
+    "本地清晰度、反差与曝光风险相对更稳妥": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Relatively stronger local sharpness, contrast, and exposure safety"
+          }
+        }
+      }
+    },
+    "本地项目": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Local project"
+          }
+        }
+      }
+    },
+    "本机仅保存安全书签、项目名、照片数量、人物/风景目标、相对路径人工决定、用户分类纠正和当前选中项。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This Mac stores only secure bookmarks, project names, photo counts, People/Scenery targets, decisions by relative path, user classification corrections, and the current selection."
+          }
+        }
+      }
+    },
+    "本次 AI 调用：输入 %lld tokens。费用以所选供应商账单为准。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI usage: %1$lld input tokens. See the selected provider's bill for cost."
+          }
+        }
+      }
+    },
+    "本次 AI 调用：输入 %lld tokens，输出 %lld tokens。费用以所选供应商账单为准。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI usage: %1$lld input tokens and %2$lld output tokens. See the selected provider's bill for cost."
+          }
+        }
+      }
+    },
+    "本次 AI 调用：输出 %lld tokens。费用以所选供应商账单为准。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI usage: %1$lld output tokens. See the selected provider's bill for cost."
+          }
+        }
+      }
+    },
+    "本次全部为人物照片。重点观察人物表情、姿态、互动、遮挡、人物清晰度和人物与环境的关系；风景只作为人物叙事背景。不得推断身份或敏感属性。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All photos in this request are People photos. Focus on expression, pose, interaction, occlusion, subject clarity, and the relationship between people and their surroundings. Treat scenery only as narrative context, and do not infer identity or sensitive attributes."
+          }
+        }
+      }
+    },
+    "本次全部为风景照片。重点观察空间层次、构图、光线、氛围和地点叙事；不得因为画面中没有人物而降低分数。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All photos in this request are Scenery photos. Focus on depth, composition, light, atmosphere, and sense of place. Do not lower a score because no person is present."
+          }
+        }
+      }
+    },
+    "本次未指定人物或风景类型；只按照片自身内容使用固定标尺评分。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No People or Scenery type was specified. Score only the photo itself using the fixed scale."
+          }
+        }
+      }
+    },
+    "权限失效时，点按项目并重新选择对应文件夹；App 不会尝试绕过系统授权。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "If access expires, select the project and choose its folder again. The app never bypasses system authorization."
+          }
+        }
+      }
+    },
+    "构图": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Composition"
+          }
+        }
+      }
+    },
+    "构图稳定，画面信息清楚": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The composition is stable and the visual information is clear"
+          }
+        }
+      }
+    },
+    "查看 AI 为什么这样评分": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "See Why AI Scored It This Way"
+          }
+        }
+      }
+    },
+    "查看常见问题和复制非敏感诊断信息": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "View common issues and copy non-sensitive diagnostic information"
+          }
+        }
+      }
+    },
+    "查看本地处理、AI 发送边界与数据删除方式": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "View on-device processing, AI sending boundaries, and data deletion options"
+          }
+        }
+      }
+    },
+    "查看评分": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "View Score"
+          }
+        }
+      }
+    },
+    "检查决定": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Review and Decide"
+          }
+        }
+      }
+    },
+    "检查总分、五维评分、具体评价和总结，然后点击“评分已查看，继续”。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Review the total score, five dimensions, detailed feedback, and summary, then click “Score Reviewed, Continue.”"
+          }
+        }
+      }
+    },
+    "模型": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Model"
+          }
+        }
+      }
+    },
+    "模型列表响应无法识别。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The model list response could not be recognized."
+          }
+        }
+      }
+    },
+    "模型列表请求未成功（HTTP %lld%@）。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The model list request failed (HTTP %1$lld%2$@)."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "new",
+            "value": "模型列表请求未成功（HTTP %1$lld%2$@）。"
+          }
+        }
+      }
+    },
+    "模型返回了响应，但未通过照片评分契约校验。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The model responded, but its output did not pass the photo scoring contract."
+          }
+        }
+      }
+    },
+    "正在刷新": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Refreshing"
+          }
+        }
+      }
+    },
+    "正在刷新%@账号模型…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Refreshing %1$@ account models…"
+          }
+        }
+      }
+    },
+    "正在安全复制 %lld 张精选照片…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Securely copying %1$lld selected photos…"
+          }
+        }
+      }
+    },
+    "正在扫描": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scanning"
+          }
+        }
+      }
+    },
+    "正在扫描 %@…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scanning %1$@…"
+          }
+        }
+      }
+    },
+    "正在本地分析 %lld / %lld 张": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Analyzing %1$lld of %2$lld photos on this Mac"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "new",
+            "value": "正在本地分析 %1$lld / %2$lld 张"
+          }
+        }
+      }
+    },
+    "正在演示 AI评分：使用内置固定结果，不联网、不读取 Keychain。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Demonstrating AI scoring with built-in fixed results. No network or Keychain access."
+          }
+        }
+      }
+    },
+    "正在生成 %lld 张%@图片并请求%@进行 AI评分…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Generating %1$lld %2$@ images and requesting AI scoring from %3$@…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "new",
+            "value": "正在生成 %1$lld 张%2$@图片并请求%3$@进行 AI评分…"
+          }
+        }
+      }
+    },
+    "正在等待当前 AI评分完成。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Waiting for the current AI scoring task to finish."
+          }
+        }
+      }
+    },
+    "正在评估": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Evaluating"
+          }
+        }
+      }
+    },
+    "正在评估 · %lld/%lld 张": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Evaluating · %1$lld/%2$lld photos"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "new",
+            "value": "正在评估 · %1$lld/%2$lld 张"
+          }
+        }
+      }
+    },
+    "正在评估第 %@ 张，共 %lld 张；正在生成%@安全图片…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Evaluating photos %1$@ of %2$lld; generating %3$@ safe images…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "new",
+            "value": "正在评估第 %1$@ 张，共 %2$lld 张；正在生成%3$@安全图片…"
+          }
+        }
+      }
+    },
+    "正在识别相似照片…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Finding similar photos…"
+          }
+        }
+      }
+    },
+    "正在载入大图预览": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loading large preview"
+          }
+        }
+      }
+    },
+    "正在重新评估失败的照片。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Re-evaluating the failed photos."
+          }
+        }
+      }
+    },
+    "正在重新评估第 %@ 张。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Re-evaluating photos %1$@."
+          }
+        }
+      }
+    },
+    "正在重新评估第 %@ 张，共 %lld 张…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Re-evaluating photos %1$@ of %2$lld…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "new",
+            "value": "正在重新评估第 %1$@ 张，共 %2$lld 张…"
+          }
+        }
+      }
+    },
+    "正在验证": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verifying"
+          }
+        }
+      }
+    },
+    "正在验证%@…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verifying %1$@…"
+          }
+        }
+      }
+    },
+    "此供应商尚未保存 Key。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No key is saved for this provider."
+          }
+        }
+      }
+    },
+    "此品牌的 Key 已保存，但当前模型尚未验证。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A key is saved for this provider, but the current model has not been verified."
+          }
+        }
+      }
+    },
+    "此品牌的 Key 已保存，当前模型连接已验证。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A key is saved for this provider, and the current model connection is verified."
+          }
+        }
+      }
+    },
+    "每个供应商的 Key 独立保存在此 Mac 的 Keychain，不写入项目状态、日志或导出文件；发起 AI 请求时只用于所选供应商的鉴权请求头。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Each provider key is stored separately in this Mac's Keychain. Keys are not written to project state, logs, or exports and are used only in the selected provider's authentication header."
+          }
+        }
+      }
+    },
+    "每个日期文件夹是一项独立任务": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Each dated folder is a separate project"
+          }
+        }
+      }
+    },
+    "每次发送前确认": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Confirm before every send"
+          }
+        }
+      }
+    },
+    "每次请求发送 2–5 张匿名 JPEG 预览；最长边由你选择为小 512px、中 1024px 或大 1536px。始终不发送原图、文件名、本地路径或 EXIF/GPS。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Each request sends 2–5 anonymous JPEG previews. You choose the longest edge: Small 512px, Medium 1024px, or Large 1536px. Originals, filenames, local paths, and EXIF/GPS are never sent."
+          }
+        }
+      }
+    },
+    "没有%@照片": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No %1$@ photos"
+          }
+        }
+      }
+    },
+    "没有可以撤销的操作。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "There is nothing to undo."
+          }
+        }
+      }
+    },
+    "没有找到 JPG、JPEG、PNG 或 WebP 图片。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No JPG, JPEG, PNG, or WebP images were found."
+          }
+        }
+      }
+    },
+    "没有技术风险提示": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No technical warnings"
+          }
+        }
+      }
+    },
+    "淘汰": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reject"
+          }
+        }
+      }
+    },
+    "清晰度风险": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sharpness risk"
+          }
+        }
+      }
+    },
+    "演示 AI评分": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Demo AI Scoring"
+          }
+        }
+      }
+    },
+    "火山方舟": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Volcengine Ark"
+          }
+        }
+      }
+    },
+    "照片不可用": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Photo Unavailable"
+          }
+        }
+      }
+    },
+    "照片只会在本机读取；原图不会被修改。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Photos are read only on this Mac. Originals will not be modified."
+          }
+        }
+      }
+    },
+    "照片大图预览": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Large photo preview"
+          }
+        }
+      }
+    },
+    "照片状态": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Photo Status"
+          }
+        }
+      }
+    },
+    "照片筛选": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Photo Filter"
+          }
+        }
+      }
+    },
+    "照片筛选项目": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Photo Curation Projects"
+          }
+        }
+      }
+    },
+    "照片类型": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Photo Type"
+          }
+        }
+      }
+    },
+    "照片类型：%@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Photo type: %@"
+          }
+        }
+      }
+    },
+    "照片预览": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Photo Preview"
+          }
+        }
+      }
+    },
+    "独立评分": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Independent Score"
+          }
+        }
+      }
+    },
+    "画面技术表现可用，但瞬间和叙事张力仍可加强。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The technical quality is usable, but the moment and visual story could be stronger."
+          }
+        }
+      }
+    },
+    "相似 %lld/%lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Similar %1$lld/%2$lld"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "new",
+            "value": "相似 %1$lld/%2$lld"
+          }
+        }
+      }
+    },
+    "相似照片": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Similar Photos"
+          }
+        }
+      }
+    },
+    "相似照片 %lld/%lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Similar photo %1$lld/%2$lld"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "new",
+            "value": "相似照片 %1$lld/%2$lld"
+          }
+        }
+      }
+    },
+    "相似照片：第 %lld / %lld 张": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Similar photos: %1$lld of %2$lld"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "new",
+            "value": "相似照片：第 %1$lld / %2$lld 张"
+          }
+        }
+      }
+    },
+    "瞬间": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moment"
+          }
+        }
+      }
+    },
+    "瞬间与旅途节奏自然": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The moment and travel pacing feel natural"
+          }
+        }
+      }
+    },
+    "确认保留": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Confirm Keeps"
+          }
+        }
+      }
+    },
+    "确认复制导出": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Confirm Copy Export"
+          }
+        }
+      }
+    },
+    "查看并采纳评分结果": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Review and Accept Scoring Results"
+          }
+        }
+      }
+    },
+    "示例筛选": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Example Curation"
+          }
+        }
+      }
+    },
+    "示例筛选已准备：4 张人物、4 张风景，各保留 2 张。先选择“人物”。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The sample is ready with four People and four Scenery photos, keeping two of each. Start by choosing People."
+          }
+        }
+      }
+    },
+    "示例筛选进行中": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Example curation in progress"
+          }
+        }
+      }
+    },
+    "离线 AI评分完成，已返回照片网格。现在点击顶部“风景”。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Offline AI Scoring is complete, and you are back in the photo grid. Now click Scenery at the top."
+          }
+        }
+      }
+    },
+    "离线 AI评分：已评估 %lld / %lld 张。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Offline AI scoring evaluated %1$lld of %2$lld photos."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "new",
+            "value": "离线 AI评分：已评估 %1$lld / %2$lld 张。"
+          }
+        }
+      }
+    },
+    "离线教学": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Offline Guide"
+          }
+        }
+      }
+    },
+    "离线演示 %lld / %lld 张": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Offline demo %1$lld / %2$lld photos"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "new",
+            "value": "离线演示 %1$lld / %2$lld 张"
+          }
+        }
+      }
+    },
+    "稍后再说": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not Now"
+          }
+        }
+      }
+    },
+    "第 %@ 张的评分格式异常；将在冷却后自动重试（%lld/%lld）。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The result for photos %1$@ is invalid and will retry after cooldown (%2$lld/%3$lld)."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "new",
+            "value": "第 %1$@ 张的评分格式异常；将在冷却后自动重试（%2$lld/%3$lld）。"
+          }
+        }
+      }
+    },
+    "第 %lld / %lld 张": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Photo %1$lld of %2$lld"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "new",
+            "value": "第 %1$lld / %2$lld 张"
+          }
+        }
+      }
+    },
+    "第一次筛选": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "First Curation"
+          }
+        }
+      }
+    },
+    "第一次筛选 / 海岸公路旅行": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "First Curation / Coastal Road Trip"
+          }
+        }
+      }
+    },
+    "第一次筛选已完成": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "First Curation Complete"
+          }
+        }
+      }
+    },
+    "第一次筛选已完成。点击“结束新手引导”返回。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your first curation is complete. Click Finish Tutorial to return."
+          }
+        }
+      }
+    },
+    "第一版支持 JPG、JPEG、PNG 和 WebP。原图只在本机读取。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This version supports JPG, JPEG, PNG, and WebP. Originals are read only on this Mac."
+          }
+        }
+      }
+    },
+    "第三方处理方": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Third-Party Processor"
+          }
+        }
+      }
+    },
+    "等待扫描": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Waiting to scan"
+          }
+        }
+      }
+    },
+    "等待运行": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Waiting to run"
+          }
+        }
+      }
+    },
+    "筛选流程": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Curation Workflow"
+          }
+        }
+      }
+    },
+    "累计：输入 %lld tokens，输出 %lld tokens。费用以所选供应商账单为准。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Total: %1$lld input tokens and %2$lld output tokens. See the selected provider's bill for cost."
+          }
+        }
+      }
+    },
+    "结束新手引导": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Finish Tutorial"
+          }
+        }
+      }
+    },
+    "继续": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Resume"
+          }
+        }
+      }
+    },
+    "缺少本地技术分析，按拍摄顺序显示": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No local technical analysis; shown in capture order"
+          }
+        }
+      }
+    },
+    "腾讯混元": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tencent Hunyuan"
+          }
+        }
+      }
+    },
+    "自定义 OpenAI-compatible": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Custom OpenAI-compatible"
+          }
+        }
+      }
+    },
+    "自定义兼容接口": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Custom Compatible Endpoint"
+          }
+        }
+      }
+    },
+    "自定义兼容配置无效，未保存。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The custom compatible configuration is invalid and was not saved."
+          }
+        }
+      }
+    },
+    "自定义兼容配置无效，未发送请求。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The custom compatible configuration is invalid. No request was sent."
+          }
+        }
+      }
+    },
+    "设置并验证%@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Set Up and Verify %1$@"
+          }
+        }
+      }
+    },
+    "评分": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Score"
+          }
+        }
+      }
+    },
+    "评分优先": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Top Score"
+          }
+        }
+      }
+    },
+    "评分只提供解释和排序；请到“评分优先”确认最终结果。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scores provide explanations and ranking only. Review the final result under Top Score."
+          }
+        }
+      }
+    },
+    "评分图片只发送给本次选择的火山方舟、MiniMax、OpenAI、Anthropic、Google、阿里云百炼、xAI、Kimi、智谱、腾讯混元或自定义兼容接口。供应商可通过你的 API Key 将调用关联到对应账号；同一组照片不会同时发送给多个服务。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scoring images are sent only to the selected Volcano Ark, MiniMax, OpenAI, Anthropic, Google, Alibaba Model Studio, xAI, Kimi, Zhipu, Tencent Hunyuan, or custom compatible endpoint. The provider can associate requests with your account through your API key. The same photos are never sent to multiple services at once."
+          }
+        }
+      }
+    },
+    "评分图片尺寸": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scoring Image Size"
+          }
+        }
+      }
+    },
+    "评分已查看，继续": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Score Reviewed, Continue"
+          }
+        }
+      }
+    },
+    "评分模型": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scoring Model"
+          }
+        }
+      }
+    },
+    "诊断信息": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diagnostic Information"
+          }
+        }
+      }
+    },
+    "诊断信息仅包含 App 版本、macOS 版本和运行模式，不包含照片、文件路径或 API Key。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diagnostic information includes only the app version, macOS version, and run mode. It does not include photos, file paths, or the API key."
+          }
+        }
+      }
+    },
+    "该文件夹已经是当前项目。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This folder is already the current project."
+          }
+        }
+      }
+    },
+    "请先在 AI评分设置中完成自定义接口和模型 ID 配置。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Complete the custom endpoint and model ID in AI Scoring Settings first."
+          }
+        }
+      }
+    },
+    "请先在 AI评分设置中验证%@及其 API Key。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verify %1$@ and its API key in AI Scoring Settings first."
+          }
+        }
+      }
+    },
+    "请先在“照片类型”中选择人物或风景，再开始该类型的 AI评分。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose People or Scenery under Photo Type before starting AI Scoring for that type."
+          }
+        }
+      }
+    },
+    "请先在照片类型中选择“人物”。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose People under Photo Type first."
+          }
+        }
+      }
+    },
+    "请先打开一张照片检查大图。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open a photo to inspect the large preview."
+          }
+        }
+      }
+    },
+    "请先选中一张相似照片。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Select a similar photo first."
+          }
+        }
+      }
+    },
+    "请等待当前分析完成，或先停止 AI 任务，再切换项目。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wait for analysis to finish, or stop the AI task before switching projects."
+          }
+        }
+      }
+    },
+    "请等待当前分析完成，或先停止 AI 任务，再删除项目。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wait for analysis to finish, or stop the AI task before deleting a project."
+          }
+        }
+      }
+    },
+    "请等待当前分析完成，或先停止 AI 任务，再新建项目。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wait for analysis to finish, or stop the AI task before creating a project."
+          }
+        }
+      }
+    },
+    "请等待当前分析完成，或先停止 AI 任务，再进入示例筛选。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wait for analysis to finish, or stop the AI task before opening example curation."
+          }
+        }
+      }
+    },
+    "请输入 API Key，或先保存该品牌的 Key。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enter an API key or save a key for this provider first."
+          }
+        }
+      }
+    },
+    "请输入完整的 /chat/completions 地址和模型 ID。远程地址必须使用 HTTPS；HTTP 仅允许本机回环地址。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enter a full /chat/completions URL and model ID. Remote endpoints must use HTTPS; HTTP is allowed only for local loopback addresses."
+          }
+        }
+      }
+    },
+    "请输入有效的 API Key。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enter a valid API key."
+          }
+        }
+      }
+    },
+    "请输入要使用的 API 模型 ID。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enter the API model ID to use."
+          }
+        }
+      }
+    },
+    "请重新选择“%@”对应的照片文件夹。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose the photo folder for “%1$@” again."
+          }
+        }
+      }
+    },
+    "账号未返回可用于通用图片理解的候选模型。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The account returned no candidate models suitable for general image understanding."
+          }
+        }
+      }
+    },
+    "账号模型列表只用于选择候选；图片输入和评分格式仍需点击验证后确认。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The account model list only provides candidates. Image input and scoring format still require verification."
+          }
+        }
+      }
+    },
+    "账号模型刷新": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Account Model Refresh"
+          }
+        }
+      }
+    },
+    "达到保留目标后可导出副本；原照片不会被移动、删除或修改。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "After reaching the keep target, you can export copies. Original photos are never moved, deleted, or modified."
+          }
+        }
+      }
+    },
+    "运行内置固定评分；人物和风景会使用不同重点分别排序，不会联网。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Run fixed built-in scores. People and Scenery use different criteria and separate rankings without connecting to the network."
+          }
+        }
+      }
+    },
+    "运行模式": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Run Mode"
+          }
+        }
+      }
+    },
+    "运行离线 AI评分": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Run Offline AI Scoring"
+          }
+        }
+      }
+    },
+    "返回照片网格后重新选择一张照片。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Return to the photo grid and select a photo again."
+          }
+        }
+      }
+    },
+    "还没有项目": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No Projects Yet"
+          }
+        }
+      }
+    },
+    "还需保留 %lld 张": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keep %lld more photos"
+          }
+        }
+      }
+    },
+    "这里有 %lld 张相似照片，当前每次最多评分 %lld 张；请先缩小范围。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "There are %1$lld similar photos here. Up to %2$lld can be scored at once; narrow the set first."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "new",
+            "value": "这里有 %1$lld 张相似照片，当前每次最多评分 %2$lld 张；请先缩小范围。"
+          }
+        }
+      }
+    },
+    "连接验证": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connection Verification"
+          }
+        }
+      }
+    },
+    "连接验证失败：%@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connection verification failed: %1$@"
+          }
+        }
+      }
+    },
+    "退出示例筛选": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exit Example Curation"
+          }
+        }
+      }
+    },
+    "适合主体与整体构图；上传最少，通常费用最低。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Best for subjects and overall composition; smallest upload and usually lowest cost."
+          }
+        }
+      }
+    },
+    "适合多人照片与一般细节；在识别、速度和费用之间平衡。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Best for group photos and general detail; balances recognition, speed, and cost."
+          }
+        }
+      }
+    },
+    "适合旅行结束后，把人物和风景分开整理与评分，再决定各自保留哪些照片。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "After a trip, curate and score People and Scenery separately, then decide which photos to keep from each."
+          }
+        }
+      }
+    },
+    "适合远景、小主体与纹理；上传、等待和潜在费用最高。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Best for distant scenes, small subjects, and texture; highest upload, wait time, and potential cost."
+          }
+        }
+      }
+    },
+    "选择一个旅行照片文件夹开始筛选。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose a travel photo folder to begin curation."
+          }
+        }
+      }
+    },
+    "选择一个日期文件夹开始本地筛选。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose a dated folder to begin local curation."
+          }
+        }
+      }
+    },
+    "选择我的照片": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose My Photos"
+          }
+        }
+      }
+    },
+    "选择旅行照片文件夹": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose Travel Photo Folder"
+          }
+        }
+      }
+    },
+    "选择此照片；双击可查看大图，也可使用保留、淘汰或恢复待定操作": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Select this photo. Double-click for a large preview, or use Keep, Reject, or Reset to Undecided."
+          }
+        }
+      }
+    },
+    "选择照片": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose Photos"
+          }
+        }
+      }
+    },
+    "选择照片、检查决定、可选 AI评分、确认保留、导出副本": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose photos, review and decide, optionally use AI scoring, confirm keeps, and export copies"
+          }
+        }
+      }
+    },
+    "选择照片文件夹": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose Photo Folder"
+          }
+        }
+      }
+    },
+    "选择精选照片的导出位置": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose Export Location"
+          }
+        }
+      }
+    },
+    "选片": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Curation"
+          }
+        }
+      }
+    },
+    "采纳 %lld 张评分结果": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Accept %lld Scoring Results"
+          }
+        }
+      }
+    },
+    "采纳后会超过%@目标 %lld 张，请先调整已有保留项。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Accepting these results would exceed the %1$@ target of %2$lld. Adjust the photos already kept first."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "new",
+            "value": "采纳后会超过%1$@目标 %2$lld 张，请先调整已有保留项。"
+          }
+        }
+      }
+    },
+    "重新授权照片文件夹": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reauthorize Photo Folder"
+          }
+        }
+      }
+    },
+    "重新运行": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Run Again"
+          }
+        }
+      }
+    },
+    "重试第 %@ 张": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Retry Photos %1$@"
+          }
+        }
+      }
+    },
+    "阿里云百炼": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alibaba Cloud Model Studio"
+          }
+        }
+      }
+    },
+    "隐私与数据": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Privacy & Data"
+          }
+        }
+      }
+    },
+    "需再淘汰 %lld 张": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reject %lld more photos"
+          }
+        }
+      }
+    },
+    "需要重新授权 · 点按项目": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Authorization required · Select project"
+          }
+        }
+      }
+    },
+    "项目": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Projects"
+          }
+        }
+      }
+    },
+    "项目已从 App 中删除，缩略图缓存已释放；原照片没有被删除或修改。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The project was removed from the app and its thumbnail cache released. Original photos were not deleted or modified."
+          }
+        }
+      }
+    },
+    "项目文件夹权限已失效，需要重新授权。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Project folder access expired and must be authorized again."
+          }
+        }
+      }
+    },
+    "项目状态": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Project State"
+          }
+        }
+      }
+    },
+    "项目状态保存失败；原照片未受影响。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not save project state; original photos were not affected."
+          }
+        }
+      }
+    },
+    "项目状态版本不受支持，需要重新创建项目。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This project state version is not supported. Create the project again."
+          }
+        }
+      }
+    },
+    "预览": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Preview"
+          }
+        }
+      }
+    },
+    "风景": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scenery"
+          }
+        }
+      }
+    },
+    "风景照片拥有独立排序。现在打开一张风景照片查看评分。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scenery photos have their own ranking. Open a Scenery photo to review its score."
+          }
+        }
+      }
+    },
+    "验证会使用 1 张内置测试图调用当前模型，可能产生少量供应商费用；验证成功后才保存新 Key。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verification calls the current model with one built-in test image and may incur a small provider charge. A new key is saved only after verification succeeds."
+          }
+        }
+      }
+    },
+    "验证已保存的 Key": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verify Saved Key"
+          }
+        }
+      }
+    },
+    "验证并保存": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verify and Save"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}
