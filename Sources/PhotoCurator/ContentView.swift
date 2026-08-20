@@ -251,11 +251,6 @@ struct ContentView: View {
             .accessibilityLabel(project.displayName)
             .accessibilityValue(projectAccessibilityValue(project, isActive: isActive))
             .accessibilityHint(projectAccessibilityHint(project, isActive: isActive))
-            .firstCurationGuideTarget(
-                isActive && library.firstCurationGuideStep == .analyzePhotos,
-                pointerSide: .noPointer,
-                cornerRadius: 10
-            )
 
             if library.isDemoProject(project) {
                 Button {
@@ -283,6 +278,15 @@ struct ContentView: View {
             RoundedRectangle(cornerRadius: 10)
                 .stroke(isActive ? Color.accentColor.opacity(0.45) : Color.clear)
         }
+        // 红框要包住整行——含蓝底、含右侧的关闭/删除按钮——并留出缝隙。
+        // 这 4pt 是常驻的，不做成"聚焦时才加"：那样红框出现的瞬间整行会跳一下。
+        // 圆角相应从 10 放到 14，才和被包住的那块蓝底同心。
+        .padding(4)
+        .firstCurationGuideTarget(
+            isActive && library.firstCurationGuideStep == .analyzePhotos,
+            pointerSide: .noPointer,
+            cornerRadius: 14
+        )
     }
 
     private func projectStatusText(_ project: PhotoProject) -> String {
