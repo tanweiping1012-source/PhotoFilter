@@ -184,6 +184,52 @@ final class PreLaunchReviewTests: XCTestCase {
         XCTAssertTrue(text.contains(PhotoCurationCategory.scenery.title))
     }
 
+    // MARK: - 采纳之后再淘汰
+
+    /// 用户报告：先采纳全部评分结果，再淘汰其中两张，被淘汰的照片仍然会被导出。
+    /// 这里用离线教学走完整条路径：评分 → 采纳 → 淘汰 → 导出，直接检查落盘结果。
+    func testRejectingAnAcceptedPhotoRemovesItFromExport() throws {
+        let library = makeLibrary()
+        library.startDemoMode()
+        library.completeDemoAIScoringImmediately()
+        library.acceptPendingAIFinalSelection()
+
+        let acceptedIDs = library.keepers.map(\.id)
+        XCTAssertFalse(acceptedIDs.isEmpty, "采纳后应当有保留照片")
+
+        // 淘汰其中一张已采纳的照片。
+        let rejectedID = try XCTUnwrap(acceptedIDs.first)
+        let rejectedName = try XCTUnwrap(
+            library.photos.first { $0.id == rejectedID }?.filename
+        )
+        library.mark(photoID: rejectedID, as: .reject)
+
+        XCTAssertFalse(
+            library.keepers.map(\.id).contains(rejectedID),
+            "被淘汰的照片不能还留在保留集合里"
+        )
+        XCTAssertEqual(library.keepers.count, acceptedIDs.count - 1)
+
+        // 真正导出一次，检查磁盘上的结果。
+        let destination = FileManager.default.temporaryDirectory
+            .appendingPathComponent("photo-curator-reject-\(UUID().uuidString)", isDirectory: true)
+        try FileManager.default.createDirectory(at: destination, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: destination) }
+
+        let exportURL = try ExportService.copyCategorized(
+            photos: library.keepers,
+            to: destination
+        )
+        let exported = FileManager.default
+            .enumerator(at: exportURL, includingPropertiesForKeys: nil)?
+            .compactMap { ($0 as? URL)?.lastPathComponent } ?? []
+
+        XCTAssertFalse(
+            exported.contains(rejectedName),
+            "被淘汰的 \(rejectedName) 出现在导出目录里"
+        )
+    }
+
     // MARK: - 辅助
 
     private func makeLibrary() -> PhotoLibraryViewModel {
