@@ -50,13 +50,8 @@ struct PrivacyInformationView: View {
                     )
                     PrivacyDisclosureRow(
                         icon: "checkmark.shield",
-                        title: "连接验证",
-                        detail: "只有你点击“验证并保存”或“验证已保存的 Key”时，App 才会向所选模型发送 1 张内置测试图，验证鉴权、图片输入和评分结果。测试图不来自你的照片。"
-                    )
-                    PrivacyDisclosureRow(
-                        icon: "arrow.clockwise",
-                        title: "账号模型刷新",
-                        detail: "只有你点击“刷新账号模型”时，App 才会使用当前输入或已保存的 OpenAI / Anthropic Key 读取账号可见模型 ID；不会发送图片，也不会保存模型列表。"
+                        title: "其他会联网的操作",
+                        detail: "“验证并保存”和“验证已保存的 Key”会向所选模型发送 1 张内置测试图，测试图不来自你的照片；“刷新账号模型”只读取 OpenAI / Anthropic 账号可见的模型 ID，不发送图片，也不保存模型列表。两者都只在你点击时发生。"
                     )
                 }
 

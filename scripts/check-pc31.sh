@@ -46,6 +46,19 @@ if rg -q '2–5 张' Sources/PhotoCurator/SupportInformationView.swift; then
   fail "帮助页又开始复述发送边界，它只应出现在隐私页"
 fi
 
+# 更一般的规则：两页各答一个问题。隐私页答"我的数据去了哪里"，帮助页答
+# "怎么用、多少钱、坏了怎么办"。同一个事实只写在能回答它所属问题的那一页——
+# 两页各写一份迟早漂移成互相矛盾的说法，这已经发生过一次：帮助页写"模型、
+# 张数和照片类型"，隐私页写"供应商、模型、预览尺寸和照片数量"，而确认弹窗
+# 实际只有前者。
+# 例外：诊断信息讲的是剪贴板产物，必须和"复制诊断信息"按钮同屏，故不设限。
+support_view="Sources/PhotoCurator/SupportInformationView.swift"
+for data_claim in 原图 原照片 只读 EXIF Keychain 匿名 不发送; do
+  if rg -q "$data_claim" "$support_view"; then
+    fail "帮助页出现数据流向承诺「$data_claim」，这类事实只属于「隐私与数据」"
+  fi
+done
+
 # 完成回执必须跟着项目走：它说的是"这个项目刚发生了什么"。
 # 作为全局单值时，真实项目评分完成后打开示例，示例第 1 步头上会顶着真实项目的
 # "风景 AI评分完成"，点"知道了"还会把真实项目的回执一并消掉。

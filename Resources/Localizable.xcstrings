@@ -470,17 +470,6 @@
         }
       }
     },
-    "AI评分使用你自己的供应商 API Key，费用以该供应商账单为准。更大的预览尺寸会增加上传量、等待时间和可能的费用。App 不销售或代充 API 额度。": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "AI Scoring uses your own provider API key, so costs appear on that provider's bill. Larger previews increase upload size, waiting time, and potential cost. This app never sells or tops up API credit."
-          }
-        }
-      }
-    },
     "AI评分包含照片间的相对比较，已要求模型重新独立评分。": {
       "localizations": {
         "en": {
@@ -877,6 +866,17 @@
         }
       }
     },
+    "“验证并保存”和“验证已保存的 Key”会向所选模型发送 1 张内置测试图，测试图不来自你的照片；“刷新账号模型”只读取 OpenAI / Anthropic 账号可见的模型 ID，不发送图片，也不保存模型列表。两者都只在你点击时发生。": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“Verify and save” and “Verify saved key” send one built-in test image to the selected model; the test image never comes from your photos. “Refresh account models” only reads the model IDs visible to your OpenAI / Anthropic account — it sends no images and stores no model list. Both happen only when you click them."
+          }
+        }
+      }
+    },
     "上一张": {
       "localizations": {
         "en": {
@@ -934,6 +934,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "No Tracking"
+          }
+        }
+      }
+    },
+    "不需要也能用：本地筛选、相似分组、技术风险提示和导出都不依赖 AI。配置 Key 之后 AI评分才可用，它始终是可选的。": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No. Local curation, similarity grouping, technical risk flags, and export all work without AI. Adding a key enables AI Scoring, which stays optional."
           }
         }
       }
@@ -1060,6 +1071,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "People photos are now shown separately. Open any People photo to inspect the large preview."
+          }
+        }
+      }
+    },
+    "什么时候能导出": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "When can I export?"
           }
         }
       }
@@ -1220,6 +1242,17 @@
         }
       }
     },
+    "保留至少一张照片就可以导出，导出多少由你决定；保留目标只用于显示进度，不构成限制。": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keep at least one photo and you can export. How many you export is up to you; the keep target only shows progress and is not a limit."
+          }
+        }
+      }
+    },
     "候选缩略图不完整，未发送请求。": {
       "localizations": {
         "en": {
@@ -1316,6 +1349,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Other API Model ID"
+          }
+        }
+      }
+    },
+    "其他会联网的操作": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Other actions that use the network"
           }
         }
       }
@@ -1626,17 +1670,6 @@
         }
       }
     },
-    "发送内容": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "What gets sent"
-          }
-        }
-      }
-    },
     "发送的数据": {
       "localizations": {
         "en": {
@@ -1694,37 +1727,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "The app sends scoring photos only after you tap send in the confirmation dialog. The dialog states the model, photo count, and photo type; the current provider, model, and preview size stay visible in the sidebar AI Scoring section."
-          }
-        }
-      }
-    },
-    "只有你点击“刷新账号模型”时，App 才会使用当前输入或已保存的 OpenAI / Anthropic Key 读取账号可见模型 ID；不会发送图片，也不会保存模型列表。": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Only when you click Refresh Account Models does the app use the currently entered or saved OpenAI / Anthropic key to read model IDs visible to your account. No images are sent, and the model list is not saved."
-          }
-        }
-      }
-    },
-    "只有你点击“验证并保存”或“验证已保存的 Key”时，App 才会向所选模型发送 1 张内置测试图，验证鉴权、图片输入和评分结果。测试图不来自你的照片。": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Only when you click Verify and Save or Verify Saved Key does the app send one built-in test image to the selected model to verify authentication, image input, and scoring output. The test image is not one of your photos."
-          }
-        }
-      }
-    },
-    "只要保留了至少一张照片就可以导出副本，导出多少由你决定；保留目标只用于显示进度。原照片不会被移动、删除或修改。": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "You can export copies as soon as one photo is kept — how many you export is up to you, and keep targets only show progress. Originals are never moved, deleted, or modified."
           }
         }
       }
@@ -3064,17 +3066,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Last updated: August 18, 2026"
-          }
-        }
-      }
-    },
-    "未配置 API Key 时，本地筛选与导出仍可使用。配置后，AI评分也只在你确认之后才会开始。": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Local curation and export work without an API key. Once a key is configured, AI scoring still starts only after you confirm."
           }
         }
       }
@@ -4628,6 +4619,17 @@
         }
       }
     },
+    "费用以你所选供应商的账单为准，App 不销售也不代充额度。预览尺寸越大，上传量、等待时间和费用越高。": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Charges follow the bill from the provider you selected; the app neither sells nor tops up credit. Larger previews mean more upload, longer waits, and higher cost."
+          }
+        }
+      }
+    },
     "运行内置固定评分；人物和风景会使用不同重点分别排序，不会联网。": {
       "localizations": {
         "en": {
@@ -4990,6 +4992,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Reject %lld more photos"
+          }
+        }
+      }
+    },
+    "需要 API Key 吗": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Do I need an API key?"
           }
         }
       }

@@ -26,13 +26,13 @@ struct SupportInformationView: View {
                     )
                     SupportHelpRow(
                         icon: "wand.and.stars",
-                        title: "AI评分",
-                        detail: "未配置 API Key 时，本地筛选与导出仍可使用。配置后，AI评分也只在你确认之后才会开始。"
+                        title: "需要 API Key 吗",
+                        detail: "不需要也能用：本地筛选、相似分组、技术风险提示和导出都不依赖 AI。配置 Key 之后 AI评分才可用，它始终是可选的。"
                     )
                     SupportHelpRow(
                         icon: "square.and.arrow.up",
-                        title: "复制导出",
-                        detail: "只要保留了至少一张照片就可以导出副本，导出多少由你决定；保留目标只用于显示进度。原照片不会被移动、删除或修改。"
+                        title: "什么时候能导出",
+                        detail: "保留至少一张照片就可以导出，导出多少由你决定；保留目标只用于显示进度，不构成限制。"
                     )
                 }
 
@@ -52,7 +52,7 @@ struct SupportInformationView: View {
                     SupportHelpRow(
                         icon: "creditcard",
                         title: "费用",
-                        detail: "AI评分使用你自己的供应商 API Key，费用以该供应商账单为准。更大的预览尺寸会增加上传量、等待时间和可能的费用。App 不销售或代充 API 额度。"
+                        detail: "费用以你所选供应商的账单为准，App 不销售也不代充额度。预览尺寸越大，上传量、等待时间和费用越高。"
                     )
                 }
 

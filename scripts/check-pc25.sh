@@ -47,7 +47,9 @@ fi
 rg -Fq '采纳 \(library.pendingAIFinalSelectionAcceptanceCount) 张评分结果' \
   Sources/PhotoCurator/ContentView.swift ||
   fail "最终结果缺少统一的采纳入口"
-rg -q 'title: "AI评分"' Sources/PhotoCurator/SupportInformationView.swift ||
+# 帮助页行标题已改为用户会问的问题（"需要 API Key 吗"），术语一致性由上面的
+# old_terms 全仓库扫描承担，这里只断言分区标题仍用统一术语。
+rg -q 'Section\("AI评分规则"\)' Sources/PhotoCurator/SupportInformationView.swift ||
   fail "帮助页未统一为 AI评分"
 rg -q 'Text\("AI评分设置"\)' Sources/PhotoCurator/AISettingsView.swift ||
   fail "设置页未统一为 AI评分设置"
