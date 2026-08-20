@@ -950,7 +950,7 @@ final class PhotoLibraryViewModel: ObservableObject {
         startDemoAnalysisPacing()
         statusMessage = String(
             localized:
-                "正在本地分析示例照片：分开人物和风景、找出相似照片、标出技术风险。"
+                "正在本地分析示例照片；完成后就能开始筛选。"
         )
     }
 

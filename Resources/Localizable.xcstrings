@@ -1448,13 +1448,13 @@
         }
       }
     },
-    "分开人物和风景、找出相似照片、标出技术风险。真实文件夹越大这一步越久，导入后就是从这里开始。": {
+    "分开人物和风景、找出相似照片、标出技术风险": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Separating people from scenery, grouping near-duplicates, and flagging technical risks. The bigger the folder, the longer this takes — it is where every import begins."
+            "value": "Separating people from scenery, grouping near-duplicates, flagging technical risks"
           }
         }
       }
@@ -3467,13 +3467,13 @@
         }
       }
     },
-    "正在本地分析示例照片：分开人物和风景、找出相似照片、标出技术风险。": {
+    "正在本地分析示例照片；完成后就能开始筛选。": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Analyzing the sample photos locally: separating people from scenery, grouping near-duplicates, and flagging technical risks."
+            "value": "Analyzing the sample photos locally. Curation starts as soon as this finishes."
           }
         }
       }
@@ -3970,6 +3970,17 @@
           "stringUnit": {
             "state": "new",
             "value": "相似照片：第 %1$lld / %2$lld 张"
+          }
+        }
+      }
+    },
+    "真实文件夹越大这一步越久，导入照片后就是从这里开始。": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The bigger the real folder, the longer this takes — every import starts here."
           }
         }
       }

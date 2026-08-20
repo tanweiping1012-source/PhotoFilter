@@ -75,7 +75,7 @@ enum FirstCurationGuideStep: Int, CaseIterable, Identifiable {
     var detail: String {
         switch self {
         case .analyzePhotos:
-            String(localized: "分开人物和风景、找出相似照片、标出技术风险。真实文件夹越大这一步越久，导入后就是从这里开始。")
+            String(localized: "真实文件夹越大这一步越久，导入照片后就是从这里开始。")
         case .choosePeople:
             String(localized: "在“照片类型”中选择“人物”。人物和风景分开整理，也分开评分。")
         case .runPeopleAIScoring:

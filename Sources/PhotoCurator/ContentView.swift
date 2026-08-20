@@ -239,6 +239,12 @@ struct ContentView: View {
                             ProgressView(value: library.analysisProgress)
                                 .accessibilityLabel("本地分析进度")
                                 .accessibilityValue(projectStatusText(project))
+                            // 说明必须紧跟进度条：它回答的是"这条在跑什么"。
+                            // 放在顶部状态栏时，用户看着侧栏的条、却要去屏幕另一头找解释。
+                            Text("分开人物和风景、找出相似照片、标出技术风险")
+                                .font(Typography.footnote)
+                                .foregroundStyle(.secondary)
+                                .fixedSize(horizontal: false, vertical: true)
                         }
                     }
                     Spacer(minLength: 0)
