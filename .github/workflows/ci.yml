@@ -20,7 +20,13 @@ jobs:
         run: brew list ripgrep >/dev/null 2>&1 || brew install ripgrep
 
       - name: Show toolchain
-        run: swift --version && xcodebuild -version
+        # 也列出 runner 上可选的 Xcode：本机是 Xcode 26 / Swift 6.2，
+        # runner 默认可能低若干个版本，编译差异（尤其是严格并发诊断）就出在这里。
+        run: |
+          swift --version
+          xcodebuild -version
+          echo "--- 可用 Xcode ---"
+          ls -d /Applications/Xcode*.app 2>/dev/null || echo "(仅默认工具链)"
 
       # 与本地开发跑的是同一条命令：swift build / swift test / 隐私与演示门禁 /
       # 20 个功能门禁 / 完整 xcodebuild。CI 少跑一项，门禁就会悄悄失效。

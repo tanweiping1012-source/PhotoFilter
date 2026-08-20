@@ -20,6 +20,13 @@ jobs:
       - name: Install ripgrep
         run: brew list ripgrep >/dev/null 2>&1 || brew install ripgrep
 
+      - name: Show toolchain
+        run: |
+          swift --version
+          xcodebuild -version
+          echo "--- 可用 Xcode ---"
+          ls -d /Applications/Xcode*.app 2>/dev/null || echo "(仅默认工具链)"
+
       # 发布前必须先过完整门禁：没跑过 check.sh 的构建不允许出现在 Release 页。
       - name: scripts/check.sh
         run: bash scripts/check.sh

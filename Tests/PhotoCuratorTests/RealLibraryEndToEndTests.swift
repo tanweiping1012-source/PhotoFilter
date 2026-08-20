@@ -10,16 +10,20 @@ import XCTest
 /// 全程只读用户目录，导出写入临时目录，不联网、不读取 Keychain。
 @MainActor
 final class RealLibraryEndToEndTests: XCTestCase {
-    private var libraryURL: URL!
-
-    override func setUpWithError() throws {
+    /// 目录在测试方法里解析，而不是 `setUpWithError`。
+    ///
+    /// `setUpWithError` 覆写的是 XCTestCase 上 nonisolated 的方法，在里面写 `@MainActor`
+    /// 存储属性只有部分 Swift 版本允许——本机 6.2 能过，CI 的 6.1.2 直接报
+    /// “main actor-isolated property can not be mutated from a nonisolated context”。
+    private func resolveLibraryURL() throws -> URL {
         guard let directory = ProcessInfo.processInfo.environment["PHOTO_BENCH_DIR"] else {
             throw XCTSkip("未设置 PHOTO_BENCH_DIR，跳过真实照片端到端测试。")
         }
-        libraryURL = URL(fileURLWithPath: directory, isDirectory: true)
+        return URL(fileURLWithPath: directory, isDirectory: true)
     }
 
     func testFullLocalCurationFlowOnRealLibrary() async throws {
+        let libraryURL = try resolveLibraryURL()
         let store = MemoryProjectStore()
         let library = PhotoLibraryViewModel(
             projectStore: store,
