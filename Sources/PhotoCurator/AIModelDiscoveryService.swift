@@ -39,7 +39,7 @@ struct AIModelDiscoveryService {
     func discover(
         providerID: AIProviderID,
         apiKey: String,
-        session: URLSession = .shared
+        session: URLSession = AIReviewURLSession.shared
     ) async throws -> [DiscoveredAIModel] {
         let request = try makeRequest(
             providerID: providerID,

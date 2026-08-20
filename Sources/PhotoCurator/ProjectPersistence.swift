@@ -82,11 +82,7 @@ struct PhotoProjectDiskStore: PhotoProjectPersisting {
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
         let catalog = try decoder.decode(PersistedPhotoProjectCatalog.self, from: data)
-        guard catalog.schemaVersion == PersistedPhotoProjectCatalog.currentSchemaVersion,
-              catalog.projects.allSatisfy({ $0.schemaVersion == PersistedPhotoProject.currentSchemaVersion }) else {
-            throw ProjectPersistenceError.unsupportedSchema
-        }
-        return catalog
+        return try ProjectCatalogMigrator.migrated(catalog)
     }
 
     func save(_ catalog: PersistedPhotoProjectCatalog) throws {
@@ -111,6 +107,46 @@ struct PhotoProjectDiskStore: PhotoProjectPersisting {
         return applicationSupport
             .appendingPathComponent(applicationNamespace, isDirectory: true)
             .appendingPathComponent("projects-v1.json", isDirectory: false)
+    }
+}
+
+/// 旧版本状态必须能迁移到当前 schema：直接丢弃会让用户的全部项目、人工决定和分类纠正凭空消失。
+/// 未来的版本写出的文件仍然拒绝读取——那是真正无法安全解释的情况。
+enum ProjectCatalogMigrator {
+    static func migrated(
+        _ catalog: PersistedPhotoProjectCatalog
+    ) throws -> PersistedPhotoProjectCatalog {
+        guard catalog.schemaVersion <= PersistedPhotoProjectCatalog.currentSchemaVersion else {
+            throw ProjectPersistenceError.unsupportedSchema
+        }
+        let projects = try catalog.projects.map { project -> PersistedPhotoProject in
+            guard project.schemaVersion <= PersistedPhotoProject.currentSchemaVersion else {
+                throw ProjectPersistenceError.unsupportedSchema
+            }
+            return migrated(project)
+        }
+        return PersistedPhotoProjectCatalog(
+            activeProjectID: catalog.activeProjectID,
+            projects: projects
+        )
+    }
+
+    /// v1 是当前唯一的版本；后续新增字段时在这里按版本补默认值，而不是丢弃整个项目。
+    private static func migrated(_ project: PersistedPhotoProject) -> PersistedPhotoProject {
+        PersistedPhotoProject(
+            id: project.id,
+            bookmarkData: project.bookmarkData,
+            displayName: project.displayName,
+            createdAt: project.createdAt,
+            lastOpenedAt: project.lastOpenedAt,
+            lastKnownPhotoCount: project.lastKnownPhotoCount,
+            targetSelectionCount: project.targetSelectionCount,
+            selectionTargets: project.selectionTargets
+                ?? PhotoSelectionTargets(legacyTotal: project.targetSelectionCount),
+            decisionsByRelativePath: project.decisionsByRelativePath,
+            categoryOverridesByRelativePath: project.categoryOverridesByRelativePath,
+            selectedRelativePath: project.selectedRelativePath
+        )
     }
 }
 

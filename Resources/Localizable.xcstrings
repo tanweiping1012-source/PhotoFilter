@@ -11,12 +11,67 @@
         }
       }
     },
+    "%1$@ %2$lld/%3$lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ %2$lld/%3$lld"
+          }
+        }
+      }
+    },
+    "%1$@中有 %2$lld 组相似照片被同时保留，请每组只留一张。": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ has %2$lld sets of similar photos kept together; keep only one from each set."
+          }
+        }
+      }
+    },
+    "%1$@保留数已达目标 %2$lld 张，无需再评分。": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ already reached its target of %2$lld kept photos, so scoring isn't needed."
+          }
+        }
+      }
+    },
+    "%1$lld 张已评分，%2$lld 张进入评分优先。逐张看过后，用底部的“采纳”把它们标记为保留。": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld photos scored; %2$lld made it into Top Scored. Look through them, then use Accept at the bottom to mark them as kept."
+          }
+        }
+      }
+    },
     "%@ AI评分": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "%@ AI Scoring"
+          }
+        }
+      }
+    },
+    "%@ AI评分完成": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ AI scoring complete"
           }
         }
       }
@@ -37,28 +92,35 @@
         }
       }
     },
-    "%@ AI评分已完成，可用“评分优先”查看结果。": {
+    "%@ AI评分完成：已得到 %lld 张评分优先照片；%lld 张同场景重复已顺延。请在“评分优先”筛选中人工确认。": {
+      "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ AI Scoring is complete. View the results under Scoring Picks."
+            "value": "%1$@ AI Scoring is complete with %2$lld preferred photos; %3$lld same-scene duplicates were deferred. Review them under Scoring Picks."
           }
         }
       }
     },
-    "%@ AI评分已开始：共 %lld 张；格式异常会自动重试 1 次，仍失败则停止。": {
+    "%@ AI评分已完成；网格已切到“已AI评分”，可逐张查看后采纳。": {
+      "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "%1$@ AI Scoring has started for %2$lld photos. Invalid output is retried once, then scoring stops if it still fails."
+            "value": "%@ AI scoring is complete. The grid switched to AI Scored so you can review each photo and then accept."
           }
-        },
-        "zh-Hans": {
+        }
+      }
+    },
+    "%@ AI评分已开始：共 %lld 张；限流或网络中断会自动退避重试，仍失败则停在当前进度。": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
           "stringUnit": {
-            "state": "new",
-            "value": "%1$@ AI评分已开始：共 %2$lld 张；格式异常会自动重试 1 次，仍失败则停止。"
+            "state": "translated",
+            "value": "%1$@ AI Scoring has started for %2$lld photos. Rate limits and network drops are retried automatically with backoff; if they persist, scoring stops at the current progress."
           }
         }
       }
@@ -151,18 +213,35 @@
         }
       }
     },
-    "%@导出需要恰好 %lld 张，当前为 %lld 张。": {
+    "%@剩下的照片都和已保留的照片属于同一组相似照片，无需再评分。": {
+      "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "%1$@ export requires exactly %2$lld photos; there are currently %3$lld."
+            "value": "The remaining %@ photos all belong to the same similar-photo groups as photos you already kept, so scoring isn't needed."
           }
-        },
-        "zh-Hans": {
+        }
+      }
+    },
+    "%@没有可评分的照片。": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
           "stringUnit": {
-            "state": "new",
-            "value": "%1$@导出需要恰好 %2$lld 张，当前为 %3$lld 张。"
+            "state": "translated",
+            "value": "%@ has no photos to score."
+          }
+        }
+      }
+    },
+    "%@的照片都已保留或淘汰，没有需要评分的照片。": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Every %@ photo is already kept or rejected, so there is nothing left to score."
           }
         }
       }
@@ -401,6 +480,17 @@
         }
       }
     },
+    "AI评分使用你自己的供应商 API Key，费用以该供应商账单为准。更大的预览尺寸会增加上传量、等待时间和可能的费用。App 不销售或代充 API 额度。": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI Scoring uses your own provider API key, so costs appear on that provider's bill. Larger previews increase upload size, waiting time, and potential cost. This app never sells or tops up API credit."
+          }
+        }
+      }
+    },
     "AI评分包含照片间的相对比较，已要求模型重新独立评分。": {
       "localizations": {
         "en": {
@@ -417,6 +507,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "AI scoring failed and stopped: %1$@"
+          }
+        }
+      }
+    },
+    "AI评分已中断：%@ 已完成 %lld 张的评分已保留，可以从中断处继续。": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI Scoring was interrupted: %1$@ Scores for the %2$lld photos already completed are kept, and you can resume from there."
           }
         }
       }
@@ -637,6 +738,17 @@
         }
       }
     },
+    "AI评分规则": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI Scoring Rules"
+          }
+        }
+      }
+    },
     "AI评分设置": {
       "localizations": {
         "en": {
@@ -673,6 +785,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "AI scoring is active. Another scoring task cannot start at the same time."
+          }
+        }
+      }
+    },
+    "AI评分进行中；停止本轮任务后即可新建或切换项目。": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI scoring is running. Stop this run to create or switch projects."
           }
         }
       }
@@ -727,6 +850,17 @@
         }
       }
     },
+    "App 将复制人物 %1$lld 张、风景 %2$lld 张，并分别放入两个子目录；不会移动或删除原图。": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The app will copy %1$lld People photos and %2$lld Scenery photos into two subfolders. Originals are never moved or deleted."
+          }
+        }
+      }
+    },
     "App 将复制人物 %lld 张、风景 %lld 张，并分别放入两个子目录；不会移动或删除原图。": {
       "localizations": {
         "en": {
@@ -759,6 +893,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Previous Photo"
+          }
+        }
+      }
+    },
+    "上一步改动的是正在评分的%@照片；请先停止本轮任务再撤销。": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The last change affected %@ photos that are currently being scored. Stop this run before undoing."
           }
         }
       }
@@ -1245,16 +1390,6 @@
         }
       }
     },
-    "切换到风景照片": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Switch to Scenery"
-          }
-        }
-      }
-    },
     "决定": {
       "localizations": {
         "en": {
@@ -1305,16 +1440,6 @@
         }
       }
     },
-    "分析完成并解决重复保留冲突后，即可开始 AI评分。": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "AI scoring becomes available after analysis is complete and duplicate keep conflicts are resolved."
-          }
-        }
-      }
-    },
     "分析完成：发现 %lld 组相似照片和 %lld 张技术风险提示。": {
       "localizations": {
         "en": {
@@ -1357,6 +1482,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Switch to this project"
+          }
+        }
+      }
+    },
+    "切换到风景照片": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Switch to Scenery"
           }
         }
       }
@@ -1501,6 +1636,17 @@
         }
       }
     },
+    "发送内容": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "What gets sent"
+          }
+        }
+      }
+    },
     "发送的数据": {
       "localizations": {
         "en": {
@@ -1581,6 +1727,17 @@
         }
       }
     },
+    "只要保留了至少一张照片就可以导出副本，导出多少由你决定；保留目标只用于显示进度。原照片不会被移动、删除或修改。": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You can export copies as soon as one photo is kept — how many you export is up to you, and keep targets only show progress. Originals are never moved, deleted, or modified."
+          }
+        }
+      }
+    },
     "可选 AI评分": {
       "localizations": {
         "en": {
@@ -1611,16 +1768,6 @@
         }
       }
     },
-    "点击“显示评分优先照片”，检查后再采纳人物和风景结果。": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Click Show Scoring Picks, review them, then accept the People and Scenery results."
-          }
-        }
-      }
-    },
     "在“照片类型”中选择“人物”。人物和风景会分开整理。": {
       "localizations": {
         "en": {
@@ -1647,6 +1794,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Click Keep in the large preview. You always make the final decision."
+          }
+        }
+      }
+    },
+    "在访达中显示": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show in Finder"
           }
         }
       }
@@ -1787,6 +1945,17 @@
         }
       }
     },
+    "导出": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Export"
+          }
+        }
+      }
+    },
     "导出 4 张后会得到“人物”和“风景”两个目录。原照片不会改变。": {
       "localizations": {
         "en": {
@@ -1813,22 +1982,34 @@
         }
       }
     },
-    "导出人物与风景 %lld 张": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Export %lld People and Scenery photos"
-          }
-        }
-      }
-    },
     "导出保留照片的副本": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Export Copies of Kept Photos"
+          }
+        }
+      }
+    },
+    "导出保留的 %lld 张": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Export %lld Kept"
+          }
+        }
+      }
+    },
+    "导出保留的人物 %1$lld 张、风景 %2$lld 张": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Export %1$lld kept People photos and %2$lld kept Scenery photos"
           }
         }
       }
@@ -1853,6 +2034,17 @@
         }
       }
     },
+    "导出完成": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Export complete"
+          }
+        }
+      }
+    },
     "导出完成：%@。原图未被修改。": {
       "localizations": {
         "en": {
@@ -1863,28 +2055,23 @@
         }
       }
     },
+    "导出目录不能选在原照片文件夹内部；请选择项目目录之外的位置。": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The export folder cannot be inside your original photo folder. Choose a location outside the project folder."
+          }
+        }
+      }
+    },
     "导出目录由你选择；人物和风景照片分别复制到两个子目录，并生成 selection.json、selection.csv。": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "You choose the export location. People and Scenery photos are copied into separate folders with selection.json and selection.csv."
-          }
-        }
-      }
-    },
-    "导出需要恰好 %lld 张保留照片，当前为 %lld 张。": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Export requires exactly %1$lld kept photos; there are currently %2$lld."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "new",
-            "value": "导出需要恰好 %1$lld 张保留照片，当前为 %2$lld 张。"
           }
         }
       }
@@ -1905,18 +2092,24 @@
         }
       }
     },
-    "将使用%@和%@预览，通过 %@ 独立评估 %lld 张%@照片；全部完成后只在%@内按统一分数排序，取前 %lld 张。每次请求只发送 2–5 张同类型、无元数据 JPEG，不发送原图、文件名、路径或 EXIF/GPS；请求至少间隔 60 秒，预计最短约 %lld 分钟。更大的预览可能增加上传量、等待时间和供应商费用；格式异常会自动重试 1 次，仍失败时会停在当前照片范围供你重试或放弃。结果不会自动标记为保留。": {
+    "将使用%1$@为 %2$lld 张%3$@照片打分。": {
+      "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Using %1$@ with %2$@ previews through %3$@, the app will independently score %4$lld %5$@ photos, rank only within %6$@, and select the top %7$lld. Each request sends 2–5 metadata-free JPEG previews of the same type, never originals, filenames, paths, or EXIF/GPS. Requests are at least 60 seconds apart and take at least about %8$lld minutes. Larger previews may increase upload size, wait time, and provider charges. Invalid output is retried once; if it still fails, scoring stops at the current photo range for retry or cancellation. Results are not marked Keep automatically."
+            "value": "%1$@ will score %2$lld %3$@ photos."
           }
-        },
-        "zh-Hans": {
+        }
+      }
+    },
+    "将复制人物 %1$lld 张、风景 %2$lld 张，并放入两个子目录；原照片不会被移动、删除或修改。": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
           "stringUnit": {
-            "state": "new",
-            "value": "将使用%1$@和%2$@预览，通过 %3$@ 独立评估 %4$lld 张%5$@照片；全部完成后只在%6$@内按统一分数排序，取前 %7$lld 张。每次请求只发送 2–5 张同类型、无元数据 JPEG，不发送原图、文件名、路径或 EXIF/GPS；请求至少间隔 60 秒，预计最短约 %8$lld 分钟。更大的预览可能增加上传量、等待时间和供应商费用；格式异常会自动重试 1 次，仍失败时会停在当前照片范围供你重试或放弃。结果不会自动标记为保留。"
+            "state": "translated",
+            "value": "%1$lld People photos and %2$lld Scenery photos will be copied into two subfolders. Originals are never moved, deleted, or modified."
           }
         }
       }
@@ -1943,32 +2136,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Small"
-          }
-        }
-      }
-    },
-    "尚不能导出：人物 %lld/%lld，风景 %lld/%lld。": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Export is not ready: People %1$lld/%2$lld, Scenery %3$lld/%4$lld."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "new",
-            "value": "尚不能导出：人物 %1$lld/%2$lld，风景 %3$lld/%4$lld。"
-          }
-        }
-      }
-    },
-    "尚不能导出：人物和风景都必须达到各自保留目标。": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Export is not ready. People and Scenery must each meet their own keep target."
           }
         }
       }
@@ -2055,6 +2222,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Stopped"
+          }
+        }
+      }
+    },
+    "已复制 %1$lld 张到“%2$@”。原图没有被移动、删除或修改。": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copied %1$lld photos into “%2$@”. Your originals were not moved, deleted, or modified."
           }
         }
       }
@@ -2267,6 +2445,17 @@
         }
       }
     },
+    "开始%1$@ AI评分（%2$lld 张）": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start %1$@ AI Scoring (%2$lld)"
+          }
+        }
+      }
+    },
     "开始%@ AI评分（%lld 张）": {
       "localizations": {
         "en": {
@@ -2313,6 +2502,17 @@
         }
       }
     },
+    "当前保留数与目标不同（%@），仍可继续导出。": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kept counts differ from your targets (%@); you can still export."
+          }
+        }
+      }
+    },
     "当前发送尺寸": {
       "localizations": {
         "en": {
@@ -2349,6 +2549,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "There are no AI scoring results to confirm."
+          }
+        }
+      }
+    },
+    "当前没有待评分的照片。": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "There are no photos waiting to be scored."
           }
         }
       }
@@ -2413,32 +2624,12 @@
         }
       }
     },
-    "待评分照片不足以支持当前保留目标，请减少保留数量。": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "There are not enough photos to support the current keep target. Reduce the keep target."
-          }
-        }
-      }
-    },
     "待评分照片包含重复项，无法开始评分。": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "The scoring set contains duplicate photos, so scoring cannot start."
-          }
-        }
-      }
-    },
-    "待评分照片超过当前评分流程可安全处理的上限。": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "The scoring set exceeds the safe capacity of the current scoring flow."
           }
         }
       }
@@ -2529,6 +2720,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "Undo Decision"
+          }
+        }
+      }
+    },
+    "支持 JPG、JPEG、PNG、WebP、HEIC、HEIF 和 TIFF。原图只在本机读取，不会被修改。": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Supports JPG, JPEG, PNG, WebP, HEIC, HEIF, and TIFF. Originals are read on this Mac only and are never modified."
+          }
+        }
+      }
+    },
+    "支持 JPG、JPEG、PNG、WebP、HEIC、HEIF 和 TIFF。子文件夹会一并扫描，隐藏文件会跳过。左上角可以新建另一个项目。": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Supports JPG, JPEG, PNG, WebP, HEIC, HEIF, and TIFF. Subfolders are scanned too; hidden files are skipped. Use the top left to start another project."
           }
         }
       }
@@ -2683,6 +2896,17 @@
         }
       }
     },
+    "无法读取照片像素，已按风景处理。": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The photo's pixels could not be read, so it was treated as scenery."
+          }
+        }
+      }
+    },
     "无法进入示例筛选：%@": {
       "localizations": {
         "en": {
@@ -2709,6 +2933,17 @@
         }
       }
     },
+    "显示全部照片": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show All Photos"
+          }
+        }
+      }
+    },
     "显示名称": {
       "localizations": {
         "en": {
@@ -2729,22 +2964,22 @@
         }
       }
     },
-    "显示评分优先照片": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Show Scoring Picks"
-          }
-        }
-      }
-    },
     "显示照片数量": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Number of photos shown"
+          }
+        }
+      }
+    },
+    "显示评分优先照片": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show Scoring Picks"
           }
         }
       }
@@ -2839,12 +3074,35 @@
         }
       }
     },
-    "未配置 API Key 时，本地筛选与导出仍可使用。AI评分只会在你确认供应商、模型、图片尺寸和照片数量后开始。": {
+    "未配置 API Key 时，本地筛选与导出仍可使用。AI评分只在你确认之后开始；确认弹窗说明模型、张数和照片类型，当前模型与图片尺寸常驻侧栏 AI评分区。": {
+      "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Local curation and export still work without an API key. AI scoring starts only after you confirm the provider, model, image size, and photo count."
+            "value": "Local curation and export keep working without an API key. AI scoring starts only after you confirm; the dialog names the model, the number of photos, and the photo type, while the current model and image size stay visible in the sidebar."
+          }
+        }
+      }
+    },
+    "本地分析完成后即可开始。": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Available once local analysis finishes."
+          }
+        }
+      }
+    },
+    "本地分析完成后即可新建或切换项目。": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You can create or switch projects once local analysis finishes."
           }
         }
       }
@@ -3019,6 +3277,16 @@
         }
       }
     },
+    "查看并采纳评分结果": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Review and Accept Scoring Results"
+          }
+        }
+      }
+    },
     "查看本地处理、AI 发送边界与数据删除方式": {
       "localizations": {
         "en": {
@@ -3095,12 +3363,34 @@
         }
       }
     },
+    "模型按固定绝对标尺对每张照片独立评分，不做组内比较，也不返回名次。全部完成后只在人物或风景内按统一分数排序，取该类型前 N 张进入“评分优先”。": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The model scores each photo independently against a fixed absolute scale — no in-group comparison and no ranking. Once every photo is done, they are ranked by that single score within People or Scenery, and the top N of that type become Scoring Picks."
+          }
+        }
+      }
+    },
     "模型返回了响应，但未通过照片评分契约校验。": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "The model responded, but its output did not pass the photo scoring contract."
+          }
+        }
+      }
+    },
+    "正在为%@照片评分": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scoring %@ photos"
           }
         }
       }
@@ -3395,6 +3685,17 @@
         }
       }
     },
+    "每次请求只发送 2–5 张同类型、去除 EXIF/GPS 的匿名 JPEG，最长边为你选择的小 512px、中 1024px 或大 1536px。不发送原图、文件名或本地路径。": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Each request sends only 2–5 same-type anonymous JPEGs with EXIF/GPS stripped, with the longest edge set to your choice of Small 512px, Medium 1024px, or Large 1536px. Originals, filenames, and local paths are never sent."
+          }
+        }
+      }
+    },
     "没有%@照片": {
       "localizations": {
         "en": {
@@ -3415,12 +3716,13 @@
         }
       }
     },
-    "没有找到 JPG、JPEG、PNG 或 WebP 图片。": {
+    "没有找到 JPG、JPEG、PNG、WebP、HEIC 或 TIFF 图片。": {
+      "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "No JPG, JPEG, PNG, or WebP images were found."
+            "value": "No JPG, JPEG, PNG, WebP, HEIC, or TIFF images were found."
           }
         }
       }
@@ -3471,6 +3773,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Volcengine Ark"
+          }
+        }
+      }
+    },
+    "点击“显示评分优先照片”，检查后再采纳人物和风景结果。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Click Show Scoring Picks, review them, then accept the People and Scenery results."
           }
         }
       }
@@ -3663,6 +3975,17 @@
         }
       }
     },
+    "知道了": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Got it"
+          }
+        }
+      }
+    },
     "确认保留": {
       "localizations": {
         "en": {
@@ -3679,16 +4002,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Confirm Copy Export"
-          }
-        }
-      }
-    },
-    "查看并采纳评分结果": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Review and Accept Scoring Results"
           }
         }
       }
@@ -3719,6 +4032,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Example curation in progress"
+          }
+        }
+      }
+    },
+    "示例练习不会联网评分。": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The sample walkthrough never scores over the network."
           }
         }
       }
@@ -3785,18 +4109,13 @@
         }
       }
     },
-    "第 %@ 张的评分格式异常；将在冷却后自动重试（%lld/%lld）。": {
+    "第 %@ 张评分失败：%@ 将在 %lld 秒后自动重试（%lld/%lld）。": {
+      "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "The result for photos %1$@ is invalid and will retry after cooldown (%2$lld/%3$lld)."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "new",
-            "value": "第 %1$@ 张的评分格式异常；将在冷却后自动重试（%2$lld/%3$lld）。"
+            "value": "Scoring photo %1$@ failed: %2$@ Retrying automatically in %3$lld seconds (%4$lld/%5$lld)."
           }
         }
       }
@@ -3853,16 +4172,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Your first curation is complete. Click Finish Tutorial to return."
-          }
-        }
-      }
-    },
-    "第一版支持 JPG、JPEG、PNG 和 WebP。原图只在本机读取。": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "This version supports JPG, JPEG, PNG, and WebP. Originals are read only on this Mac."
           }
         }
       }
@@ -3997,6 +4306,17 @@
         }
       }
     },
+    "节奏与重试": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pacing and retries"
+          }
+        }
+      }
+    },
     "设置并验证%@": {
       "localizations": {
         "en": {
@@ -4013,6 +4333,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Score"
+          }
+        }
+      }
+    },
+    "评分与排序": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scoring and ranking"
           }
         }
       }
@@ -4117,6 +4448,17 @@
         }
       }
     },
+    "请先在 AI评分设置中配置并验证 API Key。": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Configure and verify an API key in AI Scoring Settings first."
+          }
+        }
+      }
+    },
     "请先在 AI评分设置中验证%@及其 API Key。": {
       "localizations": {
         "en": {
@@ -4163,6 +4505,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Select a similar photo first."
+          }
+        }
+      }
+    },
+    "请求之间保持自适应间隔；限流、服务端故障和网络中断会自动退避重试，每张最多 4 次并产生额外请求与费用，仍失败时停在当前照片范围供你重试或放弃。鉴权和模型 ID 错误不会重试。": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Requests keep an adaptive interval. Rate limits, server failures, and dropped connections retry automatically with backoff — up to 4 times per photo, each costing an extra request — and if they still fail the run stops at the current photo range so you can retry or abandon it. Authentication and model-ID errors are never retried."
           }
         }
       }
@@ -4287,12 +4640,13 @@
         }
       }
     },
-    "达到保留目标后可导出副本；原照片不会被移动、删除或修改。": {
+    "费用": {
+      "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "After reaching the keep target, you can export copies. Original photos are never moved, deleted, or modified."
+            "value": "Cost"
           }
         }
       }
@@ -4337,6 +4691,17 @@
         }
       }
     },
+    "还没有保留任何照片，先保留至少一张再导出。": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keep at least one photo before exporting."
+          }
+        }
+      }
+    },
     "还没有项目": {
       "localizations": {
         "en": {
@@ -4353,6 +4718,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "Keep %lld more photos"
+          }
+        }
+      }
+    },
+    "这个文件夹里没有受支持的照片": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No supported photos in this folder"
+          }
+        }
+      }
+    },
+    "这张照片属于正在评分的%@；请先停止本轮任务，或先处理另一类照片。": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This photo belongs to %@, which is currently being scored. Stop this run first, or work on the other type in the meantime."
           }
         }
       }
@@ -4543,6 +4930,17 @@
         }
       }
     },
+    "采纳 %lld 张": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Accept %lld"
+          }
+        }
+      }
+    },
     "采纳 %lld 张评分结果": {
       "localizations": {
         "en": {
@@ -4575,16 +4973,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Reauthorize Photo Folder"
-          }
-        }
-      }
-    },
-    "重新运行": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Run Again"
           }
         }
       }

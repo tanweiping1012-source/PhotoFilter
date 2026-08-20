@@ -162,13 +162,12 @@ rg -q 'testAnthropicDiscoveryUsesAccountDisplayNames' \
 for document in \
   AGENTS.md \
   README.md \
-  docs/AI_BRAND_MODEL_CATALOG.md \
-  docs/AI_MODEL_PROVIDERS.md \
-  docs/AI_PROTOCOL_ADAPTERS.md \
-  docs/DATA_CONTRACTS.md \
-  docs/PRIVACY_POLICY.md \
-  docs/PRODUCT.md \
-  docs/TASKS.md; do
+  docs/ai/MODEL_CATALOG.md \
+  docs/ai/PROVIDERS.md \
+  docs/engineering/DATA_CONTRACTS.md \
+  docs/privacy/PRIVACY_POLICY.md \
+  docs/product/OVERVIEW.md \
+  docs/engineering/TASKS.md; do
   rg -q '品牌' "$document" ||
     fail "$document 未记录品牌选择"
   rg -q '验证' "$document" ||

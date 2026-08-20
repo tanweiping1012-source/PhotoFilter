@@ -41,13 +41,28 @@ final class LocalAestheticCandidatePlannerTests: XCTestCase {
         XCTAssertFalse(plan.localPhotoIDSet.contains(photos[2].id))
     }
 
-    func testCandidatePoolNeverExceedsFortyEightPhotos() {
+    /// 默认量级的目标仍然收敛在 48 张，成本不变。
+    func testDefaultSizedTargetKeepsTheFortyEightPhotoPool() {
+        let plan = LocalAestheticCandidatePlanner.makePlan(
+            for: makePhotos(count: 400),
+            targetSelectionCount: 24
+        )
+
+        XCTAssertEqual(plan.candidateCount, 48)
+    }
+
+    /// 目标很大时候选池必须跟着放宽，否则 AI 永远凑不满目标，而导出要求“恰好等于目标”。
+    func testLargeTargetExpandsThePoolButStaysWithinTheAbsoluteCap() {
         let plan = LocalAestheticCandidatePlanner.makePlan(
             for: makePhotos(count: 400),
             targetSelectionCount: 100
         )
 
-        XCTAssertEqual(plan.candidateCount, 48)
+        XCTAssertGreaterThanOrEqual(plan.candidateCount, 100)
+        XCTAssertLessThanOrEqual(
+            plan.candidateCount,
+            LocalAestheticCandidatePlanner.absoluteMaximumCandidateCount
+        )
     }
 
     func testSmallRemainingTargetNeverExceedsFinalBatchCapacity() {

@@ -21,7 +21,7 @@ if rg -q 'accessibilityIdentifier\("ai\.settings"\)' "$content_view"; then
   fail "活动项目区仍保留重复 AI 设置入口"
 fi
 
-rg -q 'library\.prepareAIFinalSelectionRun\(\)' "$content_view" ||
+rg -q 'library\.prepareAIFinalSelectionRun\(' "$content_view" ||
   fail "主界面缺少完整 AI评分入口"
 if rg -n \
   'AI评分相似照片|prepareAestheticReviewForSelectedPhoto|photo\.review-group' \
@@ -66,7 +66,7 @@ rg -q 'XCTAssertTrue\(viewModel\.canUndo\)' \
   Tests/PhotoCuratorTests/DemoModeLibraryTests.swift ||
   fail "缺少撤销可用状态回归测试"
 
-for document in AGENTS.md docs/INTERACTION_AUDIT.md docs/PRODUCT.md docs/TASKS.md; do
+for document in AGENTS.md docs/product/OVERVIEW.md docs/engineering/TASKS.md; do
   rg -q '大图|预览' "$document" ||
     fail "$document 尚未记录大图预览交互"
 done

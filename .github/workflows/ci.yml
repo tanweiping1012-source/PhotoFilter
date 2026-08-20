@@ -1,0 +1,29 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      # 门禁脚本依赖 ripgrep；runner 上不一定预装。
+      - name: Install ripgrep
+        run: brew list ripgrep >/dev/null 2>&1 || brew install ripgrep
+
+      - name: Show toolchain
+        run: swift --version && xcodebuild -version
+
+      # 与本地开发跑的是同一条命令：swift build / swift test / 隐私与演示门禁 /
+      # 20 个功能门禁 / 完整 xcodebuild。CI 少跑一项，门禁就会悄悄失效。
+      # 真实照片基准默认跳过：仓库里不放任何真实旅行照片。
+      - name: scripts/check.sh
+        run: bash scripts/check.sh

@@ -103,19 +103,18 @@ done
 for document in \
   AGENTS.md \
   README.md \
-  docs/PEOPLE_SCENERY_CURATION.md \
-  docs/PC36_ACCEPTANCE.md \
-  docs/DATA_CONTRACTS.md \
-  docs/FIRST_CURATION_GUIDE.md \
-  docs/PRODUCT.md \
-  docs/TASKS.md; do
+  docs/product/CURATION_SCOPES.md \
+  docs/engineering/DATA_CONTRACTS.md \
+  docs/product/ONBOARDING.md \
+  docs/product/OVERVIEW.md \
+  docs/engineering/TASKS.md; do
   rg -q '人物' "$document" ||
     fail "$document 未记录人物筛选"
   rg -q '风景' "$document" ||
     fail "$document 未记录风景筛选"
 done
 
-rg -A2 '## PC-36 人物与风景分开筛选' docs/TASKS.md |
+rg -A2 '## PC-36 人物与风景分开筛选' docs/engineering/TASKS.md |
   rg -q '\*\*状态：已完成\*\*' ||
   fail "PC-36 尚未标记完成"
 

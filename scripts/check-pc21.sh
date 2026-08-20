@@ -69,10 +69,10 @@ rg -q 'testDemoLaunchSkipsKeychainAndPersistence' \
 
 for document in \
   AGENTS.md \
-  docs/AI_MODEL_PROVIDERS.md \
-  docs/DATA_CONTRACTS.md \
-  docs/PRIVACY_POLICY.md \
-  docs/APP_STORE_PRIVACY.md; do
+  docs/ai/PROVIDERS.md \
+  docs/engineering/DATA_CONTRACTS.md \
+  docs/privacy/PRIVACY_POLICY.md \
+  docs/privacy/APP_STORE_PRIVACY.md; do
   rg -q 'MiniMax' "$document" ||
     fail "$document 尚未披露 MiniMax"
 done

@@ -25,7 +25,10 @@ final class ThumbnailCache {
             task = existingTask
         } else {
             task = Task.detached(priority: .utility) {
-                Self.makeThumbnailCGImage(for: url, maximumPixelSize: maximumPixelSize)
+                // 快速滚动时缩略图请求会迅速过期；解码前后各检查一次取消，避免为已经离屏的照片做无用功。
+                guard !Task.isCancelled else { return nil }
+                let image = Self.makeThumbnailCGImage(for: url, maximumPixelSize: maximumPixelSize)
+                return Task.isCancelled ? nil : image
             }
             inFlightLoads[keyString] = task
         }

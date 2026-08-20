@@ -47,7 +47,25 @@ enum AestheticReviewClientError: LocalizedError, Equatable {
     case invalidConfiguration
     case incompletePreviewSet
     case invalidResponse(stage: AestheticReviewResponseFailureStage)
-    case requestRejected(statusCode: Int, providerCode: String?)
+    /// `retryAfter` 来自服务端的 `Retry-After` 头，用于让重试节奏跟随供应商而不是猜。
+    case requestRejected(statusCode: Int, providerCode: String?, retryAfter: TimeInterval?)
+
+    /// 供应商用 `Retry-After` 表达“多久之后可以再来”，支持秒数和 HTTP 日期两种写法。
+    static func retryAfter(from response: HTTPURLResponse) -> TimeInterval? {
+        guard let raw = response.value(forHTTPHeaderField: "Retry-After")?
+            .trimmingCharacters(in: .whitespaces), !raw.isEmpty else {
+            return nil
+        }
+        if let seconds = TimeInterval(raw) {
+            return max(0, min(seconds, 600))
+        }
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.timeZone = TimeZone(secondsFromGMT: 0)
+        formatter.dateFormat = "EEE, dd MMM yyyy HH:mm:ss zzz"
+        guard let date = formatter.date(from: raw) else { return nil }
+        return max(0, min(date.timeIntervalSinceNow, 600))
+    }
 
     var errorDescription: String? {
         switch self {
@@ -57,7 +75,7 @@ enum AestheticReviewClientError: LocalizedError, Equatable {
             return String(localized: "候选缩略图不完整，未发送请求。")
         case let .invalidResponse(stage):
             return String(localized: "\(stage.userFacingDescription)，已丢弃本次评分。")
-        case let .requestRejected(statusCode, providerCode):
+        case let .requestRejected(statusCode, providerCode, _):
             let providerDetail = providerCode.map { " / \($0)" } ?? ""
             if providerCode == "MiniMax-TokenPlan-RateLimit" {
                 return String(localized: "MiniMax Token Plan 当前未接受请求（HTTP \(statusCode)）。这通常表示 5 小时额度、周额度或动态限流；请在 MiniMax 套餐用量中检查可用资源，或至少等待 1 分钟后重试。")
@@ -97,7 +115,7 @@ struct ArkAestheticReviewClient {
         request: AestheticReviewRequest,
         previews: [AestheticReviewPreview],
         apiKey: String,
-        session: URLSession = .shared
+        session: URLSession = AIReviewURLSession.shared
     ) async throws -> AestheticReviewResult {
         var urlRequest = try makeURLRequest(request: request, previews: previews, apiKey: apiKey)
         urlRequest.timeoutInterval = 90
@@ -109,7 +127,8 @@ struct ArkAestheticReviewClient {
         guard (200...299).contains(response.statusCode) else {
             throw ArkAestheticReviewClientError.requestRejected(
                 statusCode: response.statusCode,
-                providerCode: providerErrorCode(from: data)
+                providerCode: providerErrorCode(from: data),
+                retryAfter: AestheticReviewClientError.retryAfter(from: response)
             )
         }
         return try decodeResponse(data, request: request)
@@ -275,11 +294,11 @@ enum AestheticReviewPrompt {
     static let maximumOutputTokens = 1_600
 
     static let systemPrompt = """
-    你是旅行照片评分助手。必须使用固定的绝对标尺，独立评估每张图片的瞬间、构图、主体、光线和叙事表现，再给出总分。一次附带多张图片只为传输效率，不代表候选组；不得比较图片，不得返回名次，不得在评价中使用“本组、相比、更好、更差、优先、候补”等相对表述。不得杜撰图片外的信息，不得评价人物身份或敏感属性。必须且只能调用 submit_photo_reviews 工具一次提交结果。
+    你是要求严格的旅行照片评分助手。必须使用固定的绝对标尺，独立评估每张图片的瞬间、构图、主体、光线和叙事表现，再给出总分。评分锚点是 80 分等同于专业摄影师的交付水准，普通旅行快照通常落在 60–75 分，不得因为画面讨喜或有纪念意义而抬分。一次附带多张图片只为传输效率，不代表候选组；不得比较图片，不得返回名次，不得在评价中使用“本组、相比、更好、更差、优先、候补”等相对表述。不得杜撰图片外的信息，不得评价人物身份或敏感属性。必须且只能调用 submit_photo_reviews 工具一次提交结果。
     """
 
     static let jsonSystemPrompt = """
-    你是旅行照片评分助手。必须使用固定的绝对标尺，独立评估每张图片的瞬间、构图、主体、光线和叙事表现，再给出总分。一次附带多张图片只为传输效率，不代表候选组；不得比较图片，不得返回名次，不得在评价中使用“本组、相比、更好、更差、优先、候补”等相对表述。不得杜撰图片外的信息，不得评价人物身份或敏感属性。只返回用户要求的 JSON 对象，不要添加 Markdown 或解释。
+    你是要求严格的旅行照片评分助手。必须使用固定的绝对标尺，独立评估每张图片的瞬间、构图、主体、光线和叙事表现，再给出总分。评分锚点是 80 分等同于专业摄影师的交付水准，普通旅行快照通常落在 60–75 分，不得因为画面讨喜或有纪念意义而抬分。一次附带多张图片只为传输效率，不代表候选组；不得比较图片，不得返回名次，不得在评价中使用“本组、相比、更好、更差、优先、候补”等相对表述。不得杜撰图片外的信息，不得评价人物身份或敏感属性。只返回用户要求的 JSON 对象，不要添加 Markdown 或解释。
     """
 
     static func userPrompt(for request: AestheticReviewRequest) -> String {
@@ -292,7 +311,9 @@ enum AestheticReviewPrompt {
         return """
         请独立评分以下 \(request.photos.count) 张匿名照片：\(identifiers)。图片会按此顺序附在文本后。不要让其中任何一张照片影响另一张的分数或评价。
         \(categoryInstruction)
-        所有请求统一使用以下绝对标尺：90–100 为少见且完成度很高；80–89 为明显优秀，主体、瞬间或叙事有突出表现；70–79 为整体可用但仍有明确不足；60–69 为存在明显画面或表达问题；0–59 为严重技术问题，或缺少有效主体与表达。
+        评分必须严格。锚点：80 分等同于专业摄影师在同类题材上的交付水准——主体、光线、构图和瞬间都经得起挑剔，可以直接用于作品集或出版。普通旅行快照即使观感讨喜，通常也应落在 60–75 之间；不要因为画面漂亮、色彩鲜艳或有纪念意义就抬高分数。
+        所有请求统一使用以下绝对标尺：90–100 为极少见的杰作，构图、光线、瞬间与叙事同时达到发表级；80–89 为专业摄影师水准，明显优秀且几乎没有可挑剔的硬伤；70–79 为高于平均的合格旅行照片，有亮点但存在明确不足；60–69 为普通记录性快照，能看出场景但缺少摄影层面的表达；0–59 为存在明显技术问题，或缺少有效主体与表达。
+        绝大多数照片应落在 60–79；给出 80 分以上必须能在具体评价中指出使其达到专业水准的具体理由。
         返回且仅返回此 JSON：
         {"reviews":[{"photo_id":"photo_001","score":90,"dimensions":{"moment":92,"composition":88,"subject":93,"lighting":86,"storytelling":89},"reasons":["主体明确且层次清楚","瞬间具有旅途感"],"summary":"主体、光线和叙事表现完整，画面完成度高。"}]}
         规则：每个 photo_id 必须恰好出现一次；不得返回 rank 或任何名次字段；score 和 dimensions 的五项分数都必须是 0 到 100 的整数；score 是基于固定标尺的综合判断，不要求等于五维平均值；reasons 必须包含 1 到 3 条、每条 2 到 80 个字符的具体中文评价；summary 必须是 4 到 120 个字符的中文总结，且只能评价当前照片自身。不得增加任何其它字段。

@@ -1017,7 +1017,31 @@ enum AIReviewPreviewSizeStore {
     }
 }
 
+/// AI 请求专用的 URLSession。
+///
+/// `URLSession.shared` 会把响应交给共享的磁盘 `URLCache`、Cookie 存储和凭据存储——
+/// 这和“AI 原始响应、供应商会话状态一律不落盘”的承诺冲突。这里用 ephemeral 配置从构造上保证它。
+enum AIReviewURLSession {
+    static let shared: URLSession = {
+        let configuration = URLSessionConfiguration.ephemeral
+        configuration.urlCache = nil
+        configuration.requestCachePolicy = .reloadIgnoringLocalCacheData
+        configuration.httpCookieStorage = nil
+        configuration.httpShouldSetCookies = false
+        configuration.httpCookieAcceptPolicy = .never
+        // 5 张 1536px 图片加结构化 JSON 输出，在较慢的模型上会超过 60 秒的系统默认值。
+        // 超时会触发自动重试，等于把同一批图片重新发一遍、重新付一次费，所以宁可等久一点。
+        configuration.timeoutIntervalForRequest = 180
+        configuration.timeoutIntervalForResource = 600
+        return URLSession(configuration: configuration)
+    }()
+}
+
 enum AIReviewConfiguration {
     static let maximumPhotosPerReview = 5
-    static let minimumReviewInterval: TimeInterval = 60
+    /// 请求之间的基础间隔。固定 60 秒会让 48 张候选跑掉十分钟，而绝大多数供应商并不需要这么保守；
+    /// 真正遇到限流时由 `AIFinalSelectionRetryPolicy` 按 `Retry-After` 或指数退避收紧节奏。
+    static let minimumReviewInterval: TimeInterval = 4
+    /// 触发限流后的冷却上限，避免退避无限增长。
+    static let maximumReviewInterval: TimeInterval = 60
 }

@@ -64,7 +64,7 @@ if rg -n \
   Sources Tests Resources/Localizable.xcstrings; then
   fail "局部相似照片评分入口或旧规划器仍然存在"
 fi
-rg -q 'library\.prepareAIFinalSelectionRun\(\)' \
+rg -q 'library\.prepareAIFinalSelectionRun\(' \
   Sources/PhotoCurator/ContentView.swift ||
   fail "主界面缺少统一的完整 AI评分入口"
 rg -q 'inspectorSection\("相似照片"\)' \
@@ -73,13 +73,12 @@ rg -q 'inspectorSection\("相似照片"\)' \
 
 for document in \
   AGENTS.md \
-  docs/VISUAL_SIMILARITY_STRATEGY.md \
-  docs/PRODUCT.md \
-  docs/DATA_CONTRACTS.md \
-  docs/HARNESS.md \
-  docs/APP_STORE_PRIVACY.md \
-  docs/PC30_ACCEPTANCE.md \
-  docs/TASKS.md; do
+  docs/product/SIMILAR_PHOTOS.md \
+  docs/product/OVERVIEW.md \
+  docs/engineering/DATA_CONTRACTS.md \
+  docs/engineering/HARNESS.md \
+  docs/privacy/APP_STORE_PRIVACY.md \
+  docs/engineering/TASKS.md; do
   rg -q '画面相似|视觉相似' "$document" ||
     fail "$document 未记录视觉优先策略"
 done
@@ -101,7 +100,7 @@ stale_count="$(
 [[ -s docs/interaction-screenshots/similar-photos-unified-zh-Hans.png ]] ||
   fail "缺少统一相似照片界面快照"
 
-rg -A2 '## PC-30 视觉优先的相似照片策略' docs/TASKS.md |
+rg -A2 '## PC-30 视觉优先的相似照片策略' docs/engineering/TASKS.md |
   rg -q '\*\*状态：已完成\*\*' ||
   fail "PC-30 尚未标记完成"
 

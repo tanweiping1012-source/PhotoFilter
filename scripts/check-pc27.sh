@@ -50,7 +50,7 @@ for domain in \
   api.x.ai; do
   rg -q "$domain" "$catalog_source" ||
     fail "模型目录缺少端点：$domain"
-  rg -q "$domain" docs/PRIVACY_POLICY.md ||
+  rg -q "$domain" docs/privacy/PRIVACY_POLICY.md ||
     fail "隐私政策缺少端点：$domain"
 done
 
@@ -113,12 +113,11 @@ rg -q 'testCustomCompatibleConfigurationValidatesAndRoundTrips' \
 
 for document in \
   AGENTS.md \
-  docs/AI_MODEL_PROVIDERS.md \
-  docs/AI_PROTOCOL_ADAPTERS.md \
-  docs/DATA_CONTRACTS.md \
-  docs/PRIVACY_POLICY.md \
-  docs/APP_STORE_PRIVACY.md \
-  docs/TASKS.md; do
+  docs/ai/PROVIDERS.md \
+  docs/engineering/DATA_CONTRACTS.md \
+  docs/privacy/PRIVACY_POLICY.md \
+  docs/privacy/APP_STORE_PRIVACY.md \
+  docs/engineering/TASKS.md; do
   rg -q 'OpenAI' "$document" ||
     fail "$document 尚未记录多协议扩展"
 done

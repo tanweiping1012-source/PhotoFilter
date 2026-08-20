@@ -58,8 +58,11 @@ rg -q 'try image\.encode\(detail, forKey: \.detail\)' "$minimax_client" ||
 rg -q 'previewSize: context\.previewSize' "$view_model" ||
   fail "完整 AI评分请求没有使用锁定尺寸"
 
-rg -q 'pendingAIFinalSelectionPreviewSize' Sources/PhotoCurator/ContentView.swift ||
-  fail "完整 AI评分发送确认没有展示锁定尺寸"
+# 尺寸不再挤进发送确认，而是常驻在侧栏 AI评分区（运行期间设置被锁定，展示值即锁定值）。
+rg -q 'library\.selectedAIPreviewSize\.displayName' Sources/PhotoCurator/ContentView.swift ||
+  fail "侧栏没有常驻展示当前 AI 预览尺寸"
+rg -q 'isConfigurationLocked' Sources/PhotoCurator/AISettingsView.swift ||
+  fail "运行期间没有锁定 AI 配置"
 
 rg -q 'testEachPreviewSizeProducesItsExactLongestEdge' \
   Tests/PhotoCuratorTests/AIReviewPreviewEncoderTests.swift ||
@@ -77,11 +80,11 @@ rg -q 'testPreviewSizeStoreDefaultsToSmallAndRoundTrips' \
 for document in \
   AGENTS.md \
   README.md \
-  docs/AI_PREVIEW_SIZE.md \
-  docs/DATA_CONTRACTS.md \
-  docs/PRIVACY_POLICY.md \
-  docs/APP_STORE_PRIVACY.md \
-  docs/TASKS.md; do
+  docs/ai/PREVIEW_SIZE.md \
+  docs/engineering/DATA_CONTRACTS.md \
+  docs/privacy/PRIVACY_POLICY.md \
+  docs/privacy/APP_STORE_PRIVACY.md \
+  docs/engineering/TASKS.md; do
   rg -q '1536px' "$document" ||
     fail "$document 尚未披露最大 AI 预览尺寸"
 done

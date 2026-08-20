@@ -44,16 +44,14 @@ struct AIFinalSelectionRunPlan: Equatable {
 
 enum AIFinalSelectionRunPlanError: LocalizedError, Equatable {
     case emptyTarget
+    case emptyCandidatePool
     case duplicateCandidateID
-    case insufficientCandidates
-    case tooManyCandidates
 
     var errorDescription: String? {
         switch self {
         case .emptyTarget: String(localized: "保留目标必须至少为 1 张。")
+        case .emptyCandidatePool: String(localized: "当前没有待评分的照片。")
         case .duplicateCandidateID: String(localized: "待评分照片包含重复项，无法开始评分。")
-        case .insufficientCandidates: String(localized: "待评分照片不足以支持当前保留目标，请减少保留数量。")
-        case .tooManyCandidates: String(localized: "待评分照片超过当前评分流程可安全处理的上限。")
         }
     }
 }
@@ -69,15 +67,18 @@ enum AIFinalSelectionRunPlanner {
         guard targetWinnerCount > 0 else {
             throw AIFinalSelectionRunPlanError.emptyTarget
         }
+        // 候选池为空和"保留目标为 0"是两种完全不同的处境，必须分开报告：
+        // 前者要用户去调整决定或目标，后者根本不该出现。共用一句话会把用户指向错误的操作。
+        guard !candidateLocalPhotoIDs.isEmpty else {
+            throw AIFinalSelectionRunPlanError.emptyCandidatePool
+        }
         guard Set(candidateLocalPhotoIDs).count == candidateLocalPhotoIDs.count else {
             throw AIFinalSelectionRunPlanError.duplicateCandidateID
         }
-        guard candidateLocalPhotoIDs.count >= targetWinnerCount * 2 else {
-            throw AIFinalSelectionRunPlanError.insufficientCandidates
-        }
-        guard candidateLocalPhotoIDs.count <= targetWinnerCount * maximumPhotosPerReview else {
-            throw AIFinalSelectionRunPlanError.tooManyCandidates
-        }
+        // 候选多于目标、少于目标都允许开始：
+        // 候选多只是让 AI 有更大的挑选空间，候选少则最多只能选出候选那么多张。
+        // 用"候选必须达到目标的 2 倍"把用户挡在门外，是把内部偏好当成了硬性前置条件。
+        let effectiveWinnerCount = min(targetWinnerCount, candidateLocalPhotoIDs.count)
 
         var cursor = 0
         var groups: [AestheticReviewCandidateGroup] = []
@@ -125,7 +126,7 @@ enum AIFinalSelectionRunPlanner {
         return AIFinalSelectionRunPlan(
             groups: groups,
             candidatePhotoCount: candidateLocalPhotoIDs.count,
-            targetWinnerCount: targetWinnerCount
+            targetWinnerCount: effectiveWinnerCount
         )
     }
 }
@@ -208,18 +209,65 @@ enum AIFinalSelectionRunValidationError: LocalizedError, Equatable {
     }
 }
 
+/// 一轮 AI评分该锁住什么。
+///
+/// 人物和风景各有独立的目标、候选池、运行状态和结果，所以一轮任务只锁它自己那一类。
+/// 用一个全局开关把整个界面（照片类型、决定、撤销、目标）一起锁住，
+/// 用户会以为 App 卡死了——而实际上另一类的所有操作都是安全的。
+enum AIFinalSelectionRunLock {
+    static func isLocked(
+        category: PhotoCurationCategory?,
+        runningCategory: PhotoCurationCategory?
+    ) -> Bool {
+        guard let runningCategory else { return false }
+        // 还没分类的照片按锁定处理：它随时可能被归到正在评分的那一类。
+        return category == nil || category == runningCategory
+    }
+}
+
 enum AIFinalSelectionRetryPolicy {
-    static let maximumAutomaticRetryCount = 1
+    /// 限流和网络抖动是 BYOK 场景的常态，不能让整轮评分（以及已经付过的 token）为一次 429 作废。
+    static let maximumAutomaticRetryCount = 4
+    static let maximumBackoff: TimeInterval = 60
 
-    static func shouldRetry(_ error: Error, completedRetryCount: Int) -> Bool {
-        guard completedRetryCount < maximumAutomaticRetryCount else { return false }
+    /// 返回下一次重试前应等待的秒数；返回 nil 表示这个错误不该重试。
+    static func retryDelay(
+        for error: Error,
+        completedRetryCount: Int,
+        jitter: Double = Double.random(in: 0.8...1.2)
+    ) -> TimeInterval? {
+        guard completedRetryCount < maximumAutomaticRetryCount else { return nil }
+        let backoff = min(maximumBackoff, pow(2, Double(completedRetryCount)) * 2) * jitter
 
-        if let clientError = error as? AestheticReviewClientError,
-           case .invalidResponse = clientError {
-            return true
+        if let clientError = error as? AestheticReviewClientError {
+            switch clientError {
+            case .invalidResponse:
+                // 模型偶发地把 JSON 写坏；短暂冷却后重试通常就能拿到合法结果。
+                return min(backoff, 5)
+            case let .requestRejected(statusCode, _, retryAfter):
+                guard statusCode == 429 || (500...599).contains(statusCode) else { return nil }
+                return retryAfter ?? backoff
+            case .invalidConfiguration, .incompletePreviewSet:
+                return nil
+            }
         }
+
+        if let urlError = error as? URLError {
+            switch urlError.code {
+            case .timedOut,
+                 .networkConnectionLost,
+                 .notConnectedToInternet,
+                 .cannotConnectToHost,
+                 .dnsLookupFailed,
+                 .secureConnectionFailed:
+                return backoff
+            default:
+                return nil
+            }
+        }
+
         guard let validationError = error as? AestheticReviewValidationError else {
-            return false
+            return nil
         }
         switch validationError {
         case .duplicatePhotoID,
@@ -229,10 +277,14 @@ enum AIFinalSelectionRetryPolicy {
              .invalidReasons,
              .invalidSummary,
              .relativeComparison:
-            return true
+            return min(backoff, 5)
         case .unsupportedVersion, .requestIDMismatch, .scopeMismatch, .emptyRequest:
-            return false
+            return nil
         }
+    }
+
+    static func shouldRetry(_ error: Error, completedRetryCount: Int) -> Bool {
+        retryDelay(for: error, completedRetryCount: completedRetryCount, jitter: 1) != nil
     }
 }
 
@@ -304,17 +356,15 @@ enum AIFinalSelectionRunValidator {
         }
 
         let lockedKeeperIDs = Set(lockedKeeperPhotoIDs)
-        let remainingSelectionCount =
-            targetSelectionCount - lockedKeeperIDs.count
-        guard remainingSelectionCount >= 0,
-              rankedCandidatePhotoIDs.count >= remainingSelectionCount else {
-            throw AIFinalSelectionRunValidationError.finalCountMismatch
-        }
+        let remainingSelectionCount = max(0, targetSelectionCount - lockedKeeperIDs.count)
+        // 候选少于剩余目标时取实际可得数量，而不是在跑完（并付过费）之后判定整轮失败。
+        let achievableCount = min(remainingSelectionCount, rankedCandidatePhotoIDs.count)
         let selectedCandidateIDs = Set(
-            rankedCandidatePhotoIDs.prefix(remainingSelectionCount)
+            rankedCandidatePhotoIDs.prefix(achievableCount)
         )
         let finalIDs = selectedCandidateIDs.union(lockedKeeperIDs)
-        guard finalIDs.count == targetSelectionCount else {
+        // 人工保留项与候选池必须互斥；重叠说明上游状态不一致。
+        guard finalIDs.count == lockedKeeperIDs.count + achievableCount else {
             throw AIFinalSelectionRunValidationError.finalCountMismatch
         }
         return finalIDs

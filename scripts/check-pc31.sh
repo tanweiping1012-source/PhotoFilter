@@ -30,11 +30,12 @@ rg -q 'failedAIFinalSelectionPhotoRangeLabel' "$view_model" "$content" ||
 rg -q 'demoAIScoringCompletedPhotoCount' "$view_model" "$preview" ||
   fail "离线教学仍未按照片计数"
 
-rg -Fq '开始\(library.curationScope.title) AI评分（\(plan.candidatePhotoCount) 张）' "$content" ||
+# 入口改为按类型渲染（"全部"视图下同时给出人物与风景），标题仍必须带上该类型的待评分张数。
+rg -Fq '开始\(category.title) AI评分（\(availability.candidatePhotoCount) 张）' "$content" ||
   fail "开始操作没有显示总照片数"
 rg -q 'completedPhotoCount.*candidatePhotoCount.*张' "$content" ||
   fail "主状态没有按照片显示"
-rg -q '每次请求只发送 2–5 张' "$content" ||
+rg -q '每次请求只发送 2–5 张' Sources/PhotoCurator/SupportInformationView.swift ||
   fail "确认文案没有用请求照片数解释发送边界"
 rg -q '每次请求发送 2–5 张' "$privacy" ||
   fail "隐私说明仍未按每次请求照片数表达"
@@ -64,11 +65,11 @@ rg -q 'demoAIScoringCompletedPhotoCount, 8' \
 
 for document in \
   AGENTS.md \
-  docs/PHOTO_COUNT_PROGRESS.md \
-  docs/PRODUCT.md \
-  docs/FIRST_CURATION_GUIDE.md \
-  docs/PRIVACY_POLICY.md \
-  docs/TASKS.md; do
+  docs/ai/SCORING.md \
+  docs/product/OVERVIEW.md \
+  docs/product/ONBOARDING.md \
+  docs/privacy/PRIVACY_POLICY.md \
+  docs/engineering/TASKS.md; do
   rg -q '照片数|照片数量|已评估照片|评估.*张' "$document" ||
     fail "$document 未记录照片进度"
 done
@@ -86,7 +87,7 @@ stale_count="$(
 [[ "$stale_count" == 0 ]] ||
   fail "String Catalog 仍有 $stale_count 个 stale 键"
 
-rg -A2 '## PC-31 AI评分照片进度' docs/TASKS.md |
+rg -A2 '## PC-31 AI评分照片进度' docs/engineering/TASKS.md |
   rg -q '\*\*状态：已完成\*\*' ||
   fail "PC-31 尚未标记完成"
 

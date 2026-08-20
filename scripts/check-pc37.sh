@@ -81,18 +81,17 @@ done
 for document in \
   AGENTS.md \
   README.md \
-  docs/PEOPLE_SUBJECT_CLASSIFICATION.md \
-  docs/PC37_ACCEPTANCE.md \
-  docs/PEOPLE_SCENERY_CURATION.md \
-  docs/DATA_CONTRACTS.md \
-  docs/PRIVACY_POLICY.md \
-  docs/PRODUCT.md \
-  docs/TASKS.md; do
+  docs/product/PEOPLE_CLASSIFICATION.md \
+  docs/product/CURATION_SCOPES.md \
+  docs/engineering/DATA_CONTRACTS.md \
+  docs/privacy/PRIVACY_POLICY.md \
+  docs/product/OVERVIEW.md \
+  docs/engineering/TASKS.md; do
   rg -q '人物主题|视觉主题' "$document" ||
     fail "$document 未记录人物主题语义"
 done
 
-rg -A2 '## PC-37 人物主题本地识别' docs/TASKS.md |
+rg -A2 '## PC-37 人物主题本地识别' docs/engineering/TASKS.md |
   rg -q '\*\*状态：已完成\*\*' ||
   fail "PC-37 尚未标记完成"
 

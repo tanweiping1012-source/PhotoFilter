@@ -15,7 +15,7 @@ run="Sources/PhotoCurator/AIFinalSelectionRun.swift"
 view_model="Sources/PhotoCurator/PhotoLibraryViewModel.swift"
 preview="Sources/PhotoCurator/PhotoPreviewView.swift"
 content="Sources/PhotoCurator/ContentView.swift"
-schema="docs/AI_AESTHETIC_REVIEW_SCHEMA.json"
+schema="docs/ai/REVIEW_SCHEMA.json"
 tests="Tests/PhotoCuratorTests/AIFinalSelectionRunTests.swift"
 
 rg -q 'static let version = "v3"' "$contract" ||
@@ -63,7 +63,7 @@ rg -q '第.*名' "$preview" ||
   fail "评分详情没有展示分类名次"
 rg -q '独立评分' "$preview" ||
   fail "手动评分仍被表达为组内排名"
-rg -q '全部完成后只在.*内按统一分数排序' "$content" ||
+rg -q '只在人物或风景内按统一分数排序' Sources/PhotoCurator/SupportInformationView.swift ||
   fail "发送确认没有说明分类内全局排序"
 
 rg -q 'testGlobalRankingIgnoresTransferWindowBoundaries' "$tests" ||
@@ -77,12 +77,11 @@ rg -q 'testTransferWindowsAvoidSinglePhotoTail' "$tests" ||
   fail "缺少 2–5 张传输窗口测试"
 
 for document in \
-  docs/GLOBAL_AI_SCORE_RANKING.md \
-  docs/DATA_CONTRACTS.md \
-  docs/AI_SCORE_DETAILS.md \
-  docs/PRODUCT.md \
-  docs/HARNESS.md \
-  docs/TASKS.md; do
+  docs/ai/SCORING.md \
+  docs/engineering/DATA_CONTRACTS.md \
+  docs/product/OVERVIEW.md \
+  docs/engineering/HARNESS.md \
+  docs/engineering/TASKS.md; do
   rg -q '独立评分|独立评估' "$document" ||
     fail "$document 未记录独立评分"
   rg -q '全局排序|全局名次' "$document" ||

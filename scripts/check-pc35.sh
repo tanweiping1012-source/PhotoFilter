@@ -98,10 +98,8 @@ rg -q 'XCTAssertFalse\(viewModel\.isDemoModeActive\)' "$tests" ||
   fail "缺少结束后退出示例断言"
 
 for document in \
-  docs/FIRST_CURATION_SPOTLIGHT.md \
-  docs/FIRST_CURATION_GUIDE.md \
-  docs/PC35_ACCEPTANCE.md \
-  docs/TASKS.md; do
+  docs/product/ONBOARDING.md \
+  docs/engineering/TASKS.md; do
   rg -q '红色|红框' "$document" ||
     fail "$document 未记录固定红框聚焦"
   rg -q '结束新手引导' "$document" ||

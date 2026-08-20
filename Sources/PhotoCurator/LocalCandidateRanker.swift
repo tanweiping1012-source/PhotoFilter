@@ -28,9 +28,13 @@ enum LocalCandidateRanker {
         }
 
         for (groupID, indices) in indicesByGroup where indices.count > 1 {
+            // 清晰度只在家族内部比较：家族里最锐的一张作为参考值。
+            let reference = indices
+                .compactMap { photos[$0].technicalQuality?.sharpness }
+                .max() ?? 0
             let ranked = indices.sorted { lhs, rhs in
-                let lhsScore = technicalScore(for: photos[lhs])
-                let rhsScore = technicalScore(for: photos[rhs])
+                let lhsScore = technicalScore(for: photos[lhs], referenceSharpness: reference)
+                let rhsScore = technicalScore(for: photos[rhs], referenceSharpness: reference)
                 if lhsScore != rhsScore { return lhsScore > rhsScore }
 
                 let lhsDate = photos[lhs].captureDate ?? .distantFuture
@@ -53,9 +57,14 @@ enum LocalCandidateRanker {
         }
     }
 
-    private static func technicalScore(for photo: PhotoItem) -> Double {
+    static func technicalScore(
+        for photo: PhotoItem,
+        referenceSharpness: Double
+    ) -> Double {
         guard let quality = photo.technicalQuality else { return 0 }
-        let sharpness = min(quality.sharpness / 500, 1) * 0.40
+        let sharpness = referenceSharpness > 0
+            ? min(quality.sharpness / referenceSharpness, 1) * 0.40
+            : 0
         let range = Double(quality.dynamicRange) / 255 * 0.25
         let clipping = max(0, 1 - min(1, quality.shadowClippingRatio + quality.highlightClippingRatio)) * 0.25
         let riskBonus = quality.risks.isEmpty ? 0.10 : 0

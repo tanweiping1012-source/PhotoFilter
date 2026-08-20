@@ -1,47 +1,11 @@
 import Foundation
 
 enum ExportService {
-    /// Copies retained photos into a new, timestamped directory. Source URLs are never written to.
-    static func copy(
-        photos: [PhotoItem],
-        to destinationParent: URL,
-        expectedCount: Int? = nil,
-        now: Date = Date()
-    ) throws -> URL {
-        if let expectedCount, photos.count != expectedCount {
-            throw ExportError.selectionCountMismatch(expected: expectedCount, actual: photos.count)
-        }
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyyMMdd-HHmmss"
-        let exportURL = destinationParent.appendingPathComponent(
-            "旅行照片筛选器-导出-\(formatter.string(from: now))",
-            isDirectory: true
-        )
-        let manager = FileManager.default
-        try manager.createDirectory(at: exportURL, withIntermediateDirectories: false)
-
-        var exportedNames: [String] = []
-        for photo in photos {
-            let destination = uniqueDestination(for: photo.url, in: exportURL, fileManager: manager)
-            try manager.copyItem(at: photo.url, to: destination)
-            exportedNames.append(destination.lastPathComponent)
-        }
-
-        let manifest = ExportManifest(createdAt: now, exportedCount: exportedNames.count, filenames: exportedNames)
-        let encoder = JSONEncoder()
-        encoder.dateEncodingStrategy = .iso8601
-        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
-        try encoder.encode(manifest).write(to: exportURL.appendingPathComponent("selection.json"), options: .atomic)
-
-        let csv = (["filename"] + exportedNames.map(csvEscaped)).joined(separator: "\n") + "\n"
-        try csv.write(to: exportURL.appendingPathComponent("selection.csv"), atomically: true, encoding: .utf8)
-        return exportURL
-    }
-
+    /// 导出保留照片。数量由用户决定：这里只保证"有东西可导"且"每张都有类型"，
+    /// 不再要求人物与风景恰好等于各自目标——目标是筛选过程中的参考值，不是导出闸门。
     static func copyCategorized(
         photos: [PhotoItem],
         to destinationParent: URL,
-        targets: PhotoSelectionTargets,
         now: Date = Date()
     ) throws -> URL {
         let photosByCategory = Dictionary(
@@ -55,16 +19,8 @@ enum ExportService {
             by: \.0
         ).mapValues { $0.map(\.1) }
 
-        for category in PhotoCurationCategory.allCases {
-            let actual = photosByCategory[category, default: []].count
-            let expected = targets[category]
-            guard actual == expected else {
-                throw ExportError.categorySelectionCountMismatch(
-                    category: category,
-                    expected: expected,
-                    actual: actual
-                )
-            }
+        guard !photos.isEmpty else {
+            throw ExportError.emptySelection
         }
         guard photosByCategory.values.reduce(0, {
             $0 + $1.count
@@ -72,10 +28,8 @@ enum ExportService {
             throw ExportError.missingCategory
         }
 
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyyMMdd-HHmmss"
         let exportURL = destinationParent.appendingPathComponent(
-            "旅行照片筛选器-导出-\(formatter.string(from: now))",
+            "旅行照片筛选器-导出-\(exportTimestamp(from: now))",
             isDirectory: true
         )
         let manager = FileManager.default
@@ -86,7 +40,7 @@ enum ExportService {
 
         do {
             var manifestGroups: [CategorizedExportManifest.Group] = []
-            var csvRows = ["category,filename"]
+            var csvRows = ["category,path,filename"]
             for category in PhotoCurationCategory.allCases {
                 let categoryDirectory = exportURL.appendingPathComponent(
                     category.title,
@@ -111,6 +65,7 @@ enum ExportService {
                             csvEscaped(
                                 "\(category.title)/\(destination.lastPathComponent)"
                             ),
+                            csvEscaped(destination.lastPathComponent),
                         ].joined(separator: ",")
                     )
                 }
@@ -136,7 +91,9 @@ enum ExportService {
                 to: exportURL.appendingPathComponent("selection.json"),
                 options: .atomic
             )
-            let csv = csvRows.joined(separator: "\n") + "\n"
+            // 清单里的类别目录名是中文（人物 / 风景）。不带 BOM 的 UTF-8 CSV 在 Excel 里会变成乱码，
+            // 而这份文件正是给用户在表格软件里看的。
+            let csv = "\u{FEFF}" + csvRows.joined(separator: "\n") + "\n"
             try csv.write(
                 to: exportURL.appendingPathComponent("selection.csv"),
                 atomically: true,
@@ -147,6 +104,16 @@ enum ExportService {
             try? manager.removeItem(at: exportURL)
             throw error
         }
+    }
+
+    /// 导出目录名必须与系统日历无关：使用日语和历、佛历等非公历时，默认 DateFormatter 会写出完全不同的年份。
+    static func exportTimestamp(from date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.calendar = Calendar(identifier: .gregorian)
+        formatter.timeZone = .current
+        formatter.dateFormat = "yyyyMMdd-HHmmss"
+        return formatter.string(from: date)
     }
 
     private static func uniqueDestination(for source: URL, in directory: URL, fileManager: FileManager) -> URL {
@@ -169,27 +136,13 @@ enum ExportService {
 }
 
 enum ExportError: LocalizedError, Equatable {
-    case selectionCountMismatch(expected: Int, actual: Int)
-    case categorySelectionCountMismatch(
-        category: PhotoCurationCategory,
-        expected: Int,
-        actual: Int
-    )
+    case emptySelection
     case missingCategory
 
     var errorDescription: String? {
         switch self {
-        case .selectionCountMismatch(let expected, let actual):
-            String(localized: "导出需要恰好 \(expected) 张保留照片，当前为 \(actual) 张。")
-        case let .categorySelectionCountMismatch(
-            category,
-            expected,
-            actual
-        ):
-            String(
-                localized:
-                    "\(category.title)导出需要恰好 \(expected) 张，当前为 \(actual) 张。"
-            )
+        case .emptySelection:
+            String(localized: "还没有保留任何照片，先保留至少一张再导出。")
         case .missingCategory:
             String(localized: "仍有照片未完成人物或风景分类，无法导出。")
         }

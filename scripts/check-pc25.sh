@@ -24,7 +24,7 @@ fi
 
 rg -q 'Text\("AI评分"\)' Sources/PhotoCurator/ContentView.swift ||
   fail "侧栏缺少统一的 AI评分标题"
-rg -q 'library\.prepareAIFinalSelectionRun\(\)' \
+rg -q 'library\.prepareAIFinalSelectionRun\(' \
   Sources/PhotoCurator/ContentView.swift ||
   fail "缺少统一的完整 AI评分入口"
 if rg -n 'AI评分相似照片|发送并复核' \

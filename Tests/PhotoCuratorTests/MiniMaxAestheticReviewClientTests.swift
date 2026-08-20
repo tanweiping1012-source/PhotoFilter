@@ -147,7 +147,8 @@ final class MiniMaxAestheticReviewClientTests: XCTestCase {
                 error as? AestheticReviewClientError,
                 .requestRejected(
                     statusCode: 200,
-                    providerCode: "MiniMax-1002"
+                    providerCode: "MiniMax-1002",
+                    retryAfter: nil
                 )
             )
         }
@@ -197,7 +198,8 @@ final class MiniMaxAestheticReviewClientTests: XCTestCase {
                 error as? AestheticReviewClientError,
                 .requestRejected(
                     statusCode: 429,
-                    providerCode: "MiniMax-TokenPlan-RateLimit"
+                    providerCode: "MiniMax-TokenPlan-RateLimit",
+                    retryAfter: nil
                 )
             )
             XCTAssertTrue(error.localizedDescription.contains("Token Plan"))

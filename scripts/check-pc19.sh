@@ -77,14 +77,17 @@ jq -e '
   and .strings.CFBundleName.localizations["zh-Hans"].stringUnit.value == "旅行照片筛选器"
 ' "$info_catalog" >/dev/null || fail "InfoPlist 显示名称未完整本地化"
 
-[[ "$(
-  /usr/libexec/PlistBuddy -c 'Print :CFBundleDisplayName' packaging/Info.plist
-)" == "旅行照片筛选器" ]] ||
-  fail "手工打包配置的显示名称不正确"
-[[ "$(
-  /usr/libexec/PlistBuddy -c 'Print :CFBundleName' packaging/Info.plist
-)" == "旅行照片筛选器" ]] ||
-  fail "手工打包配置仍暴露内部工程名"
+# 真正打包的是 Xcode target（GENERATE_INFOPLIST_FILE），不再存在手工维护的 Info.plist：
+# 一份没人构建的副本只会和工程设置里的版本号、显示名互相矛盾。
+rg -q 'INFOPLIST_KEY_CFBundleDisplayName = "旅行照片筛选器"' "$project_file" ||
+  fail "Xcode Target 的显示名称不正确"
+rg -q 'INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.photography"' \
+  "$project_file" ||
+  fail "Xcode Target 缺少 App Store 类别"
+rg -q 'ENABLE_HARDENED_RUNTIME = YES' "$project_file" ||
+  fail "Release 未开启 Hardened Runtime"
+[[ ! -e packaging ]] ||
+  fail "packaging/ 已废弃：应只保留 Xcode 工程一处打包配置"
 rg -q 'TravelPhotoFilter-\$\(date' scripts/archive-app.sh ||
   fail "Archive 默认文件名未使用新产品名"
 rg -q 'TravelPhotoFilter-\$\{version\}-macOS-universal\.dmg' \
@@ -94,11 +97,10 @@ rg -q 'TravelPhotoFilter-\$\{version\}-macOS-universal\.dmg' \
 for source in \
   Sources/PhotoCurator \
   Resources \
-  packaging \
   scripts/package-app.sh \
   scripts/package-dmg.sh \
   README.md \
-  docs/PRIVACY_POLICY.md; do
+  docs/privacy/PRIVACY_POLICY.md; do
   if rg -n '旅行照片策展器|Photo Curator' "$source"; then
     fail "$source 仍包含旧产品名"
   fi

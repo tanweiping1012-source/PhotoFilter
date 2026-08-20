@@ -21,7 +21,7 @@ struct AIModelConnectionVerifier {
         model: AIModelDescriptor,
         apiKey: String,
         previewSize: AIReviewPreviewSize = .small,
-        session: URLSession = .shared,
+        session: URLSession = AIReviewURLSession.shared,
         testImageURL: URL? = nil
     ) async throws {
         let imageURL = testImageURL ?? Self.testImageURL()

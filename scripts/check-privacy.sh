@@ -9,8 +9,8 @@ project_file="PhotoCurator.xcodeproj/project.pbxproj"
 privacy_sources=(
   "$manifest"
   "Sources/PhotoCurator/PrivacyInformationView.swift"
-  "docs/PRIVACY_POLICY.md"
-  "docs/APP_STORE_PRIVACY.md"
+  "docs/privacy/PRIVACY_POLICY.md"
+  "docs/privacy/APP_STORE_PRIVACY.md"
 )
 
 fail() {

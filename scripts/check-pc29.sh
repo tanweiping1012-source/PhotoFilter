@@ -49,7 +49,9 @@ rg -q 'let startingPhotos: \[PhotoItem\]' "$demo" ||
   fail "离线样例缺少未评分起点"
 rg -q 'startingPhotos: startingPhotos' "$demo" ||
   fail "未评分起点没有进入样例会话"
-rg -q 'photos = session\.startingPhotos' "$view_model" ||
+# 只断言“教学起点来自未评分的 startingPhotos”，不锁定具体赋值写法，
+# 否则任何一次无关重构都会让门禁误报。真正的行为由 DemoModeLibraryTests 覆盖。
+rg -q 'session\.startingPhotos' "$view_model" ||
   fail "进入教学时仍直接载入评分结果"
 rg -q 'aiFinalSelectionPhotoIDsByCategory = \[:\]' "$view_model" ||
   fail "进入教学时仍直接载入评分优先集合"
@@ -121,12 +123,10 @@ done
 
 for document in \
   AGENTS.md \
-  docs/FIRST_CURATION_GUIDE.md \
-  docs/ONBOARDING.md \
-  docs/PRODUCT.md \
-  docs/APP_REVIEW_DEMO.md \
-  docs/PC29_ACCEPTANCE.md \
-  docs/TASKS.md; do
+  docs/product/ONBOARDING.md \
+  docs/product/OVERVIEW.md \
+  docs/privacy/APP_REVIEW_DEMO.md \
+  docs/engineering/TASKS.md; do
   rg -q '第一次筛选|完整筛选|First Curation' "$document" ||
     fail "$document 未记录新版教学"
 done
@@ -145,7 +145,7 @@ stale_count="$(
 [[ "$stale_count" == 0 ]] ||
   fail "String Catalog 仍有 $stale_count 个 stale 键"
 
-rg -A2 '## PC-29 第一次筛选任务教学' docs/TASKS.md |
+rg -A2 '## PC-29 第一次筛选任务教学' docs/engineering/TASKS.md |
   rg -q '\*\*状态：已完成\*\*' ||
   fail "PC-29 尚未标记完成"
 

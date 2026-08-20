@@ -362,44 +362,48 @@ enum PeopleSubjectEvaluator {
 }
 
 enum PhotoCategoryClassifier {
+    /// 便利入口：自行解码一次降采样图后分类。批量扫描请直接传入已解码的 `CGImage`。
     static func classify(_ url: URL) -> PhotoCurationCategory {
         classifyWithEvidence(url).category
+    }
+
+    static func classify(_ image: CGImage) -> PhotoCurationCategory {
+        classifyWithEvidence(image).category
     }
 
     static func diagnosticEvidence(
         _ url: URL
     ) throws -> PeopleSubjectEvidence {
-        var evidence = try primaryEvidence(for: url)
-        let mask = try personMaskEvidence(for: url)
-        evidence.personMaskCoverage = mask.coverage
-        evidence.personMaskBoundingBox = mask.boundingBox
-        evidence.personInstanceCount = mask.instanceCount
-        if mask.coverage >= 0.006 {
-            evidence.salientRegions = try salientRegions(for: url)
+        guard let image = decodedImage(for: url) else {
+            throw PeopleSubjectClassificationError.cannotReadImage
         }
-        return evidence
+        return try diagnosticEvidence(image)
+    }
+
+    static func diagnosticEvidence(
+        _ image: CGImage
+    ) throws -> PeopleSubjectEvidence {
+        try evidence(for: image)
     }
 
     static func classifyWithEvidence(
         _ url: URL
     ) -> PeopleSubjectClassification {
+        guard let image = decodedImage(for: url) else {
+            return PeopleSubjectClassification(
+                category: .scenery,
+                reason: .noPerson,
+                confidence: 0
+            )
+        }
+        return classifyWithEvidence(image)
+    }
+
+    static func classifyWithEvidence(
+        _ image: CGImage
+    ) -> PeopleSubjectClassification {
         do {
-            var evidence = try primaryEvidence(for: url)
-            let primary = PeopleSubjectEvaluator.classify(evidence)
-            if primary.category == .people {
-                return primary
-            }
-
-            let mask = try personMaskEvidence(for: url)
-            evidence.personMaskCoverage = mask.coverage
-            evidence.personMaskBoundingBox = mask.boundingBox
-            evidence.personInstanceCount = mask.instanceCount
-            guard mask.coverage >= 0.006 else {
-                return PeopleSubjectEvaluator.classify(evidence)
-            }
-
-            evidence.salientRegions = try salientRegions(for: url)
-            return PeopleSubjectEvaluator.classify(evidence)
+            return PeopleSubjectEvaluator.classify(try evidence(for: image))
         } catch {
             return PeopleSubjectClassification(
                 category: .scenery,
@@ -409,18 +413,67 @@ enum PhotoCategoryClassifier {
         }
     }
 
-    private static func primaryEvidence(
-        for url: URL
+    private static func decodedImage(for url: URL) -> CGImage? {
+        PhotoAnalysisPipeline.decodedImage(
+            for: url,
+            maximumPixelSize: PhotoAnalysisPipeline.analysisPixelSize
+        )
+    }
+
+    /// 人体、人脸、人像分割、实例掩码与显著性共用一个 `VNImageRequestHandler`。
+    ///
+    /// 旧实现按“先人脸、命中就早退”分三次 `perform`，每次都重新解码整张原图；
+    /// 省下的一次请求远抵不过多出来的两次全分辨率解码。
+    private static func evidence(
+        for image: CGImage
     ) throws -> PeopleSubjectEvidence {
         let humanRequest = VNDetectHumanRectanglesRequest()
         humanRequest.upperBodyOnly = false
         let faceRequest = VNDetectFaceCaptureQualityRequest()
         faceRequest.revision =
             VNDetectFaceCaptureQualityRequestRevision3
+        let segmentationRequest = VNGeneratePersonSegmentationRequest()
+        segmentationRequest.qualityLevel = .fast
+        segmentationRequest.outputPixelFormat =
+            kCVPixelFormatType_OneComponent8
+        let instanceRequest = VNGeneratePersonInstanceMaskRequest()
+        let saliencyRequest =
+            VNGenerateAttentionBasedSaliencyImageRequest()
+        saliencyRequest.revision =
+            VNGenerateAttentionBasedSaliencyImageRequestRevision2
 
-        try VNImageRequestHandler(url: url).perform(
-            [humanRequest, faceRequest]
+        try VNImageRequestHandler(cgImage: image).perform([
+            humanRequest,
+            faceRequest,
+            segmentationRequest,
+            instanceRequest,
+            saliencyRequest,
+        ])
+
+        var evidence = primaryEvidence(
+            humanRequest: humanRequest,
+            faceRequest: faceRequest
         )
+        let mask = maskEvidence(
+            segmentationRequest: segmentationRequest,
+            instanceRequest: instanceRequest
+        )
+        evidence.personMaskCoverage = mask.coverage
+        evidence.personMaskBoundingBox = mask.boundingBox
+        evidence.personInstanceCount = mask.instanceCount
+        if mask.coverage >= minimumMaskCoverageForSaliency {
+            evidence.salientRegions = saliencyRequest.results?.first?
+                .salientObjects?.map(\.boundingBox) ?? []
+        }
+        return evidence
+    }
+
+    private static let minimumMaskCoverageForSaliency = 0.006
+
+    private static func primaryEvidence(
+        humanRequest: VNDetectHumanRectanglesRequest,
+        faceRequest: VNDetectFaceCaptureQualityRequest
+    ) -> PeopleSubjectEvidence {
         let humans = (humanRequest.results ?? []).map {
             PeopleSubjectRegion(
                 boundingBox: $0.boundingBox,
@@ -442,51 +495,26 @@ enum PhotoCategoryClassifier {
         )
     }
 
-    private static func personMaskEvidence(
-        for url: URL
-    ) throws -> (
+    private static func maskEvidence(
+        segmentationRequest: VNGeneratePersonSegmentationRequest,
+        instanceRequest: VNGeneratePersonInstanceMaskRequest
+    ) -> (
         coverage: Double,
         boundingBox: CGRect?,
         instanceCount: Int
     ) {
-        let segmentationRequest =
-            VNGeneratePersonSegmentationRequest()
-        segmentationRequest.qualityLevel = .fast
-        segmentationRequest.outputPixelFormat =
-            kCVPixelFormatType_OneComponent8
-        let instanceRequest =
-            VNGeneratePersonInstanceMaskRequest()
-        try VNImageRequestHandler(url: url).perform(
-            [segmentationRequest, instanceRequest]
-        )
+        let instanceCount = instanceRequest.results?.first?
+            .allInstances.count ?? 0
         guard let buffer =
                 segmentationRequest.results?.first?.pixelBuffer else {
-            return (
-                0,
-                nil,
-                instanceRequest.results?.first?
-                    .allInstances.count ?? 0
-            )
+            return (0, nil, instanceCount)
         }
         let statistics = maskStatistics(buffer)
         return (
             statistics.coverage,
             statistics.boundingBox,
-            instanceRequest.results?.first?
-                .allInstances.count ?? 0
+            instanceCount
         )
-    }
-
-    private static func salientRegions(
-        for url: URL
-    ) throws -> [CGRect] {
-        let request =
-            VNGenerateAttentionBasedSaliencyImageRequest()
-        request.revision =
-            VNGenerateAttentionBasedSaliencyImageRequestRevision2
-        try VNImageRequestHandler(url: url).perform([request])
-        return request.results?.first?.salientObjects?
-            .map(\.boundingBox) ?? []
     }
 
     private static func maskStatistics(
@@ -546,5 +574,16 @@ enum PhotoCategoryClassifier {
                 / CGFloat(height)
         )
         return (coverage, boundingBox)
+    }
+}
+
+enum PeopleSubjectClassificationError: LocalizedError {
+    case cannotReadImage
+
+    var errorDescription: String? {
+        switch self {
+        case .cannotReadImage:
+            String(localized: "无法读取照片像素，已按风景处理。")
+        }
     }
 }

@@ -1,0 +1,66 @@
+name: Release
+
+# 打 v* 标签时构建通用 DMG 并附到 GitHub Release。
+# 仓库里不提交任何构建产物：dist/ 已被 .gitignore 排除，DMG 只作为 Release 资产存在。
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  dmg:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install ripgrep
+        run: brew list ripgrep >/dev/null 2>&1 || brew install ripgrep
+
+      # 发布前必须先过完整门禁：没跑过 check.sh 的构建不允许出现在 Release 页。
+      - name: scripts/check.sh
+        run: bash scripts/check.sh
+
+      - name: Archive
+        run: bash scripts/archive-app.sh
+
+      - name: Build universal DMG
+        id: dmg
+        run: echo "path=$(bash scripts/package-dmg.sh)" >> "$GITHUB_OUTPUT"
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: TravelPhotoFilter-dmg
+          path: ${{ steps.dmg.outputs.path }}
+          if-no-files-found: error
+
+      - name: Attach DMG to release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ steps.dmg.outputs.path }}
+          draft: true
+          generate_release_notes: true
+          body: |
+            ## 下载
+
+            下载下方的 `.dmg`，打开后把「旅行照片筛选器」拖进「应用程序」。
+
+            需要 **macOS 14 或更高版本**，Apple Silicon 与 Intel 通用。
+
+            ### 首次打开
+
+            这个版本没有经过 Apple 公证，macOS 会拦截第一次启动：
+
+            1. 在「应用程序」里**按住 Control 点按** App，选择「打开」。
+            2. 仍被拦截时，打开「系统设置 → 隐私与安全性」，在底部确认来源后选择「仍要打开」。
+
+            ### 边界
+
+            - 原照片只读：不移动、不删除、不改名、不写回，导出只有复制一条路径。
+            - AI 评分可选且自带 Key（BYOK）；不配置 API Key 时全部本地功能照常可用。
+            - API Key 只保存在本机 Keychain，不进入项目文件、日志或导出内容。

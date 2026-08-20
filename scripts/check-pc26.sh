@@ -52,9 +52,9 @@ rg -q -- '--review-demo' Sources/PhotoCurator/PhotoLibraryViewModel.swift ||
 rg -q 'testOnboardingPreferenceShowsOnceAndSkipsReviewDemo' \
   Tests/PhotoCuratorTests/DemoModeLibraryTests.swift ||
   fail "缺少首次/后续启动和审核旁路测试"
-rg -q '# 新手引导规格' docs/ONBOARDING.md ||
+rg -q '# 新手引导规格' docs/product/ONBOARDING.md ||
   fail "缺少新手引导规格"
-rg -q '## PC-26 首次启动新手引导' docs/TASKS.md ||
+rg -q '## PC-26 首次启动新手引导' docs/engineering/TASKS.md ||
   fail "任务卡缺少 PC-26"
 
 if rg -n 'URLSession|AIProviderKeyStore|SecItem|https?://' "$onboarding"; then

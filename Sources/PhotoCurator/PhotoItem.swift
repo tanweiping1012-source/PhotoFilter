@@ -60,6 +60,13 @@ enum PhotoCurationScope: String, CaseIterable, Identifiable {
         }
     }
 
+    init(_ category: PhotoCurationCategory) {
+        switch category {
+        case .people: self = .people
+        case .scenery: self = .scenery
+        }
+    }
+
     var category: PhotoCurationCategory? {
         switch self {
         case .all: nil
@@ -236,11 +243,6 @@ struct GroupRecommendation: Equatable {
     }
 }
 
-struct ExportManifest: Codable {
-    let createdAt: Date
-    let exportedCount: Int
-    let filenames: [String]
-}
 
 enum SelectionRules {
     static func keepers(in photos: [PhotoItem]) -> [PhotoItem] {

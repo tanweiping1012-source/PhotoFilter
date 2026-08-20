@@ -26,13 +26,26 @@ struct LocalAestheticCandidatePlan: Equatable {
 ///
 /// 规则：
 /// - 人工保留项不需要再次竞争，人工淘汰项不会进入待评分池；
-/// - 候选规模按剩余目标的 2–3 倍弹性收敛，最多 48 张，不为凑满 4 倍加入弱候选；
+/// - 候选规模按剩余目标的 2–3 倍弹性收敛，上限随目标数量增长（默认目标下仍是 48 张），不为凑满 4 倍加入弱候选；
 /// - 优先纳入画面相似照片中的本地技术优等生；
 /// - 空余名额从时间线上补齐，避免候选只集中在旅途的某一个片段。
 enum LocalAestheticCandidatePlanner {
     static let maximumCandidateCount = 48
+    /// 目标数量很大时，固定 48 的上限会让 AI 永远凑不满目标。
+    /// 因此上限随剩余目标线性放宽，同时保留一个总量封顶避免请求数失控。
+    static let absoluteMaximumCandidateCount = 240
     static let minimumCandidateMultiplier = 2
     static let preferredCandidateMultiplier = 3
+
+    static func candidateCapacity(remainingSelectionCount: Int) -> Int {
+        min(
+            absoluteMaximumCandidateCount,
+            max(
+                maximumCandidateCount,
+                remainingSelectionCount * preferredCandidateMultiplier
+            )
+        )
+    }
 
     static func makePlan(
         for photos: [PhotoItem],
@@ -43,6 +56,10 @@ enum LocalAestheticCandidatePlanner {
         let rawEligible = photos
             .filter { $0.decision == .undecided }
             .sorted(by: chronologicalOrder)
+        // 清晰度是相对量：以候选池自身的中位数为参考，避免用固定刻度把整批低细节场景一起压低。
+        let referenceSharpness = TechnicalQualityAnalyzer.referenceSharpness(
+            in: rawEligible.compactMap { $0.technicalQuality?.sharpness }
+        ) ?? 0
 
         guard remainingSelectionCount > 0, !rawEligible.isEmpty else {
             return LocalAestheticCandidatePlan(
@@ -75,8 +92,10 @@ enum LocalAestheticCandidatePlanner {
         }, by: { $0.0 })
         let groupedRepresentatives = groupedByFamily.values.compactMap { members in
             members.map(\.1).max { lhs, rhs in
-                if localPriority(for: lhs) != localPriority(for: rhs) {
-                    return localPriority(for: lhs) < localPriority(for: rhs)
+                let lhsPriority = localPriority(for: lhs, referenceSharpness: referenceSharpness)
+                let rhsPriority = localPriority(for: rhs, referenceSharpness: referenceSharpness)
+                if lhsPriority != rhsPriority {
+                    return lhsPriority < rhsPriority
                 }
                 return chronologicalOrder(lhs, rhs)
             }
@@ -115,7 +134,7 @@ enum LocalAestheticCandidatePlanner {
         )
         let requestedCandidateCount = min(
             collapsedEligible.count,
-            maximumCandidateCount,
+            candidateCapacity(remainingSelectionCount: remainingSelectionCount),
             remainingSelectionCount * AIReviewConfiguration.maximumPhotosPerReview,
             desiredCount
         )
@@ -148,8 +167,20 @@ enum LocalAestheticCandidatePlanner {
             }
         }
 
-        selectedIDs.formUnion(preferredDiverseSelection(from: groupedRepresentatives, count: groupedQuota).map(\.id))
-        selectedIDs.formUnion(preferredDiverseSelection(from: standalone, count: standaloneQuota).map(\.id))
+        selectedIDs.formUnion(
+            preferredDiverseSelection(
+                from: groupedRepresentatives,
+                count: groupedQuota,
+                referenceSharpness: referenceSharpness
+            ).map(\.id)
+        )
+        selectedIDs.formUnion(
+            preferredDiverseSelection(
+                from: standalone,
+                count: standaloneQuota,
+                referenceSharpness: referenceSharpness
+            ).map(\.id)
+        )
 
         let chronologicalIndex = Dictionary(
             uniqueKeysWithValues: collapsedEligible.enumerated().map { ($0.element.id, $0.offset) }
@@ -160,11 +191,13 @@ enum LocalAestheticCandidatePlanner {
                 candidateFillPriority(
                     for: lhs,
                     selectedIDs: selectedIDs,
-                    chronologicalIndex: chronologicalIndex
+                    chronologicalIndex: chronologicalIndex,
+                    referenceSharpness: referenceSharpness
                 ) < candidateFillPriority(
                     for: rhs,
                     selectedIDs: selectedIDs,
-                    chronologicalIndex: chronologicalIndex
+                    chronologicalIndex: chronologicalIndex,
+                    referenceSharpness: referenceSharpness
                 )
             }) else {
                 break
@@ -190,27 +223,44 @@ enum LocalAestheticCandidatePlanner {
         )
     }
 
-    private static func preferredDiverseSelection(from photos: [PhotoItem], count: Int) -> [PhotoItem] {
+    private static func preferredDiverseSelection(
+        from photos: [PhotoItem],
+        count: Int,
+        referenceSharpness: Double
+    ) -> [PhotoItem] {
         guard count > 0, !photos.isEmpty else { return [] }
         let preferred = photos.filter { $0.localRecommendations.contains(where: \.isTopCandidate) }
         if preferred.count >= count {
-            return diverseSegmentSelection(from: preferred, count: count)
+            return diverseSegmentSelection(
+                from: preferred,
+                count: count,
+                referenceSharpness: referenceSharpness
+            )
         }
         let remainingCount = count - preferred.count
         let remaining = photos.filter { photo in !preferred.contains(where: { $0.id == photo.id }) }
-        return (preferred + diverseSegmentSelection(from: remaining, count: remainingCount))
+        return (preferred + diverseSegmentSelection(
+            from: remaining,
+            count: remainingCount,
+            referenceSharpness: referenceSharpness
+        ))
             .sorted(by: chronologicalOrder)
     }
 
     /// 当本地组冠军多于容量时，按时间线分段，并在每段内选择技术优先级最高的一张。
-    private static func diverseSegmentSelection(from photos: [PhotoItem], count: Int) -> [PhotoItem] {
+    private static func diverseSegmentSelection(
+        from photos: [PhotoItem],
+        count: Int,
+        referenceSharpness: Double
+    ) -> [PhotoItem] {
         guard count > 0, photos.count > count else { return Array(photos.prefix(count)) }
         return (0..<count).compactMap { segment in
             let start = segment * photos.count / count
             let end = (segment + 1) * photos.count / count
             guard start < end else { return nil }
             return photos[start..<end].max { lhs, rhs in
-                localPriority(for: lhs) < localPriority(for: rhs)
+                localPriority(for: lhs, referenceSharpness: referenceSharpness)
+                    < localPriority(for: rhs, referenceSharpness: referenceSharpness)
             }
         }
     }
@@ -218,22 +268,32 @@ enum LocalAestheticCandidatePlanner {
     private static func candidateFillPriority(
         for photo: PhotoItem,
         selectedIDs: Set<String>,
-        chronologicalIndex: [String: Int]
+        chronologicalIndex: [String: Int],
+        referenceSharpness: Double
     ) -> (Int, Double, String) {
         let index = chronologicalIndex[photo.id] ?? 0
         let temporalDistance = selectedIDs
             .compactMap { chronologicalIndex[$0] }
             .map { abs($0 - index) }
             .min() ?? Int.max
-        return (temporalDistance, localPriority(for: photo), photo.id)
+        return (
+            temporalDistance,
+            localPriority(for: photo, referenceSharpness: referenceSharpness),
+            photo.id
+        )
     }
 
-    private static func localPriority(for photo: PhotoItem) -> Double {
+    private static func localPriority(
+        for photo: PhotoItem,
+        referenceSharpness: Double
+    ) -> Double {
         let localWinnerCount = photo.localRecommendations.filter(\.isTopCandidate).count
         guard let quality = photo.technicalQuality else {
             return Double(localWinnerCount) * 10
         }
-        let sharpness = min(quality.sharpness / 500, 1) * 0.40
+        let sharpness = referenceSharpness > 0
+            ? min(quality.sharpness / referenceSharpness, 1) * 0.40
+            : 0
         let range = Double(quality.dynamicRange) / 255 * 0.25
         let clipping = max(
             0,

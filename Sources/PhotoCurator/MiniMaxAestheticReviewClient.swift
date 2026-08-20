@@ -16,7 +16,7 @@ struct AestheticReviewClient {
         previews: [AestheticReviewPreview],
         previewSize: AIReviewPreviewSize = .small,
         apiKey: String,
-        session: URLSession = .shared
+        session: URLSession = AIReviewURLSession.shared
     ) async throws -> AestheticReviewResult {
         switch model.protocolID {
         case .arkResponses:
@@ -77,7 +77,7 @@ struct MiniMaxAestheticReviewClient {
         previews: [AestheticReviewPreview],
         previewSize: AIReviewPreviewSize = .small,
         apiKey: String,
-        session: URLSession = .shared
+        session: URLSession = AIReviewURLSession.shared
     ) async throws -> AestheticReviewResult {
         var urlRequest = try makeURLRequest(
             request: request,
@@ -98,7 +98,8 @@ struct MiniMaxAestheticReviewClient {
                     statusCode: response.statusCode,
                     data: data,
                     apiKey: apiKey
-                )
+                ),
+                retryAfter: AestheticReviewClientError.retryAfter(from: response)
             )
         }
         return try decodeResponse(data, request: request)
@@ -168,7 +169,8 @@ struct MiniMaxAestheticReviewClient {
         if let statusCode = completion.baseResponse?.statusCode, statusCode != 0 {
             throw AestheticReviewClientError.requestRejected(
                 statusCode: 200,
-                providerCode: "MiniMax-\(statusCode)"
+                providerCode: "MiniMax-\(statusCode)",
+                retryAfter: nil
             )
         }
 

@@ -14,7 +14,7 @@ content="Sources/PhotoCurator/ContentView.swift"
 preview="Sources/PhotoCurator/PhotoPreviewView.swift"
 filter="Sources/PhotoCurator/PhotoGridFilter.swift"
 demo="Sources/PhotoCurator/DemoModeLibrary.swift"
-schema="docs/AI_AESTHETIC_REVIEW_SCHEMA.json"
+schema="docs/ai/REVIEW_SCHEMA.json"
 
 for field in \
   moment \
@@ -151,12 +151,11 @@ done
 
 for document in \
   AGENTS.md \
-  docs/AI_SCORE_DETAILS.md \
-  docs/DATA_CONTRACTS.md \
-  docs/PRODUCT.md \
-  docs/APP_REVIEW_DEMO.md \
-  docs/PC28_ACCEPTANCE.md \
-  docs/TASKS.md; do
+  docs/ai/SCORING.md \
+  docs/engineering/DATA_CONTRACTS.md \
+  docs/product/OVERVIEW.md \
+  docs/privacy/APP_REVIEW_DEMO.md \
+  docs/engineering/TASKS.md; do
   rg -q '五维|dimensions|five dimensions' "$document" ||
     fail "$document 未记录五维评分"
 done
@@ -175,9 +174,9 @@ stale_count="$(
 [[ "$stale_count" == 0 ]] ||
   fail "String Catalog 仍有 $stale_count 个 stale 键"
 
-rg -q '## PC-28 可解释 AI评分详情' docs/TASKS.md ||
+rg -q '## PC-28 可解释 AI评分详情' docs/engineering/TASKS.md ||
   fail "任务卡缺少 PC-28"
-rg -A2 '## PC-28 可解释 AI评分详情' docs/TASKS.md |
+rg -A2 '## PC-28 可解释 AI评分详情' docs/engineering/TASKS.md |
   rg -q '\*\*状态：已完成\*\*' ||
   fail "PC-28 尚未标记完成"
 

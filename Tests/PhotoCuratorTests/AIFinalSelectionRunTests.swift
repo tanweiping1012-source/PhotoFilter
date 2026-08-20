@@ -16,7 +16,8 @@ final class AIFinalSelectionRunTests: XCTestCase {
         XCTAssertEqual(plan.coveredPhotoIDs, Set(ids))
         XCTAssertEqual(plan.transmittedPhotoCount, 48)
         XCTAssertEqual(plan.targetWinnerCount, 12)
-        XCTAssertEqual(plan.estimatedMinimumMinutes, 9)
+        // 请求间隔从固定 60 秒降到 4 秒后，48 张候选的最短耗时从约 9 分钟降到 1 分钟以内。
+        XCTAssertEqual(plan.estimatedMinimumMinutes, 1)
         XCTAssertTrue(plan.groups.allSatisfy { $0.scope.kind == .finalSelection })
     }
 
@@ -71,23 +72,73 @@ final class AIFinalSelectionRunTests: XCTestCase {
         XCTAssertEqual(progress.fractionCompleted, 0.625)
     }
 
-    func testPlannerRejectsUnsafeCandidateToTargetRatios() {
+    /// 候选多于或少于目标都不该拦住用户：候选多只是挑选空间更大，
+    /// 候选少则最多选出候选那么多张。旧实现要求候选达到目标的 2 倍，
+    /// 结果是"目标从 8 调到 9"就让开始按钮整个消失。
+    func testPlannerAcceptsAnyCandidateToTargetRatio() throws {
+        // 候选少于目标的两倍：允许，目标按实际可得数量收敛。
+        let tightPlan = try AIFinalSelectionRunPlanner.makePlan(
+            candidateLocalPhotoIDs: (1...16).map { "photo-\($0)" },
+            targetWinnerCount: 9
+        )
+        XCTAssertEqual(tightPlan.candidatePhotoCount, 16)
+        XCTAssertEqual(tightPlan.targetWinnerCount, 9)
+
+        // 候选少于目标：允许，最终最多只能选出候选那么多张。
+        let scarcePlan = try AIFinalSelectionRunPlanner.makePlan(
+            candidateLocalPhotoIDs: (1...3).map { "photo-\($0)" },
+            targetWinnerCount: 10
+        )
+        XCTAssertEqual(scarcePlan.candidatePhotoCount, 3)
+        XCTAssertEqual(scarcePlan.targetWinnerCount, 3)
+
+        // 候选远多于目标：允许，AI 的挑选空间更大而已。
+        let wide = try AIFinalSelectionRunPlanner.makePlan(
+            candidateLocalPhotoIDs: (1...13).map { "photo-\($0)" },
+            targetWinnerCount: 2
+        )
+        XCTAssertEqual(wide.candidatePhotoCount, 13)
+        XCTAssertEqual(wide.targetWinnerCount, 2)
+
+        // 仍然拒绝真正无意义的输入。两种"空"指向两种不同的操作，必须分开报告。
         XCTAssertThrowsError(
             try AIFinalSelectionRunPlanner.makePlan(
-                candidateLocalPhotoIDs: (1...11).map { "photo-\($0)" },
-                targetWinnerCount: 6
+                candidateLocalPhotoIDs: [],
+                targetWinnerCount: 3
             )
         ) { error in
-            XCTAssertEqual(error as? AIFinalSelectionRunPlanError, .insufficientCandidates)
+            XCTAssertEqual(error as? AIFinalSelectionRunPlanError, .emptyCandidatePool)
         }
         XCTAssertThrowsError(
             try AIFinalSelectionRunPlanner.makePlan(
-                candidateLocalPhotoIDs: (1...13).map { "photo-\($0)" },
-                targetWinnerCount: 2
+                candidateLocalPhotoIDs: ["photo-1"],
+                targetWinnerCount: 0
             )
         ) { error in
-            XCTAssertEqual(error as? AIFinalSelectionRunPlanError, .tooManyCandidates)
+            XCTAssertEqual(error as? AIFinalSelectionRunPlanError, .emptyTarget)
         }
+        XCTAssertThrowsError(
+            try AIFinalSelectionRunPlanner.makePlan(
+                candidateLocalPhotoIDs: ["photo-1", "photo-1"],
+                targetWinnerCount: 1
+            )
+        ) { error in
+            XCTAssertEqual(error as? AIFinalSelectionRunPlanError, .duplicateCandidateID)
+        }
+    }
+
+    /// 候选少于目标时，跑完之后也不能因为"凑不满目标"而作废整轮结果。
+    func testFinalSelectionReturnsWhatIsAvailableWhenCandidatesRunShort() throws {
+        let ranked = ["photo-1", "photo-2", "photo-3"]
+
+        let selection = try AIFinalSelectionRunValidator.finalSelectionIDs(
+            rankedCandidatePhotoIDs: ranked,
+            lockedKeeperPhotoIDs: ["keeper-1"],
+            candidatePhotoIDs: Set(ranked),
+            targetSelectionCount: 10
+        )
+
+        XCTAssertEqual(selection, Set(ranked + ["keeper-1"]))
     }
 
     func testValidatedScoresMapBackToLocalPhotoIDsWithoutRankingRequest() throws {
@@ -212,11 +263,26 @@ final class AIFinalSelectionRunTests: XCTestCase {
                 completedRetryCount: 0
             )
         )
-        XCTAssertFalse(
+        XCTAssertTrue(
             AIFinalSelectionRetryPolicy.shouldRetry(
                 formatError,
                 completedRetryCount: 1
             )
+        )
+        XCTAssertFalse(
+            AIFinalSelectionRetryPolicy.shouldRetry(
+                formatError,
+                completedRetryCount: AIFinalSelectionRetryPolicy.maximumAutomaticRetryCount
+            )
+        )
+        // 格式错误的冷却时间保持很短：这类失败重发一次通常就能拿到合法 JSON。
+        XCTAssertEqual(
+            AIFinalSelectionRetryPolicy.retryDelay(
+                for: formatError,
+                completedRetryCount: 3,
+                jitter: 1
+            ),
+            5
         )
         XCTAssertTrue(
             AIFinalSelectionRetryPolicy.shouldRetry(
@@ -230,13 +296,60 @@ final class AIFinalSelectionRunTests: XCTestCase {
                 completedRetryCount: 0
             )
         )
-        XCTAssertFalse(
-            AIFinalSelectionRetryPolicy.shouldRetry(
-                ArkAestheticReviewClientError.requestRejected(
+        // 限流和服务端故障必须自动退避重试：BYOK 场景下 429 是常态，
+        // 让整轮评分为一次限流停下来会白白浪费已经付过费的批次。
+        XCTAssertEqual(
+            AIFinalSelectionRetryPolicy.retryDelay(
+                for: ArkAestheticReviewClientError.requestRejected(
                     statusCode: 429,
-                    providerCode: "RateLimit"
+                    providerCode: "RateLimit",
+                    retryAfter: nil
                 ),
-                completedRetryCount: 0
+                completedRetryCount: 0,
+                jitter: 1
+            ),
+            2
+        )
+        // 服务端明确给了 Retry-After 时以它为准，不用自己猜。
+        XCTAssertEqual(
+            AIFinalSelectionRetryPolicy.retryDelay(
+                for: ArkAestheticReviewClientError.requestRejected(
+                    statusCode: 429,
+                    providerCode: "RateLimit",
+                    retryAfter: 17
+                ),
+                completedRetryCount: 2,
+                jitter: 1
+            ),
+            17
+        )
+        // 退避按 2 的幂增长。
+        XCTAssertEqual(
+            AIFinalSelectionRetryPolicy.retryDelay(
+                for: URLError(.timedOut),
+                completedRetryCount: 3,
+                jitter: 1
+            ),
+            16
+        )
+        // 权限、模型 ID 一类的错误重试没有意义。
+        XCTAssertNil(
+            AIFinalSelectionRetryPolicy.retryDelay(
+                for: ArkAestheticReviewClientError.requestRejected(
+                    statusCode: 401,
+                    providerCode: "invalid_api_key",
+                    retryAfter: nil
+                ),
+                completedRetryCount: 0,
+                jitter: 1
+            )
+        )
+        // 重试次数用尽后必须真的停下来。
+        XCTAssertNil(
+            AIFinalSelectionRetryPolicy.retryDelay(
+                for: URLError(.timedOut),
+                completedRetryCount: AIFinalSelectionRetryPolicy.maximumAutomaticRetryCount,
+                jitter: 1
             )
         )
     }

@@ -8,7 +8,7 @@ struct OpenAICompatibleAestheticReviewClient {
         previews: [AestheticReviewPreview],
         previewSize: AIReviewPreviewSize = .small,
         apiKey: String,
-        session: URLSession = .shared
+        session: URLSession = AIReviewURLSession.shared
     ) async throws -> AestheticReviewResult {
         var urlRequest = try makeURLRequest(
             request: request,
@@ -27,7 +27,8 @@ struct OpenAICompatibleAestheticReviewClient {
         guard (200...299).contains(response.statusCode) else {
             throw AestheticReviewClientError.requestRejected(
                 statusCode: response.statusCode,
-                providerCode: providerErrorCode(from: data)
+                providerCode: providerErrorCode(from: data),
+                retryAfter: AestheticReviewClientError.retryAfter(from: response)
             )
         }
         return try decodeResponse(data, request: request)

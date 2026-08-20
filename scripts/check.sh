@@ -4,6 +4,12 @@ set -euo pipefail
 project_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$project_root"
 
+# 门禁脚本全部基于 ripgrep；缺少它时直接说明原因，而不是让某个子脚本报 command not found。
+if ! command -v rg >/dev/null 2>&1; then
+  echo "缺少 ripgrep：请先执行 brew install ripgrep。" >&2
+  exit 1
+fi
+
 swift build
 swift test
 bash scripts/check-privacy.sh

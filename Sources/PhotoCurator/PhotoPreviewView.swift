@@ -91,16 +91,6 @@ struct PhotoPreviewView: View {
 
     private var previewHeader: some View {
         HStack(spacing: 12) {
-            Button {
-                moveSelection(by: -1)
-            } label: {
-                Image(systemName: "chevron.left")
-            }
-            .disabled(!canMove(by: -1))
-            .help("上一张")
-            .accessibilityLabel("上一张")
-            .accessibilityIdentifier("photo-preview.previous")
-
             VStack(alignment: .leading, spacing: 2) {
                 Text(photo?.filename ?? String(localized: "照片预览"))
                     .font(.headline)
@@ -119,15 +109,28 @@ struct PhotoPreviewView: View {
                     .foregroundStyle(decisionColor(photo.decision))
             }
 
-            Button {
-                moveSelection(by: 1)
-            } label: {
-                Image(systemName: "chevron.right")
+            ControlGroup {
+                Button {
+                    moveSelection(by: -1)
+                } label: {
+                    Image(systemName: "chevron.left")
+                }
+                .disabled(!canMove(by: -1))
+                .help("上一张")
+                .accessibilityLabel("上一张")
+                .accessibilityIdentifier("photo-preview.previous")
+
+                Button {
+                    moveSelection(by: 1)
+                } label: {
+                    Image(systemName: "chevron.right")
+                }
+                .disabled(!canMove(by: 1))
+                .help("下一张")
+                .accessibilityLabel("下一张")
+                .accessibilityIdentifier("photo-preview.next")
             }
-            .disabled(!canMove(by: 1))
-            .help("下一张")
-            .accessibilityLabel("下一张")
-            .accessibilityIdentifier("photo-preview.next")
+            .fixedSize()
 
             Button("完成") { dismiss() }
                 .keyboardShortcut(.cancelAction)
@@ -192,7 +195,7 @@ struct PhotoPreviewView: View {
                     .pickerStyle(.segmented)
                     .labelsHidden()
                     .disabled(
-                        library.isAIFinalSelectionRunActive
+                        library.isPhotoLockedByActiveAIFinalSelectionRun(photo.id)
                             || library.firstCurationGuideStep
                                 == .viewScore
                     )
@@ -279,7 +282,7 @@ struct PhotoPreviewView: View {
                 }
                 .disabled(
                     photo.decision == .undecided
-                        || library.isAIFinalSelectionRunActive
+                        || !library.canDecideSelectedPhoto
                 )
                 .accessibilityIdentifier("photo-preview.undecided")
 
@@ -290,7 +293,7 @@ struct PhotoPreviewView: View {
                 }
                 .disabled(
                     photo.decision == .reject
-                        || library.isAIFinalSelectionRunActive
+                        || !library.canDecideSelectedPhoto
                 )
                 .accessibilityIdentifier("photo-preview.reject")
 
@@ -303,7 +306,7 @@ struct PhotoPreviewView: View {
                 .tint(.green)
                 .disabled(
                     photo.decision == .keep
-                        || library.isAIFinalSelectionRunActive
+                        || !library.canDecideSelectedPhoto
                 )
                 .accessibilityIdentifier("photo-preview.keep")
                 .firstCurationGuideTarget(
@@ -316,13 +319,7 @@ struct PhotoPreviewView: View {
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
 
-            Text(library.statusMessage)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .lineLimit(1)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal, 16)
-                .padding(.bottom, 10)
+
         }
         .background(.bar)
         .accessibilityIdentifier("photo-preview.actions")

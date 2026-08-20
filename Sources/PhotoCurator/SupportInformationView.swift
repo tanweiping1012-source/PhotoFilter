@@ -27,12 +27,36 @@ struct SupportInformationView: View {
                     SupportHelpRow(
                         icon: "wand.and.stars",
                         title: "AI评分",
-                        detail: "未配置 API Key 时，本地筛选与导出仍可使用。AI评分只会在你确认供应商、模型、图片尺寸和照片数量后开始。"
+                        detail: "未配置 API Key 时，本地筛选与导出仍可使用。AI评分只在你确认之后开始；确认弹窗说明模型、张数和照片类型，当前模型与图片尺寸常驻侧栏 AI评分区。"
                     )
                     SupportHelpRow(
                         icon: "square.and.arrow.up",
                         title: "复制导出",
-                        detail: "达到保留目标后可导出副本；原照片不会被移动、删除或修改。"
+                        detail: "只要保留了至少一张照片就可以导出副本，导出多少由你决定；保留目标只用于显示进度。原照片不会被移动、删除或修改。"
+                    )
+                }
+
+                // 发送确认只回答"发什么给谁"；完整规则集中在这里，避免确认框变成一屏说明书。
+                Section("AI评分规则") {
+                    SupportHelpRow(
+                        icon: "photo.on.rectangle.angled",
+                        title: "发送内容",
+                        detail: "每次请求只发送 2–5 张同类型、去除 EXIF/GPS 的匿名 JPEG，最长边为你选择的小 512px、中 1024px 或大 1536px。不发送原图、文件名或本地路径。"
+                    )
+                    SupportHelpRow(
+                        icon: "list.number",
+                        title: "评分与排序",
+                        detail: "模型按固定绝对标尺对每张照片独立评分，不做组内比较，也不返回名次。全部完成后只在人物或风景内按统一分数排序，取该类型前 N 张进入“评分优先”。"
+                    )
+                    SupportHelpRow(
+                        icon: "clock.arrow.circlepath",
+                        title: "节奏与重试",
+                        detail: "请求之间保持自适应间隔；限流、服务端故障和网络中断会自动退避重试，每张最多 4 次并产生额外请求与费用，仍失败时停在当前照片范围供你重试或放弃。鉴权和模型 ID 错误不会重试。"
+                    )
+                    SupportHelpRow(
+                        icon: "creditcard",
+                        title: "费用",
+                        detail: "AI评分使用你自己的供应商 API Key，费用以该供应商账单为准。更大的预览尺寸会增加上传量、等待时间和可能的费用。App 不销售或代充 API 额度。"
                     )
                 }
 

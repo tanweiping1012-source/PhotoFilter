@@ -14,7 +14,7 @@ preview="Sources/PhotoCurator/PhotoPreviewView.swift"
 view_model="Sources/PhotoCurator/PhotoLibraryViewModel.swift"
 project="PhotoCurator.xcodeproj/project.pbxproj"
 
-rg -q 'library\.prepareAIFinalSelectionRun\(\)' "$content" ||
+rg -q 'library\.prepareAIFinalSelectionRun\(' "$content" ||
   fail "缺少统一的完整 AI评分入口"
 
 if rg -n \
