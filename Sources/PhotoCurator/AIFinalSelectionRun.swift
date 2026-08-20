@@ -410,6 +410,6 @@ struct AIFinalSelectionRunProgress: Equatable {
 
     var usageSummary: String? {
         guard inputTokens > 0 || outputTokens > 0 else { return nil }
-        return String(localized: "累计：输入 \(inputTokens) tokens，输出 \(outputTokens) tokens。费用以所选供应商账单为准。")
+        return String(localized: "本轮：输入 \(inputTokens) tokens，输出 \(outputTokens) tokens。费用以所选供应商账单为准。")
     }
 }

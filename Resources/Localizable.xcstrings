@@ -3221,6 +3221,17 @@
         }
       }
     },
+    "本轮：输入 %lld tokens，输出 %lld tokens。费用以所选供应商账单为准。": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This run: %1$lld input tokens and %2$lld output tokens. See the selected provider's bill for cost."
+          }
+        }
+      }
+    },
     "权限失效时，点按项目并重新选择对应文件夹；App 不会尝试绕过系统授权。": {
       "localizations": {
         "en": {
@@ -4207,16 +4218,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Curation Workflow"
-          }
-        }
-      }
-    },
-    "累计：输入 %lld tokens，输出 %lld tokens。费用以所选供应商账单为准。": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Total: %1$lld input tokens and %2$lld output tokens. See the selected provider's bill for cost."
           }
         }
       }

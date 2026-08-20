@@ -332,4 +332,5 @@
   ,"只有你在确认弹窗中点击发送，App 才会发送评分照片。弹窗说明模型、张数和照片类型；当前供应商、模型与预览尺寸常驻侧栏 AI评分区。": "The app sends scoring photos only after you tap send in the confirmation dialog. The dialog states the model, photo count, and photo type; the current provider, model, and preview size stay visible in the sidebar AI Scoring section."
   ,"未配置 API Key 时，本地筛选与导出仍可使用。配置后，AI评分也只在你确认之后才会开始。": "Local curation and export work without an API key. Once a key is configured, AI scoring still starts only after you confirm."
   ,"每次请求只发送 2–5 张同类型照片的匿名预览。完整的发送内容、预览尺寸和第三方处理方见「隐私与数据」。": "Each request sends only 2–5 anonymous previews of photos of the same type. See Privacy & Data for the full list of what is sent, the preview sizes, and the third-party processors."
+  ,"本轮：输入 %lld tokens，输出 %lld tokens。费用以所选供应商账单为准。": "This run: %1$lld input tokens and %2$lld output tokens. See the selected provider's bill for cost."
 }

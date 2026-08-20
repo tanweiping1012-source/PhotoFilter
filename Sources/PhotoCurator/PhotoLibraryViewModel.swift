@@ -152,6 +152,10 @@ final class PhotoLibraryViewModel: ObservableObject {
         let selectionTargets: PhotoSelectionTargets
         let statusMessage: String
         let latestAIUsageMessage: String?
+        /// 回执必须跟着项目走：它描述的是"这个项目刚发生了什么"。
+        /// 作为全局单值时，真实项目评分完成后切到示例，示例第 1 步头上会顶着
+        /// 真实项目的"风景 AI评分完成"，点"知道了"还会把真实项目的回执一起消掉。
+        let completionNotice: CurationCompletionNotice?
         let aiFinalSelectionPhotoIDsByCategory:
             [PhotoCurationCategory: Set<String>]
         let aiFinalSelectionRunProgress: AIFinalSelectionRunProgress
@@ -917,6 +921,7 @@ final class PhotoLibraryViewModel: ObservableObject {
             targetWinnerCount: session.runProgress.targetWinnerCount
         )
         latestAIUsageMessage = nil
+        completionNotice = nil
         undoStack = []
         isScanning = false
         isAnalyzing = false
@@ -1176,7 +1181,7 @@ final class PhotoLibraryViewModel: ObservableObject {
         panel.allowsMultipleSelection = false
         panel.canCreateDirectories = false
 
-        presentPanel(panel) { [weak self] folder in
+        presentPanel(panel, purpose: .source) { [weak self] folder in
             self?.openProject(folder: folder)
         }
     }
@@ -1671,6 +1676,9 @@ final class PhotoLibraryViewModel: ObservableObject {
         guard let apiKey = readAPIKeyForReview(model: model) else { return }
 
         completionNotice = nil
+        // 用量文案说的是"本轮"。不在这里清掉的话，新任务 0/N 期间会继续显示
+        // 上一类的数字，等第一批返回再被本轮小计覆盖——看上去像是用量倒退了。
+        latestAIUsageMessage = nil
         aiFinalSelectionPhotoIDsByCategory[category] = []
         let candidatePhotoIDs = plan.coveredPhotoIDs
         for index in photos.indices
@@ -2073,17 +2081,64 @@ final class PhotoLibraryViewModel: ObservableObject {
         }
     }
 
+    /// 文件面板的用途。
+    ///
+    /// AppKit 的所有 `NSOpenPanel` 共用同一个 `NSOSPLastRootDirectory`：导出到某个
+    /// 目录之后再点"新建筛选项目"，来源面板就停在那个导出目录里。两个用途各记
+    /// 各的最后位置，展示前显式覆盖 `directoryURL`，彼此不再串。
+    enum PanelPurpose {
+        case source
+        case export
+    }
+
+    /// 只留在内存里：绝对路径既不在隐私页披露的项目字段之内，
+    /// 也会在文件夹被搬走后变成一条失效路径。
+    private var lastSourceDirectory: URL?
+    private var lastExportDirectory: URL?
+
+    func defaultDirectory(for purpose: PanelPurpose) -> URL? {
+        switch purpose {
+        case .source:
+            if let lastSourceDirectory { return lastSourceDirectory }
+            // 每个日期文件夹是一项独立任务，所以下一个来源通常是当前项目的兄弟目录。
+            // 这里不用 .picturesDirectory：App 处于沙箱且只有 user-selected 权限，
+            // 那个 API 会解析到容器内部的空 Pictures，面板会停在一个什么都没有的地方。
+            if let selectedFolder {
+                return selectedFolder.deletingLastPathComponent()
+            }
+            return projects.compactMap(\.folderURL).first?.deletingLastPathComponent()
+        case .export:
+            return lastExportDirectory
+        }
+    }
+
+    func rememberDirectory(_ url: URL, for purpose: PanelPurpose) {
+        switch purpose {
+        case .source:
+            // 选中的是照片文件夹本身，记它的上一级，下次才能看到同级的其他日期文件夹。
+            lastSourceDirectory = url.deletingLastPathComponent()
+        case .export:
+            lastExportDirectory = url
+        }
+    }
+
     /// 以 sheet 方式展示文件面板。
     ///
     /// 不能用 `runModal()`：它会在 SwiftUI 的更新过程中嵌套一个 run loop，
     /// 面板关闭后窗口的标题栏 inset 与命中测试可能停在错误状态——
     /// 表现就是"导出之后整个界面错位、按钮点不动"。
+    ///
+    /// `purpose` 是必填的：默认目录的隔离必须发生在这个统一入口里。放到调用方
+    /// 各自设置的话，第三个调用点（重新授权）迟早又会漏掉。
     private func presentPanel(
         _ panel: NSOpenPanel,
+        purpose: PanelPurpose,
         onSelect: @escaping (URL) -> Void
     ) {
-        let handle: (NSApplication.ModalResponse) -> Void = { response in
+        panel.directoryURL = defaultDirectory(for: purpose)
+        let handle: (NSApplication.ModalResponse) -> Void = { [weak self] response in
             guard response == .OK, let url = panel.url else { return }
+            self?.rememberDirectory(url, for: purpose)
             onSelect(url)
         }
         if let window = NSApp.keyWindow ?? NSApp.mainWindow ?? NSApp.windows.first(where: \.isVisible) {
@@ -2110,7 +2165,7 @@ final class PhotoLibraryViewModel: ObservableObject {
         panel.allowsMultipleSelection = false
         panel.canCreateDirectories = true
 
-        presentPanel(panel) { [weak self] directory in
+        presentPanel(panel, purpose: .export) { [weak self] directory in
             guard let self else { return }
             guard !self.isInsideActiveProjectFolder(directory) else {
                 self.statusMessage = String(
@@ -2191,6 +2246,7 @@ final class PhotoLibraryViewModel: ObservableObject {
             selectionTargets: selectionTargets,
             statusMessage: statusMessage,
             latestAIUsageMessage: latestAIUsageMessage,
+            completionNotice: completionNotice,
             aiFinalSelectionPhotoIDsByCategory:
                 aiFinalSelectionPhotoIDsByCategory,
             aiFinalSelectionRunProgress: aiFinalSelectionRunProgress,
@@ -2208,6 +2264,7 @@ final class PhotoLibraryViewModel: ObservableObject {
         selectionTargets = snapshot.selectionTargets
         statusMessage = snapshot.statusMessage
         latestAIUsageMessage = snapshot.latestAIUsageMessage
+        completionNotice = snapshot.completionNotice
         aiFinalSelectionPhotoIDsByCategory =
             snapshot.aiFinalSelectionPhotoIDsByCategory
         aiFinalSelectionRunProgress = snapshot.aiFinalSelectionRunProgress
@@ -2380,7 +2437,7 @@ final class PhotoLibraryViewModel: ObservableObject {
         panel.allowsMultipleSelection = false
         panel.canCreateDirectories = false
 
-        presentPanel(panel) { [weak self] folder in
+        presentPanel(panel, purpose: .source) { [weak self] folder in
             self?.completeReauthorization(of: projectID, with: folder)
         }
     }

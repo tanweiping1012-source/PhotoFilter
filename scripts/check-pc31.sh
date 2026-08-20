@@ -40,6 +40,37 @@ rg -q '每次请求只发送 2–5 张' Sources/PhotoCurator/SupportInformationV
 rg -q '每次请求发送 2–5 张' "$privacy" ||
   fail "隐私说明仍未按每次请求照片数表达"
 
+# 完成回执必须跟着项目走：它说的是"这个项目刚发生了什么"。
+# 作为全局单值时，真实项目评分完成后打开示例，示例第 1 步头上会顶着真实项目的
+# "风景 AI评分完成"，点"知道了"还会把真实项目的回执一并消掉。
+# 回执只由真实 AI 评分或导出产生，两条路径在单元测试里都不可达，所以按结构断言。
+rg -q 'let completionNotice: CurationCompletionNotice\?' "$view_model" ||
+  fail "项目快照没有携带完成回执"
+rg -q 'completionNotice: completionNotice,' "$view_model" ||
+  fail "保存项目快照时没有带上完成回执"
+rg -q 'completionNotice = snapshot\.completionNotice' "$view_model" ||
+  fail "恢复项目快照时没有恢复该项目自己的完成回执"
+demo_notice_cleared="$(
+  awk '/func startDemoMode/,/func completeDemoAIScoringImmediately/' "$view_model" |
+    rg -c 'completionNotice = nil' || true
+)"
+[[ "${demo_notice_cleared:-0}" -ge 1 ]] ||
+  fail "进入示例筛选时没有清空上一个项目的完成回执"
+
+# 用量文案只代表本轮。不在任务开始时清掉旧文案的话，新任务 0/N 期间会继续显示
+# 上一类的数字，等第一批返回再被本轮小计覆盖——用户看到的就是一次用量倒退。
+run_start_cleared="$(
+  awk '/func submitConfirmedAIFinalSelectionRun/,/aiFinalSelectionRunContext = AIFinalSelectionRunContext/' \
+    "$view_model" | rg -c 'latestAIUsageMessage = nil' || true
+)"
+[[ "${run_start_cleared:-0}" == "1" ]] ||
+  fail "新的 AI 任务开始时没有清空上一轮用量文案"
+rg -q '本轮：输入' "$progress" ||
+  fail "用量文案没有说明这是本轮用量"
+if rg -q '累计：输入' "$progress"; then
+  fail "用量数字每轮清零，文案不能自称累计"
+fi
+
 for source in "$content" "$preview" "$privacy"; do
   if rg -n \
     'String\(localized: "[^"]*批|Text\("[^"]*批|Label\("[^"]*批|Button\("[^"]*批|detail: "[^"]*批' \
