@@ -3680,23 +3680,13 @@
         }
       }
     },
-    "每次请求发送 2–5 张匿名 JPEG 预览；最长边由你选择为小 512px、中 1024px 或大 1536px。始终不发送原图、文件名、本地路径或 EXIF/GPS。": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Each request sends 2–5 anonymous JPEG previews. You choose the longest edge: Small 512px, Medium 1024px, or Large 1536px. Originals, filenames, local paths, and EXIF/GPS are never sent."
-          }
-        }
-      }
-    },
-    "每次请求只发送 2–5 张同类型照片的匿名预览。完整的发送内容、预览尺寸和第三方处理方见「隐私与数据」。": {
+    "每次请求发送 2–5 张同类型照片的匿名 JPEG 预览；最长边由你选择为小 512px、中 1024px 或大 1536px。始终不发送原图、文件名、本地路径或 EXIF/GPS。": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Each request sends only 2–5 anonymous previews of photos of the same type. See Privacy & Data for the full list of what is sent, the preview sizes, and the third-party processors."
+            "value": "Each request sends 2–5 anonymous JPEG previews of photos of the same type. You choose the longest edge: Small 512px, Medium 1024px, or Large 1536px. Originals, filenames, local paths, and EXIF/GPS are never sent."
           }
         }
       }

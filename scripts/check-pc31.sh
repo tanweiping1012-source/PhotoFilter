@@ -35,10 +35,16 @@ rg -Fq '开始\(category.title) AI评分（\(availability.candidatePhotoCount) �
   fail "开始操作没有显示总照片数"
 rg -q 'completedPhotoCount.*candidatePhotoCount.*张' "$content" ||
   fail "主状态没有按照片显示"
-rg -q '每次请求只发送 2–5 张' Sources/PhotoCurator/SupportInformationView.swift ||
-  fail "确认文案没有用请求照片数解释发送边界"
+# 发送边界只在隐私页写一次。
+# 这条断言原本要求帮助页也出现一遍——两页各写一份，就是重复的来源，而且
+# 它们已经漂移过：帮助页写"模型、张数和照片类型"，隐私页写"供应商、模型、
+# 预览尺寸和照片数量"，弹窗实际只有前者。发送什么数据属于数据披露，
+# 归隐私页；帮助页只讲怎么跑、跑多久、花多少钱。
 rg -q '每次请求发送 2–5 张' "$privacy" ||
   fail "隐私说明仍未按每次请求照片数表达"
+if rg -q '2–5 张' Sources/PhotoCurator/SupportInformationView.swift; then
+  fail "帮助页又开始复述发送边界，它只应出现在隐私页"
+fi
 
 # 完成回执必须跟着项目走：它说的是"这个项目刚发生了什么"。
 # 作为全局单值时，真实项目评分完成后打开示例，示例第 1 步头上会顶着真实项目的

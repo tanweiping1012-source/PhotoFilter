@@ -41,7 +41,7 @@ struct PrivacyInformationView: View {
                     PrivacyDisclosureRow(
                         icon: "photo",
                         title: "发送的数据",
-                        detail: "每次请求发送 2–5 张匿名 JPEG 预览；最长边由你选择为小 512px、中 1024px 或大 1536px。始终不发送原图、文件名、本地路径或 EXIF/GPS。"
+                        detail: "每次请求发送 2–5 张同类型照片的匿名 JPEG 预览；最长边由你选择为小 512px、中 1024px 或大 1536px。始终不发送原图、文件名、本地路径或 EXIF/GPS。"
                     )
                     PrivacyDisclosureRow(
                         icon: "network",

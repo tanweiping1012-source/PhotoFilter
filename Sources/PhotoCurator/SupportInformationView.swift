@@ -36,13 +36,9 @@ struct SupportInformationView: View {
                     )
                 }
 
-                // 发送确认只回答"发什么给谁"；完整规则集中在这里，避免确认框变成一屏说明书。
+                // 这里只讲"怎么跑、跑多久、花多少钱"。发送什么数据、发给谁属于数据披露，
+                // 只在「隐私与数据」写一次——两页各写一份迟早会漂移成互相矛盾的两种说法。
                 Section("AI评分规则") {
-                    SupportHelpRow(
-                        icon: "photo.on.rectangle.angled",
-                        title: "发送内容",
-                        detail: "每次请求只发送 2–5 张同类型照片的匿名预览。完整的发送内容、预览尺寸和第三方处理方见「隐私与数据」。"
-                    )
                     SupportHelpRow(
                         icon: "list.number",
                         title: "评分与排序",
