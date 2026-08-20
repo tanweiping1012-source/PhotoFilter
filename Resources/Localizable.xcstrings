@@ -219,17 +219,6 @@
         }
       }
     },
-    "%@剩下的照片都和已保留的照片属于同一组相似照片，无需再评分。": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "The remaining %@ photos all belong to the same similar-photo groups as photos you already kept, so scoring isn't needed."
-          }
-        }
-      }
-    },
     "%@没有可评分的照片。": {
       "extractionState": "manual",
       "localizations": {

@@ -701,6 +701,16 @@ final class PhotoLibraryViewModel: ObservableObject {
             )
         }
 
+        /// 结论已经写在按钮上时不再补充说明：多一段解释只会增加要读的东西，
+        /// 却不会多给一个能做的动作。
+        func blockedWithoutExplanation() -> AIFinalSelectionAvailability {
+            AIFinalSelectionAvailability(
+                canStart: false,
+                candidatePhotoCount: candidateCount,
+                blockedReason: nil
+            )
+        }
+
         if isDemoModeActive {
             return blocked(String(localized: "示例练习不会联网评分。"))
         }
@@ -728,16 +738,16 @@ final class PhotoLibraryViewModel: ObservableObject {
                 String(localized: "\(category.title)保留数已达目标 \(selectionTargets[category]) 张，无需再评分。")
             )
         }
-        // 候选池为空有两个完全不同的原因，指向两种不同的操作，必须分开说。
         guard !candidatePlan.localPhotoIDs.isEmpty else {
             if candidatePlan.eligiblePhotoCount == 0 {
                 return blocked(
                     String(localized: "\(category.title)的照片都已保留或淘汰，没有需要评分的照片。")
                 )
             }
-            return blocked(
-                String(localized: "\(category.title)剩下的照片都和已保留的照片属于同一组相似照片，无需再评分。")
-            )
+            // 剩下的都是已保留照片的同场景重复项。按钮上的"（0 张）"已经把结论说完了，
+            // 再补一句就是要求用户先学会"相似分组"和"重复项不进候选池"两条内部规则，
+            // 而他在这一刻什么也做不了——解释反而让功能更难懂。这里静默阻止。
+            return blockedWithoutExplanation()
         }
 
         do {
