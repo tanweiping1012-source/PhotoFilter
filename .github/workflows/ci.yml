@@ -12,6 +12,10 @@ concurrency:
 jobs:
   check:
     runs-on: macos-15
+    # 这个 job 挂死过两次：一次跑满 6 小时（GitHub 单 job 上限）被掐掉，一次 3 小时。
+    # 两次都停在不同的纯值计算测试套件上，且都留下 xctest 孤儿进程——不是测试内容
+    # 的问题，是进程级卡死。没有超时的话，每次都要烧几个小时才知道它挂了。
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
 
@@ -32,4 +36,6 @@ jobs:
       # 20 个功能门禁 / 完整 xcodebuild。CI 少跑一项，门禁就会悄悄失效。
       # 真实照片基准默认跳过：仓库里不放任何真实旅行照片。
       - name: scripts/check.sh
+        # 单步超时比 job 超时先触发，日志里能直接看到是这一步卡住而不是别的。
+        timeout-minutes: 30
         run: bash scripts/check.sh
