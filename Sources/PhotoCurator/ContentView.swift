@@ -439,7 +439,12 @@ struct ContentView: View {
                     .font(SidebarTypography.sectionTitle)
             }
 
-            if !library.localAestheticCandidatePhotoIDs.isEmpty {
+            // 示例里不显示这一行：它统计的是"真实评分的候选池"（会排除已保留项和
+            // 相似重复项），而离线教学按整个类型给分。两个数并排出现（待评分 2 张 /
+            // 开始人物 AI评分（4 张））只会让人以为哪个是错的。示例里每个按钮
+            // 自己带着张数，已经够用。
+            if !library.isDemoModeActive,
+               !library.localAestheticCandidatePhotoIDs.isEmpty {
                 Text("待评分 \(library.localAestheticCandidatePhotoIDs.count) 张")
                     .font(SidebarTypography.detail)
                     .foregroundStyle(.secondary)
@@ -460,6 +465,14 @@ struct ContentView: View {
                         "正在评估 · \(library.demoAIScoringCompletedPhotoCount)/\(library.displayedAIFinalSelectionRunProgress.candidatePhotoCount) 张"
                     )
                     .font(SidebarTypography.detailNumeric)
+                } else {
+                    // 教学要驱动的就是这个真实入口，所以它在示例里也必须出现在同一位置。
+                    // 这一支以前只画"离线教学"说明、不画按钮，教学走到第 4 步就没有
+                    // 可点的东西——而"执行入口必须固定、绝不整个消失"正是下面那条注释
+                    // 已经写明的规则。
+                    ForEach(startableCategories) { category in
+                        aiStartControl(for: category)
+                    }
                 }
             } else if !library.isAIModelKeyConfigured {
                 // 没配置 Key 也不能让开始按钮消失：它留在原位、置灰、说明原因，

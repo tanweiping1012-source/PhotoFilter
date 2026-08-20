@@ -67,6 +67,14 @@ if rg -q 'guide\.run-ai-scoring|guide\.show-scoring-picks|guide\.confirm-score-r
 fi
 rg -q 'library\.demoScorableCategory == category' "$content" ||
   fail "侧栏 AI评分 入口没有承接教学指针"
+# 入口必须在示例模式里也画出来：只把可用性打开、视图分支不渲染按钮，
+# 教学会在第 4 步直接卡死——没有任何可点的东西。
+demo_branch_entry="$(
+  awk '/if library\.isDemoModeActive \{/,/\} else if !library\.isAIModelKeyConfigured \{/' \
+    "$content" | rg -c 'aiStartControl\(for: category\)' || true
+)"
+[[ "${demo_branch_entry:-0}" -ge 1 ]] ||
+  fail "示例模式的侧栏没有渲染 AI评分 启动入口，教学会卡在第 4 步"
 rg -q 'func demoScorableCategory|var demoScorableCategory' "$view_model" ||
   fail "示例模式没有按类型开放真实的 AI评分 入口"
 rg -q 'startDemoAIScoring\(for: category\)' "$view_model" ||
