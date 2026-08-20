@@ -75,9 +75,23 @@ if rg -q 'if let notice = library\.completionNotice \{' "$content"; then
   fail "完成回执横幅又直接读取了未过滤的回执"
 fi
 
+# 进度条只允许有一条，且必须长在项目行里。
+#
+# 它曾经在工具栏和侧栏各有一条（同一件事说两遍），后来单独占了侧栏中段一块——
+# 那是整个侧栏唯一没有区块标题的块，夹在"保留目标"和"AI评分"之间，孤零零的。
+# 项目行本来就在说"475 张 · 分析中"，进度属于那里。
+#
+# 也不做成弹窗：分析期间只锁项目切换、不锁选片，界面同时还在说"现在即可开始
+# 手动选片"——弹窗会正好挡住 App 承诺此刻能做的事。教学与实操必须同一种呈现。
 analysis_bars="$(rg -c 'value: library\.analysisProgress' "$content" || true)"
 [[ "${analysis_bars:-0}" == "1" ]] ||
-  fail "本地分析进度条有 ${analysis_bars:-0} 条，应只保留侧栏那一条"
+  fail "本地分析进度条有 ${analysis_bars:-0} 条，应只保留项目行里那一条"
+project_row_bar="$(
+  awk '/private func projectRow/,/private func projectStatusText/' "$content" |
+    rg -c 'value: library\.analysisProgress' || true
+)"
+[[ "${project_row_bar:-0}" == "1" ]] ||
+  fail "本地分析进度不在项目行里，会变成侧栏中段一个没有标题的孤儿块"
 
 # 教学必须驱动真实控件。
 #

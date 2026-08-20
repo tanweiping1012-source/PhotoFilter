@@ -235,6 +235,11 @@ struct ContentView: View {
                         Text(projectStatusText(project))
                             .font(Typography.detailNumeric)
                             .foregroundStyle(project.accessState == .needsAuthorization ? .orange : .secondary)
+                        if isActive, library.analysisProgressLabel != nil {
+                            ProgressView(value: library.analysisProgress)
+                                .accessibilityLabel("本地分析进度")
+                                .accessibilityValue(projectStatusText(project))
+                        }
                     }
                     Spacer(minLength: 0)
                 }
@@ -246,6 +251,11 @@ struct ContentView: View {
             .accessibilityLabel(project.displayName)
             .accessibilityValue(projectAccessibilityValue(project, isActive: isActive))
             .accessibilityHint(projectAccessibilityHint(project, isActive: isActive))
+            .firstCurationGuideTarget(
+                isActive && library.firstCurationGuideStep == .analyzePhotos,
+                pointerSide: .noPointer,
+                cornerRadius: 10
+            )
 
             if library.isDemoProject(project) {
                 Button {
@@ -281,6 +291,13 @@ struct ContentView: View {
         }
         if project.accessState == .needsAuthorization {
             return String(localized: "需要重新授权 · 点按项目")
+        }
+        if project.id == library.activeProjectID,
+           library.analysisProgressLabel != nil,
+           library.analysisTotal > 0 {
+            return String(
+                localized: "分析中 \(library.analysisCompleted) / \(library.analysisTotal) 张"
+            )
         }
         return project.photoCount == 0
             ? String(localized: "等待扫描")
@@ -358,28 +375,6 @@ struct ContentView: View {
             }
             .accessibilityElement(children: .contain)
             .accessibilityIdentifier("selection.targets")
-
-            if let analysisLabel = library.analysisProgressLabel {
-                VStack(alignment: .leading, spacing: 5) {
-                    Text(analysisLabel)
-                        .font(Typography.detail)
-                        .foregroundStyle(.secondary)
-                    ProgressView(value: library.analysisProgress)
-                        .accessibilityLabel("本地分析进度")
-                        .accessibilityValue(analysisLabel)
-                }
-                // 红框要框住一块区域才读得出来。不加内边距时，它紧贴着一行小字
-                // 和一条 4pt 的进度条，看上去像是划了一道线而不是圈出了一处。
-                .padding(.vertical, 8)
-                .padding(.horizontal, 10)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .accessibilityIdentifier("analysis.progress")
-                .firstCurationGuideTarget(
-                    library.firstCurationGuideStep == .analyzePhotos,
-                    pointerSide: .noPointer,
-                    cornerRadius: 10
-                )
-            }
 
             if library.keeperDiversityConflictCount > 0 {
                 Label("已有 \(library.keeperDiversityConflictCount) 组重复照片被同时保留，请每组只留一张。", systemImage: "exclamationmark.triangle.fill")
