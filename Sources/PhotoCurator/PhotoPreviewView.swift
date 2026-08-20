@@ -66,6 +66,12 @@ struct PhotoPreviewView: View {
         .focused($previewIsFocused)
         .onAppear {
             previewIsFocused = true
+            // 最后一道兜底：无论从哪个入口进来，选中项都必须在本次预览列表里，
+            // 否则 currentIndex 为 nil，位置指示和前后切换会全部失效。
+            if let first = photoIDs.first,
+               library.selectedPhotoID.map({ !photoIDs.contains($0) }) ?? true {
+                library.select(first)
+            }
             library.recordDemoPhotoPreviewOpened()
             closePreviewIfGuideRequiresIt(
                 library.firstCurationGuideStep

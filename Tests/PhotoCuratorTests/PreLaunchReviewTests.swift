@@ -119,6 +119,9 @@ final class PreLaunchReviewTests: XCTestCase {
         let library = makeLibrary()
         library.scan(folder: folder)
         await waitUntil { !library.isProjectNavigationLocked && !library.photos.isEmpty }
+        // 界面渲染网格后会推送可见集合；无头测试里要手工做这一步，
+        // 因为"选中项必须可见"这条不变量依赖它。
+        library.updateVisiblePhotos(library.photos.map(\.id))
 
         XCTAssertTrue(library.canDecideSelectedPhoto)
         library.markSelected(as: .keep)

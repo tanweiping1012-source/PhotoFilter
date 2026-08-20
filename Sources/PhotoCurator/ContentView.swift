@@ -814,29 +814,11 @@ struct ContentView: View {
                 decisionActionBar
             }
         }
-        .onChange(of: gridFilter) { _, newFilter in
-            let visiblePhotos = newFilter.photos(
-                from: library.photos(in: library.curationScope),
-                localAICandidateIDs:
-                    library.localAestheticCandidatePhotoIDs
-            )
-            selectFirstVisiblePhoto(from: visiblePhotos)
-        }
-        .onChange(of: library.curationScope) { _, newScope in
-            let visiblePhotos = gridFilter.photos(
-                from: library.photos(in: newScope),
-                localAICandidateIDs:
-                    library.localAestheticCandidatePhotoIDs
-            )
-            selectFirstVisiblePhoto(from: visiblePhotos)
-        }
-        .onChange(of: localAICandidateIDs) { _, _ in
-            guard gridFilter == .aiCandidates else { return }
-            let candidates = gridFilter.photos(
-                from: library.photos(in: library.curationScope),
-                localAICandidateIDs: library.localAestheticCandidatePhotoIDs
-            )
-            selectFirstVisiblePhoto(from: candidates)
+        // 可见集合只在这里推送一次。原来筛选、类型、候选池各监听各的、
+        // 各自重算一遍可见列表，任何没被枚举到的原因（异步分析、评分结果到达）
+        // 都会让选中项停在网格外。改成直接盯住渲染用的那份列表，覆盖全部原因。
+        .onChange(of: filteredPhotos.map(\.id), initial: true) { _, visibleIDs in
+            library.updateVisiblePhotos(visibleIDs)
         }
         .onChange(of: library.firstCurationGuideStep) { _, step in
             // 兜底：教学的每一步都要在网格里有可操作对象。
@@ -853,17 +835,8 @@ struct ContentView: View {
             switch step {
             case .viewScore:
                 gridFilter = .aiScored
-                let scoredPhotos = PhotoGridFilter.aiScored.photos(
-                    from: library.photos(in: library.curationScope),
-                    localAICandidateIDs:
-                        library.localAestheticCandidatePhotoIDs
-                )
-                selectFirstVisiblePhoto(from: scoredPhotos)
             case .acceptResults:
                 gridFilter = .all
-                selectFirstVisiblePhoto(
-                    from: library.photos(in: library.curationScope)
-                )
             default:
                 break
             }
@@ -873,7 +846,9 @@ struct ContentView: View {
 
     @ViewBuilder
     private var selectedPhotoInspector: some View {
-        if let selected = library.selectedPhoto {
+        // 多一层防御：不变量由 onChange 维护，而 onChange 在本帧渲染之后才触发，
+        // 那一帧里选中项可能还没归位。检查条宁可不显示，也不能显示网格里没有的照片。
+        if library.isSelectionVisible, let selected = library.selectedPhoto {
             selectedPhotoInspectorStrip(
                 selected,
                 visiblePhotos: gridFilter.photos(
@@ -1063,16 +1038,12 @@ struct ContentView: View {
         return String(localized: "切换到“全部照片”查看完整照片集。")
     }
 
-    private func selectFirstVisiblePhoto(from visiblePhotos: [PhotoItem]) {
-        guard let firstVisible = visiblePhotos.first else { return }
-        if !visiblePhotos.contains(where: { $0.id == library.selectedPhotoID }) {
-            library.select(firstVisible.id)
-        }
-    }
-
     private func openPhotoPreview(_ visiblePhotos: [PhotoItem]) {
-        guard !visiblePhotos.isEmpty, library.selectedPhoto != nil else {
-            return
+        guard let first = visiblePhotos.first else { return }
+        // 选中项必须在传入列表里，否则预览的 currentIndex 为 nil，
+        // 上一张/下一张会全部禁用，看起来像预览坏了。
+        if !visiblePhotos.contains(where: { $0.id == library.selectedPhotoID }) {
+            library.select(first.id)
         }
         previewPhotoIDs = visiblePhotos.map(\.id)
         showPhotoPreview = true

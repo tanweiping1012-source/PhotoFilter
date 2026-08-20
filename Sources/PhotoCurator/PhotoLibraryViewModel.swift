@@ -37,6 +37,9 @@ final class PhotoLibraryViewModel: ObservableObject {
         }
     }
     @Published var selectedPhotoID: String?
+    /// 当前网格里可见的照片顺序，由界面推送；见 `updateVisiblePhotos(_:)`。
+    @Published private(set) var visiblePhotoIDs: [String] = []
+    private var visiblePhotoIDSet: Set<String> = []
     @Published private(set) var selectedFolder: URL?
     @Published private(set) var isScanning = false
     @Published private(set) var isAnalyzing = false
@@ -770,10 +773,45 @@ final class PhotoLibraryViewModel: ObservableObject {
         return isLockedByActiveAIFinalSelectionRun(photos[index].curationCategory)
     }
 
-    /// 当前选中照片能否被标记；界面用它决定决定按钮是否可用。
+    /// 当前选中照片能否被标记；底部决定按钮和菜单快捷键共用它。
+    ///
+    /// 除了"没有被正在跑的评分锁住"，还必须"在当前网格里看得见"——
+    /// 否则用户会在看不见照片的情况下改掉它的保留/淘汰。
     var canDecideSelectedPhoto: Bool {
-        guard let selectedPhotoID else { return false }
+        guard let selectedPhotoID, isSelectionVisible else { return false }
         return !isPhotoLockedByActiveAIFinalSelectionRun(selectedPhotoID)
+    }
+
+    /// 选中项是否属于当前可见集合。
+    var isSelectionVisible: Bool {
+        guard let selectedPhotoID else { return false }
+        return visiblePhotoIDSet.contains(selectedPhotoID)
+    }
+
+    /// 界面在筛选、照片类型或照片集合变化后推送当前网格里可见的照片顺序。
+    ///
+    /// 可见集合是界面概念，但检查条、决定命令、菜单快捷键和大图预览都要以它为准，
+    /// 所以它必须有一个各处共享的唯一来源，而不是每个视图各算一遍。
+    func updateVisiblePhotos(_ photoIDs: [String]) {
+        guard photoIDs != visiblePhotoIDs else { return }
+        visiblePhotoIDs = photoIDs
+        visiblePhotoIDSet = Set(photoIDs)
+        reconcileSelection()
+    }
+
+    /// 把选中项拉回可见集合：不在集合里就改选第一张，集合为空就清空。
+    ///
+    /// 空集合时必须真的清空——早期实现在这里直接 return，
+    /// 于是切到一个空筛选后，底部仍然显示并可操作上一个类型里的那张照片。
+    func reconcileSelection() {
+        guard let first = visiblePhotoIDs.first else {
+            if selectedPhotoID != nil { selectedPhotoID = nil }
+            return
+        }
+        if let selectedPhotoID, visiblePhotoIDSet.contains(selectedPhotoID) {
+            return
+        }
+        selectedPhotoID = first
     }
 
     func dismissCompletionNotice() {
@@ -1402,6 +1440,9 @@ final class PhotoLibraryViewModel: ObservableObject {
     }
 
     func markSelected(as decision: PhotoDecision) {
+        // 这里不再加可见性守卫：命令静默失败恰恰是要消灭的那种"点了没反应"。
+        // 不可见的选中项由 `reconcileSelection()` 在源头消除，
+        // 按钮和菜单则由 `canDecideSelectedPhoto` 提前置灰。
         guard let selectedPhotoID else { return }
         mark(photoID: selectedPhotoID, as: decision)
     }

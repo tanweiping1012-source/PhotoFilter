@@ -95,9 +95,12 @@
    `invalidateCandidatePlans()`，否则界面会一直沿用分析期间读到的空候选池。
 9. **AI 请求不落盘。** 走 `AIReviewURLSession.shared`，不得改回 `URLSession.shared`——
    共享 session 挂着磁盘 URLCache、Cookie 与凭据存储。
-10. **附加界面不占主布局高度。** 完成回执用浮层；任何新增的固定行都可能把底部命令条挤出窗口。
+10. **选中项必须可见。** `updateVisiblePhotos(_:)` 是可见集合的唯一来源；
+    `reconcileSelection()` 保证 `selectedPhotoID` 要么是它的成员、要么为 nil。
+    新增任何改变网格内容的路径时不必单独接线——界面只盯 `filteredPhotos` 一处推送。
+11. **附加界面不占主布局高度。** 完成回执用浮层；任何新增的固定行都可能把底部命令条挤出窗口。
     文件面板用 `beginSheetModal(for:)`，不用 `runModal()`。
-11. **导出目录在项目目录之外。** 否则既往只读的原图目录写入，又会让下一次递归扫描
+12. **导出目录在项目目录之外。** 否则既往只读的原图目录写入，又会让下一次递归扫描
     把副本当成新照片。
 
 ## 改动落点速查
