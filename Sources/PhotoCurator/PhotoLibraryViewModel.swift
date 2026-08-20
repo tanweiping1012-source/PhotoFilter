@@ -1433,6 +1433,14 @@ final class PhotoLibraryViewModel: ObservableObject {
         }
         storeUndoState(previousDecisionsByPhotoID: [photoID: photos[index].decision])
         photos[index].decision = decision
+        // 淘汰是对 AI 结果的明确否决：这张照片必须同时退出"评分优先"。
+        // 否则它一边显示"淘汰"，一边继续躺在 AI 选出的名单里，
+        // 用户会以为自己那一下没生效，或者以为它仍会被导出。
+        if decision == .reject,
+           let category = photos[index].curationCategory,
+           aiFinalSelectionPhotoIDsByCategory[category]?.contains(photoID) == true {
+            aiFinalSelectionPhotoIDsByCategory[category]?.remove(photoID)
+        }
         invalidateCandidatePlans()
         persistActiveProjectState()
         statusMessage = String(

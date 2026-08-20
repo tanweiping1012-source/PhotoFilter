@@ -230,6 +230,32 @@ final class PreLaunchReviewTests: XCTestCase {
         )
     }
 
+    /// 淘汰是对 AI 结果的否决：那张照片必须同时退出"评分优先"。
+    /// 否则它一边显示"淘汰"、一边还挂在 AI 选出的名单里，用户会以为自己那一下没生效。
+    func testRejectingRemovesPhotoFromTopScoredSet() throws {
+        let library = makeLibrary()
+        library.startDemoMode()
+        library.completeDemoAIScoringImmediately()
+        library.acceptPendingAIFinalSelection()
+
+        let victim = try XCTUnwrap(library.keepers.first { $0.curationCategory == .scenery })
+        XCTAssertTrue(
+            library.aiFinalSelectionPhotoIDs(for: .scenery).contains(victim.id),
+            "前提：这张本来在评分优先集合里"
+        )
+        let beforeCount = library.aiFinalSelectionPhotoIDs(for: .scenery).count
+
+        library.mark(photoID: victim.id, as: .reject)
+
+        XCTAssertFalse(
+            library.aiFinalSelectionPhotoIDs(for: .scenery).contains(victim.id),
+            "被淘汰的照片仍留在评分优先集合里"
+        )
+        XCTAssertEqual(library.aiFinalSelectionPhotoIDs(for: .scenery).count, beforeCount - 1)
+        XCTAssertEqual(library.counts(in: .scenery).reject, 1)
+        XCTAssertFalse(library.keepers.contains { $0.id == victim.id })
+    }
+
     // MARK: - 辅助
 
     private func makeLibrary() -> PhotoLibraryViewModel {
