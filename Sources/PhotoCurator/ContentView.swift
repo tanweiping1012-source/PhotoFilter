@@ -143,7 +143,7 @@ struct ContentView: View {
 
                 if let reason = library.projectNavigationLockReason {
                     Text(reason)
-                        .font(.caption)
+                        .font(SidebarTypography.detail)
                         .foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
                         .accessibilityIdentifier("sidebar.navigation-lock-reason")
@@ -345,7 +345,7 @@ struct ContentView: View {
         VStack(alignment: .leading, spacing: 14) {
             VStack(alignment: .leading, spacing: 10) {
                 Text("保留目标")
-                    .font(.headline)
+                    .font(SidebarTypography.sectionTitle)
                 ForEach(PhotoCurationCategory.allCases) { category in
                     selectionTargetRow(category)
                 }
@@ -355,7 +355,9 @@ struct ContentView: View {
 
             if let analysisLabel = library.analysisProgressLabel {
                 VStack(alignment: .leading, spacing: 5) {
-                    Text(analysisLabel).font(.caption)
+                    Text(analysisLabel)
+                        .font(SidebarTypography.detail)
+                        .foregroundStyle(.secondary)
                     ProgressView(value: library.analysisProgress)
                         .accessibilityLabel("本地分析进度")
                         .accessibilityValue(analysisLabel)
@@ -381,7 +383,7 @@ struct ContentView: View {
         return VStack(alignment: .leading, spacing: 5) {
             HStack(spacing: 8) {
                 Label(category.title, systemImage: category.systemImage)
-                    .font(.subheadline.weight(.medium))
+                    .font(SidebarTypography.rowLabel)
                 Spacer()
                 Stepper(
                     "\(target)",
@@ -404,7 +406,7 @@ struct ContentView: View {
                         || library.isDemoModeActive
                 )
                 Text("\(target) 张")
-                    .font(.caption.monospacedDigit())
+                    .font(SidebarTypography.rowValue)
                     .frame(width: 44, alignment: .trailing)
             }
             ProgressView(
@@ -416,7 +418,7 @@ struct ContentView: View {
             Text(
                 "保留 \(counts.keep) · 淘汰 \(counts.reject) · 待定 \(counts.undecided)"
             )
-            .font(.caption2.monospacedDigit())
+            .font(SidebarTypography.detailNumeric)
             .foregroundStyle(.secondary)
         }
         .accessibilityIdentifier(
@@ -428,12 +430,12 @@ struct ContentView: View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
                 Text("AI评分")
-                    .font(.headline)
+                    .font(SidebarTypography.sectionTitle)
             }
 
             if !library.localAestheticCandidatePhotoIDs.isEmpty {
                 Text("待评分 \(library.localAestheticCandidatePhotoIDs.count) 张")
-                    .font(.caption)
+                    .font(SidebarTypography.detail)
                     .foregroundStyle(.secondary)
             }
 
@@ -441,7 +443,7 @@ struct ContentView: View {
                 Label("离线教学", systemImage: "graduationcap")
                     .foregroundStyle(Color.accentColor)
                 Text("不联网，不读取 Keychain，不消耗 API 额度。")
-                    .font(.caption)
+                    .font(SidebarTypography.detail)
                     .foregroundStyle(.secondary)
                 if library.isRunningDemoAIScoring {
                     ProgressView(
@@ -451,7 +453,7 @@ struct ContentView: View {
                     Text(
                         "正在评估 · \(library.demoAIScoringCompletedPhotoCount)/\(library.displayedAIFinalSelectionRunProgress.candidatePhotoCount) 张"
                     )
-                    .font(.caption.monospacedDigit())
+                    .font(SidebarTypography.detailNumeric)
                 }
             } else if !library.isAIModelKeyConfigured {
                 // 没配置 Key 也不能让开始按钮消失：它留在原位、置灰、说明原因，
@@ -465,10 +467,10 @@ struct ContentView: View {
             } else if library.displayedAIFinalSelectionRunProgress.phase == .failed {
                 ProgressView(value: library.displayedAIFinalSelectionRunProgress.fractionCompleted)
                 Text("失败并停止 · 已评估 \(library.displayedAIFinalSelectionRunProgress.completedPhotoCount)/\(library.displayedAIFinalSelectionRunProgress.candidatePhotoCount) 张")
-                    .font(.caption.monospacedDigit())
+                    .font(SidebarTypography.detailNumeric)
                 if let failure = library.displayedAIFinalSelectionRunProgress.failureMessage {
                     Text(failure)
-                        .font(.caption)
+                        .font(SidebarTypography.detail)
                         .foregroundStyle(.red)
                 }
                 HStack {
@@ -482,15 +484,15 @@ struct ContentView: View {
             } else if library.isAIFinalSelectionRunActive {
                 if let running = library.activeAIFinalSelectionCategory {
                     Text("正在为\(running.title)照片评分")
-                        .font(.caption)
+                        .font(SidebarTypography.detail)
                         .foregroundStyle(.secondary)
                 }
                 ProgressView(value: library.displayedAIFinalSelectionRunProgress.fractionCompleted)
                 Text("\(library.displayedAIFinalSelectionRunProgress.phase.title) · \(library.displayedAIFinalSelectionRunProgress.completedPhotoCount)/\(library.displayedAIFinalSelectionRunProgress.candidatePhotoCount) 张")
-                    .font(.caption.monospacedDigit())
+                    .font(SidebarTypography.detailNumeric)
                 if library.displayedAIFinalSelectionRunProgress.waitingSeconds > 0 {
                     Text("下一次请求约 \(library.displayedAIFinalSelectionRunProgress.waitingSeconds) 秒后发送")
-                        .font(.caption.monospacedDigit())
+                        .font(SidebarTypography.detailNumeric)
                         .foregroundStyle(.secondary)
                 }
                 HStack {
@@ -506,7 +508,7 @@ struct ContentView: View {
                     Text(
                         "\(library.curationScope.title) AI评分已完成；网格已切到“已AI评分”，可逐张查看后采纳。"
                     )
-                        .font(.caption)
+                        .font(SidebarTypography.detail)
                         .foregroundStyle(.secondary)
                     ForEach(startableCategories) { category in
                         aiStartControl(for: category)
@@ -524,13 +526,13 @@ struct ContentView: View {
 
             if !library.isDemoModeActive {
                 Text("\(library.selectedAIModel.providerAndModelDisplayName) · \(library.selectedAIPreviewSize.displayName)")
-                    .font(.caption2)
+                    .font(SidebarTypography.footnote)
                     .foregroundStyle(.secondary)
             }
 
             if let usage = library.latestAIUsageMessage {
                 Text(usage)
-                    .font(.caption2)
+                    .font(SidebarTypography.footnote)
                     .foregroundStyle(.secondary)
             }
         }
@@ -561,7 +563,7 @@ struct ContentView: View {
 
             if let reason = availability.blockedReason {
                 Text(reason)
-                    .font(.caption2)
+                    .font(SidebarTypography.detail)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -1244,6 +1246,25 @@ struct ContentView: View {
 /// 直接用 `Label` 的话，每个按钮的图标中心和文字起点都会差几个点；
 /// 五个按钮竖排在一起时这种参差非常显眼。
 /// 字号也显式固定：`.borderedProminent` 会把标题加粗，和相邻的 `.bordered` 不一致。
+/// 侧栏的四级字阶。
+///
+/// 规则只有两条，但必须守住：同一角色在任何区块里都用同一级；
+/// 一行内配对的标签与数值也必须同级。之前"人物"用 subheadline、
+/// 右侧配对的"6 张"却用 caption，同为明细的"保留·淘汰·待定"是 caption2、
+/// "待评分 N 张"又是 caption——竖排在一起就像字号是随机挑的。
+private enum SidebarTypography {
+    /// 区块标题：保留目标 / AI评分
+    static let sectionTitle = Font.headline
+    /// 行主体：类别名，以及它右侧配对的数值
+    static let rowLabel = Font.subheadline.weight(.medium)
+    static let rowValue = Font.subheadline.monospacedDigit()
+    /// 明细：计数、进度、运行状态
+    static let detail = Font.caption
+    static let detailNumeric = Font.caption.monospacedDigit()
+    /// 脚注：不可用原因、当前模型档位、token 用量
+    static let footnote = Font.caption2
+}
+
 private struct SidebarEntryLabelStyle: LabelStyle {
     func makeBody(configuration: Configuration) -> some View {
         HStack(spacing: 8) {

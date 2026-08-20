@@ -126,6 +126,18 @@ sidebar_entry_count="$(
 [[ "$sidebar_entry_count" == "5" ]] ||
   fail "侧栏入口有 $sidebar_entry_count 个应用了统一排版，应为 5 个"
 
+# 侧栏字阶：同一角色跨区块必须同级，配对的标签与数值必须同级。
+# 这里断言"保留目标 → AI评分"整段没有裸写字号，全部走 SidebarTypography。
+rg -q 'enum SidebarTypography' Sources/PhotoCurator/ContentView.swift ||
+  fail "缺少侧栏字阶定义"
+sidebar_raw_fonts="$(
+  awk '/private var compactAIControls/,/private var aiAccessibilityStatus/' \
+    Sources/PhotoCurator/ContentView.swift |
+    rg -c 'font\(\.(caption|subheadline|headline|footnote)' || true
+)"
+[[ "${sidebar_raw_fonts:-0}" == "0" ]] ||
+  fail "侧栏 AI 区块仍有 $sidebar_raw_fonts 处裸写字号，应改用 SidebarTypography"
+
 for identifier in \
   photo-curator.main \
   photo.filter \
