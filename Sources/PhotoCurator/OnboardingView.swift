@@ -119,7 +119,7 @@ struct OnboardingView: View {
         VStack(alignment: .leading, spacing: 0) {
             HStack(alignment: .firstTextBaseline) {
                 Text("第一次筛选")
-                    .font(.title2.weight(.bold))
+                    .font(Typography.paneTitle)
                 Spacer()
                 Button("稍后再说") {
                     dismiss()
@@ -133,17 +133,17 @@ struct OnboardingView: View {
 
             VStack(spacing: 14) {
                 Image(systemName: "photo.stack")
-                    .font(.system(size: 48, weight: .regular))
+                    .font(Typography.heroIcon)
                     .foregroundStyle(Color.accentColor)
                     .frame(width: 72, height: 64)
 
                 Text("从一段旅程中，选出真正值得保留的照片")
-                    .font(.title.weight(.semibold))
+                    .font(Typography.heroTitle)
                     .multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
 
                 Text("适合旅行结束后，把人物和风景分开整理与评分，再决定各自保留哪些照片。")
-                    .font(.body)
+                    .font(Typography.heroBody)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
@@ -179,7 +179,7 @@ struct OnboardingView: View {
                 .accessibilityIdentifier("onboarding.choose-folder")
 
                 Text("完整体验使用 4 张人物、4 张风景和离线固定评分，不读取你的照片、Keychain 或网络。")
-                    .font(.caption)
+                    .font(Typography.detail)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
@@ -207,11 +207,11 @@ private struct CurationFlowView: View {
             ForEach(Array(steps.enumerated()), id: \.offset) { index, step in
                 VStack(spacing: 7) {
                     Image(systemName: step.0)
-                        .font(.system(size: 18, weight: .medium))
+                        .font(Typography.heroStepIcon)
                         .foregroundStyle(index == 2 ? Color.accentColor : .primary)
                         .frame(width: 28, height: 24)
                     Text(step.1)
-                        .font(.caption)
+                        .font(Typography.detail)
                         .foregroundStyle(.secondary)
                         .lineLimit(1)
                 }
@@ -219,7 +219,7 @@ private struct CurationFlowView: View {
 
                 if index < steps.count - 1 {
                     Image(systemName: "chevron.right")
-                        .font(.caption2)
+                        .font(Typography.footnote)
                         .foregroundStyle(.tertiary)
                         .accessibilityHidden(true)
                 }

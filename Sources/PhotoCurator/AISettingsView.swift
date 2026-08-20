@@ -81,9 +81,9 @@ struct AISettingsView: View {
         VStack(alignment: .leading, spacing: 20) {
             VStack(alignment: .leading, spacing: 6) {
                 Text("AI评分设置")
-                    .font(.title2.weight(.bold))
+                    .font(Typography.paneTitle)
                 Text("先选择品牌，再选择支持图片输入的模型；每个品牌的 Key 独立保存在本机 Keychain。")
-                    .font(.caption)
+                    .font(Typography.detail)
                     .foregroundStyle(.secondary)
             }
 
@@ -109,19 +109,19 @@ struct AISettingsView: View {
 
                     LabeledContent("API 模型 ID") {
                         Text(selectedModel.apiModelID)
-                            .font(.caption.monospaced())
+                            .font(Typography.code)
                             .textSelection(.enabled)
                     }
 
                     LabeledContent("接口") {
                         Text(selectedModel.endpointHost)
-                            .font(.caption.monospaced())
+                            .font(Typography.code)
                             .textSelection(.enabled)
                     }
 
                     if isConfigurationLocked {
                         Text("当前 AI 任务已锁定模型与预览尺寸；停止任务后可调整。")
-                            .font(.caption)
+                            .font(Typography.detail)
                             .foregroundStyle(.secondary)
                     }
                 }
@@ -135,7 +135,7 @@ struct AISettingsView: View {
                                     text: additionalModelIDBinding
                                 )
                                 .labelsHidden()
-                                .font(.caption.monospaced())
+                                .font(Typography.code)
                             }
                             .accessibilityElement(children: .contain)
                             .accessibilityLabel("其他 API 模型 ID")
@@ -208,7 +208,7 @@ struct AISettingsView: View {
                         }
 
                         Text("账号模型列表只用于选择候选；图片输入和评分格式仍需点击验证后确认。")
-                            .font(.caption)
+                            .font(Typography.detail)
                             .foregroundStyle(.secondary)
                             .fixedSize(
                                 horizontal: false,
@@ -233,7 +233,7 @@ struct AISettingsView: View {
                         customField("完整 Chat Completions endpoint") {
                             TextField("", text: $customEndpoint)
                                 .labelsHidden()
-                                .font(.caption.monospaced())
+                                .font(Typography.code)
                         }
                         .accessibilityElement(children: .contain)
                         .accessibilityLabel(
@@ -246,7 +246,7 @@ struct AISettingsView: View {
                         customField("API 模型 ID") {
                             TextField("", text: $customModelID)
                                 .labelsHidden()
-                                .font(.caption.monospaced())
+                                .font(Typography.code)
                         }
                         .accessibilityElement(children: .contain)
                         .accessibilityLabel("API 模型 ID")
@@ -259,7 +259,7 @@ struct AISettingsView: View {
                                 ? String(localized: "兼容配置有效；首次 AI评分会验证服务实际是否支持图片和 JSON 输出。")
                                 : String(localized: "请输入完整的 /chat/completions 地址和模型 ID。远程地址必须使用 HTTPS；HTTP 仅允许本机回环地址。")
                         )
-                        .font(.caption)
+                        .font(Typography.detail)
                         .foregroundStyle(
                             customConfiguration.isReady
                                 ? Color.secondary
@@ -296,11 +296,11 @@ struct AISettingsView: View {
 
                     LabeledContent("当前发送尺寸") {
                         Text(selectedPreviewSize.displayName)
-                            .font(.body.weight(.semibold))
+                            .font(Typography.rowLabelActive)
                     }
 
                     Text(selectedPreviewSize.guidance)
-                        .font(.caption)
+                        .font(Typography.detail)
                         .foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
 
@@ -308,7 +308,7 @@ struct AISettingsView: View {
                         "更大的预览可能提高细节识别，也会增加上传量、等待时间和供应商费用。",
                         systemImage: "info.circle"
                     )
-                    .font(.caption)
+                    .font(Typography.detail)
                     .foregroundStyle(.secondary)
                 }
 
@@ -329,7 +329,7 @@ struct AISettingsView: View {
                             )
                             : String(localized: "此供应商尚未保存 Key。")
                     )
-                    .font(.caption)
+                    .font(Typography.detail)
                     .foregroundStyle(.secondary)
 
                     HStack {
@@ -376,7 +376,7 @@ struct AISettingsView: View {
                         }
                     }
                     Text("验证会使用 1 张内置测试图调用当前模型，可能产生少量供应商费用；验证成功后才保存新 Key。")
-                        .font(.caption)
+                        .font(Typography.detail)
                         .foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
                 }
@@ -384,7 +384,7 @@ struct AISettingsView: View {
 
             if let statusMessage {
                 Text(statusMessage)
-                    .font(.caption)
+                    .font(Typography.detail)
                     .foregroundStyle(.secondary)
             }
 
@@ -568,7 +568,7 @@ struct AISettingsView: View {
     ) -> some View {
         VStack(alignment: .leading, spacing: 5) {
             Text(title)
-                .font(.caption)
+                .font(Typography.detail)
                 .foregroundStyle(.secondary)
             content()
         }

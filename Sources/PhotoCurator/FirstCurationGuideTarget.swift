@@ -68,7 +68,7 @@ private struct FirstCurationGuideTargetModifier: ViewModifier {
             .overlay(alignment: pointerSide.alignment) {
                 if isActive, let symbolName = pointerSide.symbolName {
                     Image(systemName: symbolName)
-                        .font(.system(size: 20, weight: .bold))
+                        .font(Typography.guidePointer)
                         .foregroundStyle(.white)
                         .frame(width: 34, height: 34)
                         .background(Color.red, in: Circle())

@@ -126,25 +126,32 @@ sidebar_entry_count="$(
 [[ "$sidebar_entry_count" == "5" ]] ||
   fail "侧栏入口有 $sidebar_entry_count 个应用了统一排版，应为 5 个"
 
-# 侧栏字阶：同一角色跨区块必须同级，配对的标签与数值必须同级。
-# 范围必须盖住整个侧栏。上一版只卡 compactAIControls 起的那一段——也就是
-# 已经合规的那一段——顶部标题块和"项目"标签的裸写字号因此一直没被发现。
-# 字号名也不能枚举：漏网的正是没列进去的 .title2。
-rg -q 'enum SidebarTypography' Sources/PhotoCurator/ContentView.swift ||
-  fail "缺少侧栏字阶定义"
-sidebar_raw_fonts="$(
-  awk '/private var projectSidebar/,/private var aiAccessibilityStatus/' \
-    Sources/PhotoCurator/ContentView.swift |
-    rg -c 'font\(\.' || true
-)"
-[[ "${sidebar_raw_fonts:-0}" == "0" ]] ||
-  fail "侧栏仍有 $sidebar_raw_fonts 处裸写字号，应改用 SidebarTypography"
+# 全 App 字阶：同一角色在任何界面里都用同一级，配对的标签与数值必须同级。
+#
+# 这条断言的范围扩过两次，每次都是因为上一版盖得太窄：
+#   一开始只卡侧栏 AI 区块——也就是当时已经合规的那一段；
+#   然后扩到整个侧栏，主内容区依旧没有任何约定：状态行 subheadline、
+#   可见张数 callout、回执标题 subheadline.semibold、回执正文 callout、
+#   底栏文件名 caption.medium、摘要 caption2、任务条又是另一套……
+#   同一屏上十来种字号。
+# 现在覆盖整个 Sources：字阶定义文件自己除外，其余任何地方都不准裸写字号。
+# 确实需要跳出字阶的地方（大图总分、场景首页、等宽 model ID、图标尺寸）
+# 都在 Typography 里单独命名，例外因此是被声明出来的，而不是又一次裸写。
+rg -q 'enum Typography' Sources/PhotoCurator/Typography.swift ||
+  fail "缺少全 App 字阶定义"
+if rg -q 'font\(\.' Sources/PhotoCurator -g '!Typography.swift'; then
+  fail "仍有裸写字号，应改用 Typography"
+fi
 
-# 面板标题只有顶部一处；区块标题恰好三处：项目 / 保留目标 / AI评分。
-pane_title_uses="$(rg -c 'SidebarTypography\.paneTitle' Sources/PhotoCurator/ContentView.swift || true)"
+# 侧栏内部：面板标题只有顶部一处；区块标题恰好三处：项目 / 保留目标 / AI评分。
+sidebar="$(
+  awk '/private var projectSidebar/,/private var aiAccessibilityStatus/' \
+    Sources/PhotoCurator/ContentView.swift
+)"
+pane_title_uses="$(printf '%s' "$sidebar" | rg -c 'Typography\.paneTitle' || true)"
 [[ "${pane_title_uses:-0}" == "1" ]] ||
-  fail "面板标题级被用了 ${pane_title_uses:-0} 次，整栏只应有 1 处"
-section_title_uses="$(rg -c 'SidebarTypography\.sectionTitle' Sources/PhotoCurator/ContentView.swift || true)"
+  fail "侧栏面板标题级被用了 ${pane_title_uses:-0} 次，整栏只应有 1 处"
+section_title_uses="$(printf '%s' "$sidebar" | rg -c 'Typography\.sectionTitle' || true)"
 [[ "${section_title_uses:-0}" == "3" ]] ||
   fail "区块标题有 ${section_title_uses:-0} 处，应为 3 处（项目 / 保留目标 / AI评分）"
 

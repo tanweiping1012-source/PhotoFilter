@@ -7,9 +7,9 @@ struct PrivacyInformationView: View {
         VStack(alignment: .leading, spacing: 18) {
             VStack(alignment: .leading, spacing: 5) {
                 Text("隐私与数据")
-                    .font(.title2.weight(.bold))
+                    .font(Typography.paneTitle)
                 Text("最后更新：2026 年 8 月 18 日")
-                    .font(.caption)
+                    .font(Typography.detail)
                     .foregroundStyle(.secondary)
             }
 
@@ -107,9 +107,9 @@ private struct PrivacyDisclosureRow: View {
                 .foregroundStyle(.secondary)
             VStack(alignment: .leading, spacing: 3) {
                 Text(title)
-                    .font(.subheadline.weight(.semibold))
+                    .font(Typography.rowLabelActive)
                 Text(detail)
-                    .font(.caption)
+                    .font(Typography.detail)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             }

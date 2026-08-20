@@ -105,9 +105,9 @@ struct ContentView: View {
             VStack(alignment: .leading, spacing: 12) {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("照片筛选项目")
-                        .font(SidebarTypography.paneTitle)
+                        .font(Typography.paneTitle)
                     Text("每个日期文件夹是一项独立任务")
-                        .font(SidebarTypography.paneSubtitle)
+                        .font(Typography.paneSubtitle)
                         .foregroundStyle(.secondary)
                 }
 
@@ -147,7 +147,7 @@ struct ContentView: View {
 
                 if let reason = library.projectNavigationLockReason {
                     Text(reason)
-                        .font(SidebarTypography.detail)
+                        .font(Typography.detail)
                         .foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
                         .accessibilityIdentifier("sidebar.navigation-lock-reason")
@@ -168,7 +168,7 @@ struct ContentView: View {
                         .padding(.vertical, 32)
                     } else {
                         Text("项目")
-                            .font(SidebarTypography.sectionTitle)
+                            .font(Typography.sectionTitle)
 
                         ForEach(library.projects) { project in
                             projectRow(project)
@@ -228,12 +228,12 @@ struct ContentView: View {
                         Text(project.displayName)
                             .font(
                                 isActive
-                                    ? SidebarTypography.rowLabelActive
-                                    : SidebarTypography.rowLabel
+                                    ? Typography.rowLabelActive
+                                    : Typography.rowLabel
                             )
                             .lineLimit(2)
                         Text(projectStatusText(project))
-                            .font(SidebarTypography.detailNumeric)
+                            .font(Typography.detailNumeric)
                             .foregroundStyle(project.accessState == .needsAuthorization ? .orange : .secondary)
                     }
                     Spacer(minLength: 0)
@@ -351,7 +351,7 @@ struct ContentView: View {
         VStack(alignment: .leading, spacing: 14) {
             VStack(alignment: .leading, spacing: 10) {
                 Text("保留目标")
-                    .font(SidebarTypography.sectionTitle)
+                    .font(Typography.sectionTitle)
                 ForEach(PhotoCurationCategory.allCases) { category in
                     selectionTargetRow(category)
                 }
@@ -362,7 +362,7 @@ struct ContentView: View {
             if let analysisLabel = library.analysisProgressLabel {
                 VStack(alignment: .leading, spacing: 5) {
                     Text(analysisLabel)
-                        .font(SidebarTypography.detail)
+                        .font(Typography.detail)
                         .foregroundStyle(.secondary)
                     ProgressView(value: library.analysisProgress)
                         .accessibilityLabel("本地分析进度")
@@ -383,7 +383,7 @@ struct ContentView: View {
 
             if library.keeperDiversityConflictCount > 0 {
                 Label("已有 \(library.keeperDiversityConflictCount) 组重复照片被同时保留，请每组只留一张。", systemImage: "exclamationmark.triangle.fill")
-                    .font(SidebarTypography.detail)
+                    .font(Typography.detail)
                     .foregroundStyle(.orange)
             }
 
@@ -399,7 +399,7 @@ struct ContentView: View {
         return VStack(alignment: .leading, spacing: 5) {
             HStack(spacing: 8) {
                 Label(category.title, systemImage: category.systemImage)
-                    .font(SidebarTypography.rowLabel)
+                    .font(Typography.rowLabel)
                 Spacer()
                 Stepper(
                     "\(target)",
@@ -422,7 +422,7 @@ struct ContentView: View {
                         || library.isDemoModeActive
                 )
                 Text("\(target) 张")
-                    .font(SidebarTypography.rowValue)
+                    .font(Typography.rowValue)
                     .frame(width: 44, alignment: .trailing)
             }
             ProgressView(
@@ -434,7 +434,7 @@ struct ContentView: View {
             Text(
                 "保留 \(counts.keep) · 淘汰 \(counts.reject) · 待定 \(counts.undecided)"
             )
-            .font(SidebarTypography.detailNumeric)
+            .font(Typography.detailNumeric)
             .foregroundStyle(.secondary)
         }
         .accessibilityIdentifier(
@@ -446,7 +446,7 @@ struct ContentView: View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
                 Text("AI评分")
-                    .font(SidebarTypography.sectionTitle)
+                    .font(Typography.sectionTitle)
             }
 
             // 示例里不显示这一行：它统计的是"真实评分的候选池"（会排除已保留项和
@@ -456,7 +456,7 @@ struct ContentView: View {
             if !library.isDemoModeActive,
                !library.localAestheticCandidatePhotoIDs.isEmpty {
                 Text("待评分 \(library.localAestheticCandidatePhotoIDs.count) 张")
-                    .font(SidebarTypography.detail)
+                    .font(Typography.detail)
                     .foregroundStyle(.secondary)
             }
 
@@ -464,7 +464,7 @@ struct ContentView: View {
                 Label("离线教学", systemImage: "graduationcap")
                     .foregroundStyle(Color.accentColor)
                 Text("不联网，不读取 Keychain，不消耗 API 额度。")
-                    .font(SidebarTypography.detail)
+                    .font(Typography.detail)
                     .foregroundStyle(.secondary)
                 if library.isRunningDemoAIScoring {
                     ProgressView(
@@ -474,7 +474,7 @@ struct ContentView: View {
                     Text(
                         "正在评估 · \(library.demoAIScoringCompletedPhotoCount)/\(library.displayedAIFinalSelectionRunProgress.candidatePhotoCount) 张"
                     )
-                    .font(SidebarTypography.detailNumeric)
+                    .font(Typography.detailNumeric)
                 } else {
                     // 教学要驱动的就是这个真实入口，所以它在示例里也必须出现在同一位置。
                     // 这一支以前只画"离线教学"说明、不画按钮，教学走到第 4 步就没有
@@ -496,10 +496,10 @@ struct ContentView: View {
             } else if library.displayedAIFinalSelectionRunProgress.phase == .failed {
                 ProgressView(value: library.displayedAIFinalSelectionRunProgress.fractionCompleted)
                 Text("失败并停止 · 已评估 \(library.displayedAIFinalSelectionRunProgress.completedPhotoCount)/\(library.displayedAIFinalSelectionRunProgress.candidatePhotoCount) 张")
-                    .font(SidebarTypography.detailNumeric)
+                    .font(Typography.detailNumeric)
                 if let failure = library.displayedAIFinalSelectionRunProgress.failureMessage {
                     Text(failure)
-                        .font(SidebarTypography.detail)
+                        .font(Typography.detail)
                         .foregroundStyle(.red)
                 }
                 HStack {
@@ -513,15 +513,15 @@ struct ContentView: View {
             } else if library.isAIFinalSelectionRunActive {
                 if let running = library.activeAIFinalSelectionCategory {
                     Text("正在为\(running.title)照片评分")
-                        .font(SidebarTypography.detail)
+                        .font(Typography.detail)
                         .foregroundStyle(.secondary)
                 }
                 ProgressView(value: library.displayedAIFinalSelectionRunProgress.fractionCompleted)
                 Text("\(library.displayedAIFinalSelectionRunProgress.phase.title) · \(library.displayedAIFinalSelectionRunProgress.completedPhotoCount)/\(library.displayedAIFinalSelectionRunProgress.candidatePhotoCount) 张")
-                    .font(SidebarTypography.detailNumeric)
+                    .font(Typography.detailNumeric)
                 if library.displayedAIFinalSelectionRunProgress.waitingSeconds > 0 {
                     Text("下一次请求约 \(library.displayedAIFinalSelectionRunProgress.waitingSeconds) 秒后发送")
-                        .font(SidebarTypography.detailNumeric)
+                        .font(Typography.detailNumeric)
                         .foregroundStyle(.secondary)
                 }
                 HStack {
@@ -537,7 +537,7 @@ struct ContentView: View {
                     Text(
                         "\(library.curationScope.title) AI评分已完成；网格已切到“已AI评分”，可逐张查看后采纳。"
                     )
-                        .font(SidebarTypography.detail)
+                        .font(Typography.detail)
                         .foregroundStyle(.secondary)
                     ForEach(startableCategories) { category in
                         aiStartControl(for: category)
@@ -555,13 +555,13 @@ struct ContentView: View {
 
             if !library.isDemoModeActive {
                 Text("\(library.selectedAIModel.providerAndModelDisplayName) · \(library.selectedAIPreviewSize.displayName)")
-                    .font(SidebarTypography.footnote)
+                    .font(Typography.footnote)
                     .foregroundStyle(.secondary)
             }
 
             if let usage = library.latestAIUsageMessage {
                 Text(usage)
-                    .font(SidebarTypography.footnote)
+                    .font(Typography.footnote)
                     .foregroundStyle(.secondary)
             }
         }
@@ -596,7 +596,7 @@ struct ContentView: View {
 
             if let reason = availability.blockedReason {
                 Text(reason)
-                    .font(SidebarTypography.detail)
+                    .font(Typography.detail)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -647,7 +647,7 @@ struct ContentView: View {
                             .accessibilityLabel("正在扫描")
                     }
                     Text(library.statusMessage)
-                        .font(.subheadline)
+                        .font(Typography.rowLabel)
                         .foregroundStyle(.secondary)
                         .lineLimit(2)
                         .accessibilityIdentifier("photo.status")
@@ -698,7 +698,7 @@ struct ContentView: View {
                     // 计数是"我刚才那一下筛掉了多少"的唯一反馈，不能小到看不清，
                     // 也不能因为宽度不够被截断——宁可挤压右侧空白。
                     Text("显示 \(filteredPhotos.count) / \(scopedPhotos.count)")
-                        .font(.callout.monospacedDigit())
+                        .font(Typography.rowValue)
                         .foregroundStyle(.secondary)
                         .fixedSize(horizontal: true, vertical: false)
                         .accessibilityIdentifier("photo.visible-count")
@@ -1098,12 +1098,12 @@ struct ContentView: View {
 
             VStack(alignment: .leading, spacing: 1) {
                 Text(photo.filename)
-                    .font(.caption.weight(.medium))
+                    .font(Typography.rowLabel)
                     .lineLimit(1)
                     .truncationMode(.middle)
                 if let summary = selectedPhotoSummary(photo) {
                     Text(summary)
-                        .font(.caption2)
+                        .font(Typography.detail)
                         .foregroundStyle(
                             photo.technicalQuality?.risks.isEmpty == false
                                 ? .orange
@@ -1185,9 +1185,9 @@ struct ContentView: View {
                 .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 2) {
                 Text(notice.title)
-                    .font(.subheadline.weight(.semibold))
+                    .font(Typography.rowLabelActive)
                 Text(notice.message)
-                    .font(.callout)
+                    .font(Typography.detail)
                     .foregroundStyle(.secondary)
                     // 浮层高度必须有上限，长文案不能无限撑高把照片挡光。
                     .lineLimit(2)
@@ -1255,34 +1255,6 @@ struct ContentView: View {
 
 }
 
-/// 侧栏的字阶。
-///
-/// 规则只有两条，但必须守住：同一角色在任何区块里都用同一级；
-/// 一行内配对的标签与数值也必须同级。之前"人物"用 subheadline、
-/// 右侧配对的"6 张"却用 caption，同为明细的"保留·淘汰·待定"是 caption2、
-/// "待评分 N 张"又是 caption——竖排在一起就像字号是随机挑的。
-///
-/// 建了字阶还不够，还得全栏都接进来：上一版只把"保留目标 → AI评分"接了，
-/// 顶部标题块和"项目"仍是裸写，于是"项目"（caption 灰）和它在同一个
-/// LazyVStack 里的兄弟"保留目标"（headline 主色）差了两级，还多缩进 4pt。
-/// 门禁也只卡了已经合规的那一段，等于自证清白。现在断言整个侧栏零裸写字号。
-private enum SidebarTypography {
-    /// 面板标题：侧栏顶部"照片筛选项目"及其副标题，整栏只此一处
-    static let paneTitle = Font.title2.weight(.bold)
-    static let paneSubtitle = Font.caption
-    /// 区块标题：项目 / 保留目标 / AI评分
-    static let sectionTitle = Font.headline
-    /// 行主体：类别名、项目名，以及它右侧配对的数值
-    static let rowLabel = Font.subheadline.weight(.medium)
-    static let rowLabelActive = Font.subheadline.weight(.semibold)
-    static let rowValue = Font.subheadline.monospacedDigit()
-    /// 明细：计数、进度、运行状态
-    static let detail = Font.caption
-    static let detailNumeric = Font.caption.monospacedDigit()
-    /// 脚注：不可用原因、当前模型档位、token 用量
-    static let footnote = Font.caption2
-}
-
 /// 侧栏入口按钮的统一排版：固定宽度的图标列 + 统一字号字重。
 ///
 /// SF Symbols 的固有宽度各不相同（`folder.badge.plus` 明显比 `gearshape` 宽），
@@ -1296,7 +1268,7 @@ private struct SidebarEntryLabelStyle: LabelStyle {
                 .imageScale(.medium)
                 .frame(width: 18, alignment: .center)
             configuration.title
-                .font(.body)
+                .font(Typography.entryLabel)
         }
     }
 }
@@ -1329,7 +1301,7 @@ private struct PhotoCard: View {
                     .overlay(alignment: .topTrailing) {
                         if photo.decision != .undecided {
                             Label(photo.decision.title, systemImage: photo.decision.symbolName)
-                                .font(.caption2.weight(.semibold))
+                                .font(Typography.badge)
                                 .foregroundStyle(decisionColor)
                                 .padding(.horizontal, 7)
                                 .padding(.vertical, 5)
@@ -1343,7 +1315,7 @@ private struct PhotoCard: View {
                                 category.title,
                                 systemImage: category.systemImage
                             )
-                            .font(.caption2.weight(.semibold))
+                            .font(Typography.badge)
                             .padding(.horizontal, 7)
                             .padding(.vertical, 5)
                             .background(
@@ -1490,7 +1462,7 @@ private struct CandidatePoolBadge: View {
 
     var body: some View {
         Text(text)
-            .font(.caption2.weight(.semibold))
+            .font(Typography.badge)
             .foregroundStyle(.white)
             .padding(.horizontal, 7)
             .padding(.vertical, 4)
@@ -1510,7 +1482,7 @@ private struct RiskBadge: View {
 
     var body: some View {
         Text(text)
-            .font(.caption2.weight(.semibold))
+            .font(Typography.badge)
             .foregroundStyle(.white)
             .padding(.horizontal, 7)
             .padding(.vertical, 4)
@@ -1523,7 +1495,7 @@ private struct AestheticRecommendationBadge: View {
 
     var body: some View {
         Text(text)
-            .font(.caption2.weight(.semibold))
+            .font(Typography.badge)
             .foregroundStyle(.white)
             .padding(.horizontal, 7)
             .padding(.vertical, 4)
@@ -1536,7 +1508,7 @@ private struct GroupBadge: View {
 
     var body: some View {
         Text(text)
-            .font(.caption2.weight(.semibold))
+            .font(Typography.badge)
             .foregroundStyle(.white)
             .padding(.horizontal, 7)
             .padding(.vertical, 4)

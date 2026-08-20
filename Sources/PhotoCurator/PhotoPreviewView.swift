@@ -91,11 +91,11 @@ struct PhotoPreviewView: View {
         HStack(spacing: 12) {
             VStack(alignment: .leading, spacing: 2) {
                 Text(photo?.filename ?? String(localized: "照片预览"))
-                    .font(.headline)
+                    .font(Typography.sectionTitle)
                     .lineLimit(1)
                 if let currentIndex {
                     Text("\(currentIndex + 1) / \(photoIDs.count)")
-                        .font(.caption.monospacedDigit())
+                        .font(Typography.detailNumeric)
                         .foregroundStyle(.secondary)
                 }
             }
@@ -246,7 +246,7 @@ struct PhotoPreviewView: View {
     ) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(title)
-                .font(.caption.weight(.semibold))
+                .font(Typography.detailEmphasis)
                 .foregroundStyle(.secondary)
             content()
         }
@@ -366,7 +366,7 @@ struct FirstCurationGuideBar: View {
         if let step = library.firstCurationGuideStep {
             HStack(spacing: 12) {
                 Image(systemName: step.systemImage)
-                    .font(.system(size: 20, weight: .semibold))
+                    .font(Typography.guideIcon)
                     .foregroundStyle(
                         step == .completed ? Color.green : Color.accentColor
                     )
@@ -375,21 +375,21 @@ struct FirstCurationGuideBar: View {
                 VStack(alignment: .leading, spacing: 3) {
                     HStack(spacing: 7) {
                         Text("第一次筛选")
-                            .font(.caption.weight(.semibold))
+                            .font(Typography.detailEmphasis)
                             .foregroundStyle(.secondary)
                         if step != .completed {
                             Text(
                                 "\(step.taskPosition) / \(FirstCurationGuideStep.taskCount)"
                             )
-                            .font(.caption.monospacedDigit())
+                            .font(Typography.detailNumeric)
                             .foregroundStyle(Color.accentColor)
                         }
                     }
                     Text(step.title)
-                        .font(.subheadline.weight(.semibold))
+                        .font(Typography.rowLabelActive)
                     if !compact {
                         Text(step.detail)
-                            .font(.caption)
+                            .font(Typography.detail)
                             .foregroundStyle(.secondary)
                             .lineLimit(2)
                     }
@@ -469,10 +469,10 @@ private struct AestheticScoreDetailView: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(alignment: .firstTextBaseline) {
                 Text(scoreTitle)
-                    .font(.subheadline.weight(.semibold))
+                    .font(Typography.rowLabelActive)
                 Spacer()
                 Text(rankingLabel)
-                .font(.caption.weight(.medium))
+                .font(Typography.detail)
                 .foregroundStyle(
                     isScorePreferred
                         ? Color.accentColor
@@ -482,14 +482,14 @@ private struct AestheticScoreDetailView: View {
 
             HStack(alignment: .lastTextBaseline, spacing: 5) {
                 Text("\(recommendation.score)")
-                    .font(.system(size: 34, weight: .bold, design: .rounded))
+                    .font(Typography.scoreDisplay)
                     .monospacedDigit()
                 Text("/ 100")
-                    .font(.caption.monospacedDigit())
+                    .font(Typography.detailNumeric)
                     .foregroundStyle(.secondary)
                 Spacer()
                 Text("总分")
-                    .font(.caption.weight(.semibold))
+                    .font(Typography.detailEmphasis)
                     .foregroundStyle(.secondary)
             }
             .accessibilityElement(children: .ignore)
@@ -503,7 +503,7 @@ private struct AestheticScoreDetailView: View {
                     )
                     HStack(spacing: 8) {
                         Text(dimension.title)
-                            .font(.caption)
+                            .font(Typography.detail)
                             .frame(width: 72, alignment: .leading)
                         ProgressView(
                             value: Double(score),
@@ -512,7 +512,7 @@ private struct AestheticScoreDetailView: View {
                         .progressViewStyle(.linear)
                         .accessibilityHidden(true)
                         Text("\(score)")
-                            .font(.caption.monospacedDigit())
+                            .font(Typography.detailNumeric)
                             .foregroundStyle(.secondary)
                             .frame(width: 26, alignment: .trailing)
                     }
@@ -527,7 +527,7 @@ private struct AestheticScoreDetailView: View {
 
             VStack(alignment: .leading, spacing: 6) {
                 Text("具体评价")
-                    .font(.caption.weight(.semibold))
+                    .font(Typography.detailEmphasis)
                     .foregroundStyle(.secondary)
                 ForEach(
                     Array(recommendation.reasons.enumerated()),
@@ -535,10 +535,10 @@ private struct AestheticScoreDetailView: View {
                 ) { _, reason in
                     HStack(alignment: .firstTextBaseline, spacing: 7) {
                         Image(systemName: "circle.fill")
-                            .font(.system(size: 5))
+                            .font(Typography.bulletDot)
                             .foregroundStyle(.secondary)
                         Text(reason)
-                            .font(.caption)
+                            .font(Typography.detail)
                             .fixedSize(horizontal: false, vertical: true)
                     }
                 }
@@ -546,10 +546,10 @@ private struct AestheticScoreDetailView: View {
 
             VStack(alignment: .leading, spacing: 6) {
                 Text("AI总结")
-                    .font(.caption.weight(.semibold))
+                    .font(Typography.detailEmphasis)
                     .foregroundStyle(.secondary)
                 Text(recommendation.summary)
-                    .font(.caption)
+                    .font(Typography.detail)
                     .fixedSize(horizontal: false, vertical: true)
             }
         }

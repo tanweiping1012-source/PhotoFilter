@@ -11,9 +11,9 @@ struct SupportInformationView: View {
         VStack(alignment: .leading, spacing: 18) {
             VStack(alignment: .leading, spacing: 5) {
                 Text("帮助与支持")
-                    .font(.title2.weight(.bold))
+                    .font(Typography.paneTitle)
                 Text("常见问题与非敏感诊断信息")
-                    .font(.caption)
+                    .font(Typography.detail)
                     .foregroundStyle(.secondary)
             }
 
@@ -58,7 +58,7 @@ struct SupportInformationView: View {
 
                 Section("诊断信息") {
                     Text("诊断信息仅包含 App 版本、macOS 版本和运行模式，不包含照片、文件路径或 API Key。")
-                        .font(.caption)
+                        .font(Typography.detail)
                         .foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
 
@@ -71,7 +71,7 @@ struct SupportInformationView: View {
 
                     if copiedDiagnostics {
                         Label("已复制不含照片、路径或 API Key 的诊断信息。", systemImage: "checkmark.circle.fill")
-                            .font(.caption)
+                            .font(Typography.detail)
                             .foregroundStyle(.green)
                             .accessibilityIdentifier("support.copy-status")
                     }
@@ -123,9 +123,9 @@ private struct SupportHelpRow: View {
                 .foregroundStyle(.secondary)
             VStack(alignment: .leading, spacing: 3) {
                 Text(title)
-                    .font(.subheadline.weight(.semibold))
+                    .font(Typography.rowLabelActive)
                 Text(detail)
-                    .font(.caption)
+                    .font(Typography.detail)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
