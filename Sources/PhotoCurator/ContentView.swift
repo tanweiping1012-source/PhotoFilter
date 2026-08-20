@@ -111,6 +111,7 @@ struct ContentView: View {
                     library.chooseFolder()
                 } label: {
                     Label("新建筛选项目", systemImage: "folder.badge.plus")
+                        .labelStyle(SidebarEntryLabelStyle())
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
                 .buttonStyle(.borderedProminent)
@@ -122,6 +123,7 @@ struct ContentView: View {
                         showOnboarding = true
                     } label: {
                         Label("新手引导", systemImage: "graduationcap")
+                            .labelStyle(SidebarEntryLabelStyle())
                             .frame(maxWidth: .infinity, alignment: .leading)
                     }
                     .buttonStyle(.bordered)
@@ -132,6 +134,7 @@ struct ContentView: View {
                         showAISettings = true
                     } label: {
                         Label("AI评分设置", systemImage: "gearshape")
+                            .labelStyle(SidebarEntryLabelStyle())
                             .frame(maxWidth: .infinity, alignment: .leading)
                     }
                     .buttonStyle(.bordered)
@@ -185,6 +188,7 @@ struct ContentView: View {
                     showSupportInformation = true
                 } label: {
                     Label("帮助与支持", systemImage: "questionmark.circle")
+                        .labelStyle(SidebarEntryLabelStyle())
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
                 .buttonStyle(.plain)
@@ -195,6 +199,7 @@ struct ContentView: View {
                     showPrivacyInformation = true
                 } label: {
                     Label("隐私与数据", systemImage: "hand.raised")
+                        .labelStyle(SidebarEntryLabelStyle())
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
                 .buttonStyle(.plain)
@@ -1231,6 +1236,24 @@ struct ContentView: View {
     }
 
 
+}
+
+/// 侧栏入口按钮的统一排版：固定宽度的图标列 + 统一字号字重。
+///
+/// SF Symbols 的固有宽度各不相同（`folder.badge.plus` 明显比 `gearshape` 宽），
+/// 直接用 `Label` 的话，每个按钮的图标中心和文字起点都会差几个点；
+/// 五个按钮竖排在一起时这种参差非常显眼。
+/// 字号也显式固定：`.borderedProminent` 会把标题加粗，和相邻的 `.bordered` 不一致。
+private struct SidebarEntryLabelStyle: LabelStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        HStack(spacing: 8) {
+            configuration.icon
+                .imageScale(.medium)
+                .frame(width: 18, alignment: .center)
+            configuration.title
+                .font(.body)
+        }
+    }
 }
 
 private struct IdentifiedBadge {

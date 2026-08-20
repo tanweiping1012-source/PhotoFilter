@@ -116,6 +116,16 @@ rg -q 'String\(localized: "旅行照片筛选器"\)' \
 rg -q 'accessibilityIdentifier\("sidebar\.support"\)' Sources/PhotoCurator/ContentView.swift ||
   fail "缺少支持入口 accessibility identifier"
 
+# 侧栏五个入口必须共用同一套图标列宽与字号：SF Symbols 固有宽度不同，
+# 直接用 Label 会让图标中心和文字起点各差几个点，竖排时非常显眼。
+rg -q 'struct SidebarEntryLabelStyle: LabelStyle' Sources/PhotoCurator/ContentView.swift ||
+  fail "缺少侧栏入口统一排版样式"
+sidebar_entry_count="$(
+  rg -c 'labelStyle\(SidebarEntryLabelStyle\(\)\)' Sources/PhotoCurator/ContentView.swift
+)"
+[[ "$sidebar_entry_count" == "5" ]] ||
+  fail "侧栏入口有 $sidebar_entry_count 个应用了统一排版，应为 5 个"
+
 for identifier in \
   photo-curator.main \
   photo.filter \
