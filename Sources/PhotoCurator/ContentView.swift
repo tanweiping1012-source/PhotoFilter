@@ -811,7 +811,7 @@ struct ContentView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .overlay(alignment: .top) {
-                if let notice = library.completionNotice {
+                if let notice = library.visibleCompletionNotice {
                     completionBanner(notice)
                         .padding(12)
                 }

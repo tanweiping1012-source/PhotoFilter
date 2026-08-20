@@ -59,6 +59,16 @@ rg -q 'library\.isAcceptGuideStep' "$content" ||
 # 没有它，用户不知道该盯着哪儿等分析结束。
 # 本地分析进度只允许有一条：工具栏和侧栏各画一条时，同一件事说了两遍，
 # 而旁边的状态文字已经在说同样的话。带张数的那条留在侧栏。
+# 教学进行中不得再显示完成回执横幅：任务条已经在讲下一步，回执讲的是另一个
+# 下一步，两条指令同屏竞争；回执还是浮层，会盖住网格顶排照片。
+rg -q 'var visibleCompletionNotice' "$view_model" ||
+  fail "缺少教学期间隐藏完成回执的判定"
+rg -q 'library\.visibleCompletionNotice' "$content" ||
+  fail "完成回执横幅没有在教学期间隐藏"
+if rg -q 'if let notice = library\.completionNotice \{' "$content"; then
+  fail "完成回执横幅又直接读取了未过滤的回执"
+fi
+
 analysis_bars="$(rg -c 'value: library\.analysisProgress' "$content" || true)"
 [[ "${analysis_bars:-0}" == "1" ]] ||
   fail "本地分析进度条有 ${analysis_bars:-0} 条，应只保留侧栏那一条"

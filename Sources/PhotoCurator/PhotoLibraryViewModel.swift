@@ -1038,6 +1038,15 @@ final class PhotoLibraryViewModel: ObservableObject {
         )
     }
 
+    /// 教学进行中不显示完成回执。
+    ///
+    /// 任务条本身就在讲"下一步做什么"，回执再讲一遍另一个下一步——
+    /// 同一屏上出现两条互相竞争的指令。而且回执是浮层，会盖住网格顶排照片。
+    /// 回执仍然照常产生：它负责把网格带到该类型的"已AI评分"，只是不渲染。
+    var visibleCompletionNotice: CurationCompletionNotice? {
+        firstCurationGuideStep == nil ? completionNotice : nil
+    }
+
     /// 教学此刻是否该指向"照片类型"分段控件。
     ///
     /// 第 6 步分两段：先指分段控件让用户切到风景，切过去之后指针转到侧栏的
