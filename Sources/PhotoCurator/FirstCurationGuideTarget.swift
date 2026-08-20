@@ -4,20 +4,29 @@ enum FirstCurationGuidePointerSide {
     case leading
     case trailing
     case top
+    /// 只画红框，不画手形指针。
+    ///
+    /// 手形指针的偏移是固定的 24pt，前提是目标周围留得出这段空间。侧栏里满宽的
+    /// 一行两边都没有——右边紧贴面板边缘，左边只有 16pt padding，指针会压在
+    /// 边界上甚至被裁掉。而且"手"表达的是"点这里"；自动执行的步骤要说的是
+    /// "看这里等"，本来就不该出现手。
+    case noPointer
 
     var alignment: Alignment {
         switch self {
         case .leading: .leading
         case .trailing: .trailing
         case .top: .top
+        case .noPointer: .center
         }
     }
 
-    var symbolName: String {
+    var symbolName: String? {
         switch self {
         case .leading: "hand.point.right.fill"
         case .trailing: "hand.point.left.fill"
         case .top: "hand.point.down.fill"
+        case .noPointer: nil
         }
     }
 
@@ -29,6 +38,8 @@ enum FirstCurationGuidePointerSide {
             CGSize(width: 24, height: 0)
         case .top:
             CGSize(width: 0, height: -24)
+        case .noPointer:
+            .zero
         }
     }
 }
@@ -55,8 +66,8 @@ private struct FirstCurationGuideTargetModifier: ViewModifier {
                 }
             }
             .overlay(alignment: pointerSide.alignment) {
-                if isActive {
-                    Image(systemName: pointerSide.symbolName)
+                if isActive, let symbolName = pointerSide.symbolName {
+                    Image(systemName: symbolName)
                         .font(.system(size: 20, weight: .bold))
                         .foregroundStyle(.white)
                         .frame(width: 34, height: 34)

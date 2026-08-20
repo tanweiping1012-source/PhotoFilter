@@ -34,6 +34,12 @@ if rg -q 'withAnimation|repeatForever|isAnimating|scaleEffect|padding\(-[0-9]|co
 fi
 rg -q 'hand\.point\.(left|right|down)\.fill' "$target" ||
   fail "聚焦缺少固定小指针"
+# 指针的偏移是固定 24pt，前提是目标周围留得出这段空间。侧栏里满宽的一行两边
+# 都没有，指针会压在面板边界上。自动执行的步骤也不该出现"点这里"的手。
+rg -q 'case noPointer' "$target" ||
+  fail "聚焦缺少无指针模式，满宽目标只能画框"
+rg -Uq 'firstCurationGuideStep == \.analyzePhotos,[[:space:]\n]*pointerSide: \.noPointer' "$content" ||
+  fail "本地分析这一步不该画手形指针：它是自动执行的，且目标两侧没有指针空间"
 rg -q 'var offset: CGSize' "$target" ||
   fail "聚焦指针没有使用固定坐标"
 rg -q 'allowsHitTesting\(false\)' "$target" ||

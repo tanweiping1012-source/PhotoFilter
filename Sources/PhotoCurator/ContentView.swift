@@ -368,10 +368,16 @@ struct ContentView: View {
                         .accessibilityLabel("本地分析进度")
                         .accessibilityValue(analysisLabel)
                 }
+                // 红框要框住一块区域才读得出来。不加内边距时，它紧贴着一行小字
+                // 和一条 4pt 的进度条，看上去像是划了一道线而不是圈出了一处。
+                .padding(.vertical, 8)
+                .padding(.horizontal, 10)
+                .frame(maxWidth: .infinity, alignment: .leading)
                 .accessibilityIdentifier("analysis.progress")
                 .firstCurationGuideTarget(
                     library.firstCurationGuideStep == .analyzePhotos,
-                    pointerSide: .trailing
+                    pointerSide: .noPointer,
+                    cornerRadius: 10
                 )
             }
 
