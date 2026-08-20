@@ -108,10 +108,6 @@ AI 是可选的，用你自己的 Key：
         导出：复制到「人物」「风景」两个子目录 + selection.json / csv
 ```
 
-![主界面](docs/interaction-screenshots/people-scenery-results-zh-Hans-920x640.png)
-
-> 上图是 App 内置的离线样例（8 张程序生成的示意图），第一次启动的教学就用它走完整流程——
-> 不联网、不读 Keychain、不碰你的目录。
 
 ### 它不做什么
 
