@@ -17,14 +17,22 @@ enum OnboardingPreferenceStore {
     }
 }
 
+/// 第一次筛选的八步。
+///
+/// 顺序必须和真实主链路一致：本地分析 → 按类型 AI评分 → 采纳 → 导出。
+///
+/// 旧版把"手动保留"排在 AI评分 之前，教出来的因果是反的：真实流程里
+/// `采纳` 做的事就是 `decision = .keep`，所以"保留"是整条流程的产出，
+/// 不是评分的入场券。旧版还整段跳过了本地分析——而那恰恰是真实用户
+/// 第一次导入文件夹后最先看到、也最久的一屏。
 enum FirstCurationGuideStep: Int, CaseIterable, Identifiable {
+    case analyzePhotos
     case choosePeople
-    case inspectPhoto
-    case keepPhoto
-    case runAIScoring
-    case switchToScenery
+    case runPeopleAIScoring
     case viewScore
-    case acceptResults
+    case acceptPeopleResults
+    case switchSceneryAndScore
+    case acceptSceneryResults
     case exportCopies
     case completed
 
@@ -38,13 +46,13 @@ enum FirstCurationGuideStep: Int, CaseIterable, Identifiable {
 
     var systemImage: String {
         switch self {
+        case .analyzePhotos: "wand.and.rays"
         case .choosePeople: "person.2.fill"
-        case .inspectPhoto: "photo.on.rectangle.angled"
-        case .keepPhoto: "checkmark.circle"
-        case .runAIScoring: "wand.and.stars"
-        case .switchToScenery: "mountain.2.fill"
+        case .runPeopleAIScoring: "wand.and.stars"
         case .viewScore: "chart.bar.xaxis"
-        case .acceptResults: "checkmark.seal"
+        case .acceptPeopleResults: "checkmark.seal"
+        case .switchSceneryAndScore: "mountain.2.fill"
+        case .acceptSceneryResults: "checkmark.seal.fill"
         case .exportCopies: "square.and.arrow.up"
         case .completed: "checkmark.circle.fill"
         }
@@ -52,13 +60,13 @@ enum FirstCurationGuideStep: Int, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
+        case .analyzePhotos: String(localized: "正在本地分析这 8 张照片")
         case .choosePeople: String(localized: "先查看人物照片")
-        case .inspectPhoto: String(localized: "打开任意一张照片")
-        case .keepPhoto: String(localized: "先保留这张照片")
-        case .runAIScoring: String(localized: "为人物运行 AI评分")
-        case .switchToScenery: String(localized: "切换到风景并评分")
+        case .runPeopleAIScoring: String(localized: "为人物运行 AI评分")
         case .viewScore: String(localized: "查看 AI 为什么这样评分")
-        case .acceptResults: String(localized: "查看并采纳评分结果")
+        case .acceptPeopleResults: String(localized: "采纳人物结果")
+        case .switchSceneryAndScore: String(localized: "切换到风景并评分")
+        case .acceptSceneryResults: String(localized: "采纳风景结果")
         case .exportCopies: String(localized: "导出保留照片的副本")
         case .completed: String(localized: "第一次筛选已完成")
         }
@@ -66,35 +74,38 @@ enum FirstCurationGuideStep: Int, CaseIterable, Identifiable {
 
     var detail: String {
         switch self {
+        case .analyzePhotos:
+            String(localized: "分开人物和风景、找出相似照片、标出技术风险。真实文件夹越大这一步越久，导入后就是从这里开始。")
         case .choosePeople:
-            String(localized: "在“照片类型”中选择“人物”。人物和风景会分开整理。")
-        case .inspectPhoto:
-            String(localized: "双击任意人物照片，或选中后点击“预览”。")
-        case .keepPhoto:
-            String(localized: "在大图中点击“保留”。最终决定始终由你完成。")
-        case .runAIScoring:
+            String(localized: "在“照片类型”中选择“人物”。人物和风景分开整理，也分开评分。")
+        case .runPeopleAIScoring:
             String(localized: "在左侧“AI评分”里点击“开始人物 AI评分”，并在确认框中继续。使用内置结果，不会联网。")
-        case .switchToScenery:
-            String(localized: "在“照片类型”中选择“风景”，再点左侧“开始风景 AI评分”。两类分别评分、分别排序。")
         case .viewScore:
             String(localized: "选中一张已评分的照片，点底部“查看评分”；看过总分与五维评价后关掉大图即可。")
-        case .acceptResults:
-            String(localized: "网格已切到“已AI评分”，按分数逐张看过后，用底部的“采纳”确认。")
+        case .acceptPeopleResults:
+            String(localized: "点底部“采纳”。被采纳的照片就成为“保留”，导出时会被复制出去；最终决定始终由你做。")
+        case .switchSceneryAndScore:
+            String(localized: "在“照片类型”中选择“风景”，再点左侧“开始风景 AI评分”。两类分别评分、分别排序。")
+        case .acceptSceneryResults:
+            String(localized: "同样点底部“采纳”，把风景结果也变成保留。")
         case .exportCopies:
             String(localized: "导出 4 张后会得到“人物”和“风景”两个目录。原照片不会改变。")
         case .completed:
-            String(localized: "你已经完成检查、AI评分、人工确认和复制导出。点击“结束新手引导”返回。")
+            String(localized: "你已经完成本地分析、AI评分、采纳确认和复制导出。点击“结束新手引导”返回。")
         }
     }
 
     /// 需要回到网格才能继续的步骤。
     ///
-    /// AI评分 的入口在侧栏，采纳的入口在底部命令条——大图盖着这两处时，
-    /// 教学让用户去点一个他看不见的按钮。
+    /// AI评分 的入口在侧栏，采纳和导出的入口在底部命令条——大图盖着它们时，
+    /// 教学是在让用户去点一个他看不见的按钮。第 4 步恰恰相反：它就是要留在大图里。
     var shouldClosePhotoPreview: Bool {
         switch self {
-        case .runAIScoring, .switchToScenery, .acceptResults: true
-        default: false
+        case .runPeopleAIScoring, .acceptPeopleResults,
+             .switchSceneryAndScore, .acceptSceneryResults, .exportCopies:
+            true
+        default:
+            false
         }
     }
 }

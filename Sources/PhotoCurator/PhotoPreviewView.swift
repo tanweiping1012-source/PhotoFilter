@@ -65,7 +65,6 @@ struct PhotoPreviewView: View {
                library.selectedPhotoID.map({ !photoIDs.contains($0) }) ?? true {
                 library.select(first)
             }
-            library.recordDemoPhotoPreviewOpened()
             closePreviewIfGuideRequiresIt(
                 library.firstCurationGuideStep
             )
@@ -308,10 +307,6 @@ struct PhotoPreviewView: View {
                         || !library.canDecideSelectedPhoto
                 )
                 .accessibilityIdentifier("photo-preview.keep")
-                .firstCurationGuideTarget(
-                    library.firstCurationGuideStep == .keepPhoto,
-                    pointerSide: .trailing
-                )
 
                 Spacer()
             }

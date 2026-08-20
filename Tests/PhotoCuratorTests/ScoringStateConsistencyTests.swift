@@ -16,6 +16,7 @@ final class ScoringStateConsistencyTests: XCTestCase {
     func testDemoScoringClearsPendingCandidates() {
         let library = makeLibrary()
         library.startDemoMode()
+        library.completeDemoAnalysisImmediately()
 
         // 界面每帧都会读它；这一读把候选集合写进缓存。
         let beforeCount = library.localAestheticCandidatePhotoIDs.count
@@ -37,6 +38,7 @@ final class ScoringStateConsistencyTests: XCTestCase {
     func testNoPhotoIsBothScoredAndPending() {
         let library = makeLibrary()
         library.startDemoMode()
+        library.completeDemoAnalysisImmediately()
         _ = library.localAestheticCandidatePhotoIDs.count
         library.completeDemoAIScoringImmediately()
 
@@ -85,6 +87,7 @@ final class ScoringStateConsistencyTests: XCTestCase {
     func testCategoryChangeWithScoresStillWarnsAboutReset() {
         let library = makeLibrary()
         library.startDemoMode()
+        library.completeDemoAnalysisImmediately()
         library.completeDemoAIScoringImmediately()
 
         let scored = library.photos.first { !$0.aestheticRecommendations.isEmpty }

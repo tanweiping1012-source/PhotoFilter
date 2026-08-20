@@ -39,21 +39,23 @@ rg -q 'var offset: CGSize' "$target" ||
 rg -q 'allowsHitTesting\(false\)' "$target" ||
   fail "聚焦 overlay 可能拦截真实控件"
 
-# runAIScoring 不在这个循环里：它的聚焦目标是侧栏那个真实入口，条件写成
-# `library.demoScorableCategory == category`（由下面单独断言），而不是直接
-# 比对步骤枚举——正因为要指向真实控件，条件才不能再写成 == .runAIScoring。
-for step in \
-  choosePeople \
-  inspectPhoto \
-  keepPhoto \
-  switchToScenery \
-  viewScore \
-  acceptResults \
-  exportCopies; do
-  rg -q "firstCurationGuideStep.*\\.$step|firstCurationGuideStep == \\.$step|== \\.$step" \
-    "$content" "$preview" ||
+# 每一步都必须有聚焦目标。
+#
+# 多数条件收在 ViewModel 里而不是直接写在视图上：ContentView 那个大 VStack
+# 再多几个布尔运算，Swift 类型检查就会超时。所以这里对源和视图两头都断言。
+for step in viewScore exportCopies; do
+  rg -q "firstCurationGuideStep == \.$step" "$content" ||
     fail "教学步骤缺少聚焦目标：$step"
 done
+rg -q 'var isCurationScopeGuideTarget' "$view_model" ||
+  fail "缺少 choosePeople / switchSceneryAndScore 的聚焦条件"
+rg -q 'library\.isCurationScopeGuideTarget' "$content" ||
+  fail "照片类型分段控件没有承接教学指针"
+rg -q 'var isAcceptGuideStep' "$view_model" ||
+  fail "缺少 acceptPeopleResults / acceptSceneryResults 的聚焦条件"
+rg -q 'library\.isAcceptGuideStep' "$content" ||
+  fail "采纳按钮没有承接教学指针"
+# analyzePhotos 是自动步骤，没有可点的目标：任务条里的进度条本身就是它的呈现。
 
 # 教学必须驱动真实控件。
 #
@@ -79,7 +81,7 @@ rg -q 'func demoScorableCategory|var demoScorableCategory' "$view_model" ||
   fail "示例模式没有按类型开放真实的 AI评分 入口"
 rg -q 'startDemoAIScoring\(for: category\)' "$view_model" ||
   fail "示例评分没有走真实的发送确认框"
-rg -Uq 'case \.acceptResults:[[:space:]\n]*gridFilter = \.aiScored' "$content" ||
+rg -Uq 'case \.acceptPeopleResults, \.acceptSceneryResults:[[:space:]\n]*gridFilter = \.aiScored' "$content" ||
   fail "确认结果步骤应停在已AI评分列表，推荐结果就在那份列表里"
 rg -q 'onChange\(of: library\.firstCurationGuideStep\)' "$preview" ||
   fail "大图没有监听教学步骤切换"

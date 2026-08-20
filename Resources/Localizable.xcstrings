@@ -1066,23 +1066,24 @@
         }
       }
     },
-    "人物照片已单独显示。现在打开任意一张人物照片检查大图。": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "People photos are now shown separately. Open any People photo to inspect the large preview."
-          }
-        }
-      }
-    },
-    "人物离线评分完成。现在点击顶部“风景”，再为风景评一次分。": {
+    "人物照片已单独显示。现在在左侧点击“开始人物 AI评分”。": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Offline scoring for people is done. Click Scenery at the top and score that type too."
+            "value": "People photos are now shown on their own. Click “Start people AI scoring” in the sidebar."
+          }
+        }
+      }
+    },
+    "人物离线评分完成。打开任意一张照片，用底部的“查看评分”看它为什么得这个分。": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Offline scoring for people is done. Open any photo and use “View score” at the bottom to see why it scored that way."
           }
         }
       }
@@ -1148,12 +1149,13 @@
         }
       }
     },
-    "你已经完成检查、AI评分、人工确认和复制导出。点击“结束新手引导”返回。": {
+    "你已经完成本地分析、AI评分、采纳确认和复制导出。点击“结束新手引导”返回。": {
+      "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "You completed review, AI scoring, confirmation, and copy export. Click Finish Tutorial to return."
+            "value": "You have completed local analysis, AI scoring, acceptance, and export. Click Finish tutorial to return."
           }
         }
       }
@@ -1281,16 +1283,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Stop"
-          }
-        }
-      }
-    },
-    "先保留这张照片": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Keep This Photo First"
           }
         }
       }
@@ -1452,6 +1444,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Decision: %1$@"
+          }
+        }
+      }
+    },
+    "分开人物和风景、找出相似照片、标出技术风险。真实文件夹越大这一步越久，导入后就是从这里开始。": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Separating people from scenery, grouping near-duplicates, and flagging technical risks. The bigger the folder, the longer this takes — it is where every import begins."
           }
         }
       }
@@ -1633,16 +1636,6 @@
         }
       }
     },
-    "双击任意人物照片，或选中后点击“预览”。": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Double-click any People photo, or select one and click Preview."
-          }
-        }
-      }
-    },
     "双击可查看大图": {
       "localizations": {
         "en": {
@@ -1764,6 +1757,17 @@
         }
       }
     },
+    "同样点底部“采纳”，把风景结果也变成保留。": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Click Accept again to turn the scenery results into keeps."
+          }
+        }
+      }
+    },
     "品牌": {
       "localizations": {
         "en": {
@@ -1784,6 +1788,17 @@
         }
       }
     },
+    "在“照片类型”中选择“人物”。人物和风景分开整理，也分开评分。": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose People under Photo type. People and scenery are curated separately and scored separately."
+          }
+        }
+      }
+    },
     "在“照片类型”中选择“风景”，再点左侧“开始风景 AI评分”。两类分别评分、分别排序。": {
       "extractionState": "manual",
       "localizations": {
@@ -1791,16 +1806,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Choose Scenery under Photo type, then click “Start scenery AI scoring” in the sidebar. Each type is scored and ranked separately."
-          }
-        }
-      }
-    },
-    "在大图中点击“保留”。最终决定始终由你完成。": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Click Keep in the large preview. You always make the final decision."
           }
         }
       }
@@ -1863,16 +1868,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Large"
-          }
-        }
-      }
-    },
-    "大图用于检查细节；现在将这张照片标记为保留。": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Use the large preview to inspect details. Now mark this photo as Keep."
           }
         }
       }
@@ -3116,6 +3111,17 @@
         }
       }
     },
+    "本地分析完成：4 张人物、4 张风景，各保留 2 张。现在在“照片类型”中选择“人物”。": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Local analysis is done: 4 people photos and 4 scenery photos, keeping 2 of each. Now choose People under Photo type."
+          }
+        }
+      }
+    },
     "本地分析进度": {
       "localizations": {
         "en": {
@@ -3461,6 +3467,28 @@
         }
       }
     },
+    "正在本地分析示例照片：分开人物和风景、找出相似照片、标出技术风险。": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Analyzing the sample photos locally: separating people from scenery, grouping near-duplicates, and flagging technical risks."
+          }
+        }
+      }
+    },
+    "正在本地分析这 8 张照片": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Analyzing these 8 photos locally"
+          }
+        }
+      }
+    },
     "正在演示 AI评分：使用内置固定结果，不联网、不读取 Keychain。": {
       "localizations": {
         "en": {
@@ -3767,6 +3795,17 @@
         }
       }
     },
+    "点底部“采纳”。被采纳的照片就成为“保留”，导出时会被复制出去；最终决定始终由你做。": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Click Accept at the bottom. Accepted photos become Keep and are copied on export. The final call is always yours."
+          }
+        }
+      }
+    },
     "照片不可用": {
       "localizations": {
         "en": {
@@ -3992,16 +4031,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Example Curation"
-          }
-        }
-      }
-    },
-    "示例筛选已准备：4 张人物、4 张风景，各保留 2 张。先选择“人物”。": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "The sample is ready with four People and four Scenery photos, keeping two of each. Start by choosing People."
           }
         }
       }
@@ -4330,13 +4359,13 @@
         }
       }
     },
-    "评分只提供解释和排序；用底部的“采纳”确认最终结果。": {
+    "评分只提供解释和排序。点底部的“采纳”，被采纳的照片就成为保留。": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Scoring only explains and ranks. Use Accept at the bottom to confirm the final result."
+            "value": "Scores only explain and rank. Click Accept at the bottom and the accepted photos become keeps."
           }
         }
       }
@@ -4458,16 +4487,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Choose People under Photo Type first."
-          }
-        }
-      }
-    },
-    "请先打开一张照片检查大图。": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Open a photo to inspect the large preview."
           }
         }
       }
@@ -4926,6 +4945,17 @@
         }
       }
     },
+    "采纳人物结果": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Accept the people results"
+          }
+        }
+      }
+    },
     "采纳后会超过%@目标 %lld 张，请先调整已有保留项。": {
       "localizations": {
         "en": {
@@ -4938,6 +4968,17 @@
           "stringUnit": {
             "state": "new",
             "value": "采纳后会超过%1$@目标 %2$lld 张，请先调整已有保留项。"
+          }
+        }
+      }
+    },
+    "采纳风景结果": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Accept the scenery results"
           }
         }
       }
@@ -5104,13 +5145,13 @@
         }
       }
     },
-    "风景离线评分完成。打开任意一张照片，用底部的“查看评分”看它为什么得这个分。": {
+    "风景离线评分完成。点底部的“采纳”，把风景结果也变成保留。": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Offline scoring for scenery is done. Open any photo and use “View score” at the bottom to see why it scored that way."
+            "value": "Offline scoring for scenery is done. Click Accept at the bottom to turn those results into keeps."
           }
         }
       }

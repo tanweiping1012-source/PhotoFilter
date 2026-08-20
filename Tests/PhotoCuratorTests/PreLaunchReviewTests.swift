@@ -194,6 +194,7 @@ final class PreLaunchReviewTests: XCTestCase {
     func testRejectingAnAcceptedPhotoRemovesItFromExport() throws {
         let library = makeLibrary()
         library.startDemoMode()
+        library.completeDemoAnalysisImmediately()
         library.completeDemoAIScoringImmediately()
         library.acceptPendingAIFinalSelection()
 
@@ -238,6 +239,7 @@ final class PreLaunchReviewTests: XCTestCase {
     func testRejectingRemovesPhotoFromTopScoredSet() throws {
         let library = makeLibrary()
         library.startDemoMode()
+        library.completeDemoAnalysisImmediately()
         library.completeDemoAIScoringImmediately()
         library.acceptPendingAIFinalSelection()
 

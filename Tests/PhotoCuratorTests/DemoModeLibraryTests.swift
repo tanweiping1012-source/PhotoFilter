@@ -177,6 +177,11 @@ final class DemoModeLibraryTests: XCTestCase {
         XCTAssertEqual(viewModel.activeProjectID, DemoModeLibrary.projectID)
         XCTAssertEqual(viewModel.photos.count, 8)
         XCTAssertEqual(viewModel.targetSelectionCount, 4)
+        // 教学从本地分析开始——那是真实用户导入文件夹后最先看到的一屏。
+        XCTAssertEqual(viewModel.firstCurationGuideStep, .analyzePhotos)
+        XCTAssertTrue(viewModel.isAnalyzing)
+        viewModel.completeDemoAnalysisImmediately()
+        XCTAssertFalse(viewModel.isAnalyzing)
         XCTAssertEqual(viewModel.firstCurationGuideStep, .choosePeople)
         XCTAssertEqual(viewModel.curationScope, .all)
         XCTAssertTrue(viewModel.aiFinalSelectionPhotoIDs.isEmpty)
@@ -189,44 +194,44 @@ final class DemoModeLibraryTests: XCTestCase {
         XCTAssertNil(store.catalog)
         XCTAssertFalse(viewModel.canUndo)
 
-        let firstPhotoID = try XCTUnwrap(viewModel.photos.first?.id)
-        let secondPhotoID = viewModel.photos[1].id
-        viewModel.mark(photoID: firstPhotoID, as: .keep)
-        XCTAssertFalse(viewModel.canUndo, "教学必须先引导用户检查大图")
-
+        // 真实流程里 AI评分 不要求先手动保留任何照片：分析完就能直接评。
         viewModel.curationScope = .people
-        XCTAssertEqual(viewModel.firstCurationGuideStep, .inspectPhoto)
-        viewModel.select(secondPhotoID)
-        viewModel.recordDemoPhotoPreviewOpened()
-        XCTAssertEqual(viewModel.firstCurationGuideStep, .keepPhoto)
-        viewModel.mark(photoID: secondPhotoID, as: .keep)
-        XCTAssertTrue(viewModel.canUndo)
-        XCTAssertEqual(viewModel.firstCurationGuideStep, .runAIScoring)
+        XCTAssertEqual(viewModel.firstCurationGuideStep, .runPeopleAIScoring)
+        XCTAssertEqual(viewModel.demoScorableCategory, .people)
 
         viewModel.completeDemoAIScoringImmediately()
-        // 人物、风景各评一次之后，教学才走到"查看评分"。
-        XCTAssertEqual(viewModel.firstCurationGuideStep, .viewScore)
-        // 第 4、5、7 步的入口分别在侧栏和底部命令条，大图盖着它们时必须先关掉；
-        // 第 6 步恰恰相反——它就是要留在大图里看评分。
-        XCTAssertTrue(
-            FirstCurationGuideStep.runAIScoring.shouldClosePhotoPreview
-        )
-        XCTAssertTrue(
-            FirstCurationGuideStep.switchToScenery.shouldClosePhotoPreview
-        )
-        XCTAssertTrue(
-            FirstCurationGuideStep.acceptResults.shouldClosePhotoPreview
-        )
+        // 两类都评完之后，教学落在"采纳风景结果"。
+        XCTAssertEqual(viewModel.firstCurationGuideStep, .acceptSceneryResults)
+        // 评分、采纳和导出的入口分别在侧栏和底部命令条，大图盖着它们时必须先关掉；
+        // 只有"查看评分"那一步恰恰要留在大图里。
+        for step in [
+            FirstCurationGuideStep.runPeopleAIScoring,
+            .acceptPeopleResults,
+            .switchSceneryAndScore,
+            .acceptSceneryResults,
+            .exportCopies,
+        ] {
+            XCTAssertTrue(
+                step.shouldClosePhotoPreview,
+                "\(step) 的入口不在大图里，必须先关掉大图"
+            )
+        }
         XCTAssertFalse(
             FirstCurationGuideStep.viewScore.shouldClosePhotoPreview
         )
         XCTAssertEqual(
             viewModel.statusMessage,
-            "风景离线评分完成。打开任意一张照片，用底部的“查看评分”看它为什么得这个分。"
+            "风景离线评分完成。点底部的“采纳”，把风景结果也变成保留。"
         )
         XCTAssertEqual(viewModel.aiFinalSelectionPhotoIDs.count, 4)
-        XCTAssertTrue(viewModel.aiFinalSelectionPhotoIDs.contains(secondPhotoID))
-        XCTAssertTrue(viewModel.aiFinalSelectionPhotoIDs.contains(firstPhotoID))
+        for category in PhotoCurationCategory.allCases {
+            XCTAssertEqual(
+                (viewModel.aiFinalSelectionPhotoIDsByCategory[category] ?? [])
+                    .count,
+                2,
+                "\(category) 应各自产出 2 张推荐"
+            )
+        }
         XCTAssertTrue(viewModel.localAestheticCandidatePhotoIDs.isEmpty)
         XCTAssertEqual(
             viewModel.photos.filter {
@@ -234,15 +239,18 @@ final class DemoModeLibraryTests: XCTestCase {
             }.count,
             8
         )
-        XCTAssertEqual(viewModel.photos[1].decision, .keep)
+        // 教学不再要求先手动保留一张：分析完就能直接评分。
+        XCTAssertTrue(
+            viewModel.photos.allSatisfy { $0.decision == .undecided },
+            "AI评分 不该以任何人工决定为前置条件"
+        )
 
         viewModel.curationScope = .scenery
-        XCTAssertEqual(viewModel.firstCurationGuideStep, .viewScore)
-        XCTAssertFalse(
-            try XCTUnwrap(
-                viewModel.firstCurationGuideStep
-            ).shouldClosePhotoPreview
+        // 对同一张照片重复设置同一分类，不得清空既有评分。
+        let sceneryPhotoID = try XCTUnwrap(
+            viewModel.photos.first { $0.curationCategory == .scenery }?.id
         )
+        viewModel.select(sceneryPhotoID)
         let scoreCountBeforeRepeatedCategory =
             viewModel.selectedPhoto?.aestheticRecommendations.count
         let finalIDsBeforeRepeatedCategory =
@@ -256,11 +264,15 @@ final class DemoModeLibraryTests: XCTestCase {
             viewModel.aiFinalSelectionPhotoIDs,
             finalIDsBeforeRepeatedCategory
         )
-        viewModel.confirmDemoScoreReview()
-        XCTAssertEqual(viewModel.firstCurationGuideStep, .acceptResults)
-        XCTAssertEqual(viewModel.curationScope, .all)
-        XCTAssertEqual(viewModel.pendingAIFinalSelectionAcceptanceCount, 3)
+        // 两类都评完之后教学停在"采纳风景结果"；采纳一次即推进到导出。
+        XCTAssertEqual(viewModel.firstCurationGuideStep, .acceptSceneryResults)
+        // 这个测试用 completeDemoAIScoringImmediately 一次评完两类，跳过了
+        // 第 5 步的人物采纳，所以这里回到"全部"一次性采纳 4 张。
+        viewModel.curationScope = .all
+        XCTAssertEqual(viewModel.pendingAIFinalSelectionAcceptanceCount, 4)
         viewModel.acceptPendingAIFinalSelection()
+        // 采纳同样是一次可撤销的人工决定——最终决定始终能收回。
+        XCTAssertTrue(viewModel.canUndo)
         XCTAssertEqual(viewModel.firstCurationGuideStep, .exportCopies)
         XCTAssertEqual(viewModel.keepers.count, 4)
         XCTAssertTrue(viewModel.canExport)
@@ -292,12 +304,10 @@ final class DemoModeLibraryTests: XCTestCase {
             launchesInDemoMode: true,
             demoResourceDirectory: directory
         )
-        let firstPhotoID = try XCTUnwrap(viewModel.photos.first?.id)
+        viewModel.completeDemoAnalysisImmediately()
         viewModel.curationScope = .people
-        viewModel.recordDemoPhotoPreviewOpened()
-        viewModel.mark(photoID: firstPhotoID, as: .keep)
 
-        // 第 4 步：教学必须驱动侧栏那个真实入口，而且只对人物可用——
+        // 第 3 步：教学必须驱动侧栏那个真实入口，而且只对人物可用——
         // 真实流程就是一类评一次，一次评两类会教出一个不存在的流程。
         XCTAssertEqual(viewModel.demoScorableCategory, .people)
         XCTAssertTrue(
@@ -315,7 +325,7 @@ final class DemoModeLibraryTests: XCTestCase {
 
         XCTAssertTrue(viewModel.isRunningDemoAIScoring)
         await waitUntil {
-            viewModel.firstCurationGuideStep == .switchToScenery
+            viewModel.firstCurationGuideStep == .viewScore
         }
         XCTAssertFalse(viewModel.isRunningDemoAIScoring)
         XCTAssertEqual(viewModel.demoAIScoringCompletedPhotoCount, 4)
@@ -327,7 +337,15 @@ final class DemoModeLibraryTests: XCTestCase {
         // 完成回执与真实流程一致，网格会被带到该类型的"已AI评分"。
         XCTAssertNotNil(viewModel.completionNotice)
 
-        // 第 5 步：切到风景之后，风景的入口才出现。
+        // 看完评分、采纳人物结果之后，才轮到风景。
+        XCTAssertNil(viewModel.demoScorableCategory)
+        viewModel.confirmDemoScoreReview()
+        XCTAssertEqual(viewModel.firstCurationGuideStep, .acceptPeopleResults)
+        viewModel.acceptPendingAIFinalSelection()
+        XCTAssertEqual(viewModel.firstCurationGuideStep, .switchSceneryAndScore)
+        // 采纳做的事就是 decision = .keep——"保留"是流程的产出，不是评分的前置条件。
+        XCTAssertEqual(viewModel.keepers(in: .people).count, 2)
+
         XCTAssertNil(viewModel.demoScorableCategory)
         viewModel.curationScope = .scenery
         XCTAssertEqual(viewModel.demoScorableCategory, .scenery)
@@ -336,11 +354,55 @@ final class DemoModeLibraryTests: XCTestCase {
         XCTAssertTrue(viewModel.showAIFinalSelectionRunConfirmation)
         viewModel.submitConfirmedAIFinalSelectionRun()
         await waitUntil {
-            viewModel.firstCurationGuideStep == .viewScore
+            viewModel.firstCurationGuideStep == .acceptSceneryResults
         }
 
         XCTAssertEqual(viewModel.demoAIScoringCompletedPhotoCount, 8)
         XCTAssertEqual(viewModel.aiFinalSelectionPhotoIDs.count, 4)
+    }
+
+    /// 教学不再强制"先保留一张"，但用户随时可以自己保留。
+    /// 离线结果必须和真实评分一样尊重人工决定——否则教学会演示出一个
+    /// "AI 会覆盖你的决定"的假象，而这恰恰是这个 App 承诺不做的事。
+    @MainActor
+    func testDemoScoringKeepsManualKeeperInRecommendations() throws {
+        let directory = try makeDemoDirectory()
+        let viewModel = PhotoLibraryViewModel(
+            projectStore: MemoryProjectStore(),
+            bookmarkAccess: TestBookmarkAccess(),
+            apiKeyConfigurationCheck: { _ in false },
+            launchesInDemoMode: true,
+            demoResourceDirectory: directory
+        )
+        viewModel.completeDemoAnalysisImmediately()
+        viewModel.curationScope = .people
+
+        // 挑一张 AI 本来不会推荐的人物照片，人工保留它。
+        let peopleIDs = viewModel.photos
+            .filter { $0.curationCategory == .people }
+            .map(\.id)
+        let sessionPicks = try XCTUnwrap(
+            DemoModeLibrary
+                .makeSession(resourceDirectory: directory)
+                .finalSelectionPhotoIDsByCategory[.people]
+        )
+        let manualKeeperID = try XCTUnwrap(
+            peopleIDs.first { !sessionPicks.contains($0) }
+        )
+        viewModel.mark(photoID: manualKeeperID, as: .keep)
+
+        viewModel.completeDemoAIScoringImmediately()
+
+        XCTAssertTrue(
+            (viewModel.aiFinalSelectionPhotoIDsByCategory[.people] ?? [])
+                .contains(manualKeeperID),
+            "人工保留的照片必须留在推荐结果里，AI 不得覆盖人工决定"
+        )
+        XCTAssertEqual(
+            (viewModel.aiFinalSelectionPhotoIDsByCategory[.people] ?? []).count,
+            2,
+            "人物仍应收敛到目标张数"
+        )
     }
 
     @MainActor
@@ -371,6 +433,8 @@ final class DemoModeLibraryTests: XCTestCase {
         let keyChecksBeforeDemo = keyCheckCount
 
         viewModel.startDemoMode(resourceDirectory: demoDirectory)
+        // 分析进行中会锁住项目导航，这正是真实流程的行为；测试直接跳到完成态。
+        viewModel.completeDemoAnalysisImmediately()
 
         XCTAssertTrue(viewModel.isDemoModeActive)
         XCTAssertEqual(keyCheckCount, keyChecksBeforeDemo)

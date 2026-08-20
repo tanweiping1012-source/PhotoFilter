@@ -29,14 +29,17 @@ rg -q 'Label\("体验一次完整筛选"' "$onboarding" ||
 rg -q 'Label\("选择我的照片"' "$onboarding" ||
   fail "场景首页缺少真实照片入口"
 
+# 步骤顺序必须和真实主链路一致：本地分析 → 按类型 AI评分 → 采纳 → 导出。
+# 旧版把"手动保留"排在 AI评分 之前，教出来的因果是反的——真实流程里"采纳"
+# 做的事就是 decision = .keep，保留是产出而不是评分的入场券。
 for step in \
+  analyzePhotos \
   choosePeople \
-  inspectPhoto \
-  keepPhoto \
-  runAIScoring \
-  switchToScenery \
+  runPeopleAIScoring \
   viewScore \
-  acceptResults \
+  acceptPeopleResults \
+  switchSceneryAndScore \
+  acceptSceneryResults \
   exportCopies \
   completed; do
   rg -q "case $step" "$onboarding" ||
@@ -84,8 +87,12 @@ for identifier in \
   rg -Fq "\"$identifier\"" "$preview" ||
     fail "任务条缺少无障碍标识：$identifier"
 done
-rg -q 'recordDemoPhotoPreviewOpened' "$preview" ||
-  fail "打开大图没有推进教学"
+# 教学不再有"打开大图"这一步：本地分析之后直接进入按类型评分。
+if rg -q 'recordDemoPhotoPreviewOpened' "$preview" "$view_model"; then
+  fail "教学仍保留已废弃的打开大图步骤"
+fi
+rg -q 'func startDemoAnalysisPacing' "$view_model" ||
+  fail "示例没有走本地分析这一步，而它是真实用户最先看到的一屏"
 rg -q 'recordDemoScoreReviewFinished' "$preview" ||
   fail "查看评分没有推进教学"
 rg -q 'confirmDemoScoreReview' "$preview" "$view_model" ||

@@ -672,13 +672,7 @@ struct ContentView: View {
                     .accessibilityLabel("照片类型")
                     .accessibilityValue(library.curationScope.title)
                     .firstCurationGuideTarget(
-                        library.firstCurationGuideStep == .choosePeople
-                            || (
-                                library.firstCurationGuideStep
-                                    == .switchToScenery
-                                    && library.curationScope.category
-                                        != .scenery
-                            ),
+                        library.isCurationScopeGuideTarget,
                         pointerSide: .trailing,
                         cornerRadius: 6
                     )
@@ -777,14 +771,6 @@ struct ContentView: View {
                                         movePhotoFocus(direction, from: index, in: filteredPhotos)
                                     }
                                 )
-                                .firstCurationGuideTarget(
-                                    library.firstCurationGuideStep
-                                        == .inspectPhoto
-                                        && photo.id
-                                            == library.selectedPhotoID,
-                                    pointerSide: .trailing,
-                                    cornerRadius: 12
-                                )
                                 .contextMenu {
                                     if !photo.aestheticRecommendations.isEmpty {
                                         Button("查看评分") {
@@ -859,7 +845,7 @@ struct ContentView: View {
             switch step {
             case .viewScore:
                 gridFilter = .aiScored
-            case .acceptResults:
+            case .acceptPeopleResults, .acceptSceneryResults:
                 gridFilter = .aiScored
             default:
                 break
@@ -926,8 +912,7 @@ struct ContentView: View {
                 .accessibilityIdentifier("decision.accept-ai")
                 .accessibilityLabel("采纳 \(library.pendingAIFinalSelectionAcceptanceCount) 张评分结果")
                 .firstCurationGuideTarget(
-                    library.firstCurationGuideStep == .acceptResults
-                        && gridFilter == .aiScored,
+                    library.isAcceptGuideStep && gridFilter == .aiScored,
                     pointerSide: .leading
                 )
             }
@@ -986,8 +971,7 @@ struct ContentView: View {
                 .accessibilityLabel("采纳 \(library.pendingAIFinalSelectionAcceptanceCount) 张评分结果")
                 .help("采纳 \(library.pendingAIFinalSelectionAcceptanceCount) 张评分结果")
                 .firstCurationGuideTarget(
-                    library.firstCurationGuideStep == .acceptResults
-                        && gridFilter == .aiScored,
+                    library.isAcceptGuideStep && gridFilter == .aiScored,
                     pointerSide: .leading
                 )
             }

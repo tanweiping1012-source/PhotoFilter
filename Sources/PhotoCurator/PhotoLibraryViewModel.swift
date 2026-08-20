@@ -130,7 +130,7 @@ final class PhotoLibraryViewModel: ObservableObject {
         PhotoCurationCategory?
     private var demoModeSession: DemoModeSession?
     private var demoAIScoringTask: Task<Void, Never>?
-    private var demoGuidedKeeperPhotoID: String?
+    private var demoAnalysisTask: Task<Void, Never>?
     private var projectSnapshots: [UUID: PhotoProjectSnapshot] = [:]
     private var persistedProjects: [UUID: PersistedPhotoProject] = [:]
     private var startedSecurityScopes: [UUID: URL] = [:]
@@ -922,12 +922,11 @@ final class PhotoLibraryViewModel: ObservableObject {
         activeProjectID = project.id
         isDemoModeActive = true
         curationScope = .all
-        firstCurationGuideStep = .choosePeople
+        firstCurationGuideStep = .analyzePhotos
         demoModeSession = session
         isRunningDemoAIScoring = false
         demoAIScoringCompletedBatchCount = 0
         demoAIScoringCompletedPhotoCount = 0
-        demoGuidedKeeperPhotoID = nil
         isAIModelKeyConfigured = false
         selectedFolder = session.resourceDirectory
         replacePhotos(session.startingPhotos)
@@ -944,13 +943,14 @@ final class PhotoLibraryViewModel: ObservableObject {
         completionNotice = nil
         undoStack = []
         isScanning = false
-        isAnalyzing = false
         isGroupingCandidates = false
-        analysisCompleted = session.startingPhotos.count
+        isAnalyzing = true
+        analysisCompleted = 0
         analysisTotal = session.startingPhotos.count
+        startDemoAnalysisPacing()
         statusMessage = String(
             localized:
-                "示例筛选已准备：4 张人物、4 张风景，各保留 2 张。先选择“人物”。"
+                "正在本地分析示例照片：分开人物和风景、找出相似照片、标出技术风险。"
         )
     }
 
@@ -961,12 +961,12 @@ final class PhotoLibraryViewModel: ObservableObject {
             selectedPhotoID = photos.first {
                 $0.curationCategory == .people
             }?.id
-            firstCurationGuideStep = .inspectPhoto
+            firstCurationGuideStep = .runPeopleAIScoring
             statusMessage = String(
                 localized:
-                    "人物照片已单独显示。现在打开任意一张人物照片检查大图。"
+                    "人物照片已单独显示。现在在左侧点击“开始人物 AI评分”。"
             )
-        } else if firstCurationGuideStep == .switchToScenery,
+        } else if firstCurationGuideStep == .switchSceneryAndScore,
                   curationScope == .scenery {
             selectedPhotoID = photos.first {
                 $0.curationCategory == .scenery
@@ -980,22 +980,6 @@ final class PhotoLibraryViewModel: ObservableObject {
         }
     }
 
-    func recordDemoPhotoPreviewOpened() {
-        guard isDemoModeActive,
-              firstCurationGuideStep == .inspectPhoto,
-              let selectedPhotoID,
-              photos.contains(where: { $0.id == selectedPhotoID }) else {
-            return
-        }
-        demoGuidedKeeperPhotoID = selectedPhotoID
-        if selectedPhoto?.decision == .keep {
-            firstCurationGuideStep = .runAIScoring
-        } else {
-            firstCurationGuideStep = .keepPhoto
-        }
-        statusMessage = String(localized: "大图用于检查细节；现在将这张照片标记为保留。")
-    }
-
     func recordDemoScoreReviewFinished() {
         confirmDemoScoreReview()
     }
@@ -1006,9 +990,71 @@ final class PhotoLibraryViewModel: ObservableObject {
               selectedPhoto?.aestheticRecommendations.isEmpty == false else {
             return
         }
-        curationScope = .all
-        firstCurationGuideStep = .acceptResults
-        statusMessage = String(localized: "评分只提供解释和排序；用底部的“采纳”确认最终结果。")
+        firstCurationGuideStep = .acceptPeopleResults
+        statusMessage = String(localized: "评分只提供解释和排序。点底部的“采纳”，被采纳的照片就成为保留。")
+    }
+
+    /// 示例的本地分析进度按教学节奏走完，不是算力开销。
+    ///
+    /// 演示结果必须是确定的——相似分组和内置评分结果的 scope 是按烘焙分组编号的，
+    /// 真跑一遍分析管线重算就可能对不上，所以这里不重算。
+    /// 但真实用户第一次导入文件夹后，最先看到、也停留最久的就是这条进度条；
+    /// 教学整段跳过它，用户第一次面对真实图库那几十秒时会不知道发生了什么。
+    /// 8 张 × 850ms ≈ 6.8 秒是刻意选的教学时长。
+    private func startDemoAnalysisPacing() {
+        demoAnalysisTask?.cancel()
+        let total = max(analysisTotal, 1)
+        demoAnalysisTask = Task { @MainActor [weak self] in
+            for completed in 1...total {
+                try? await Task.sleep(for: .milliseconds(850))
+                if Task.isCancelled { return }
+                guard let self, self.isDemoModeActive,
+                      self.firstCurationGuideStep == .analyzePhotos else { return }
+                self.analysisCompleted = completed
+            }
+            guard let self, self.isDemoModeActive,
+                  self.firstCurationGuideStep == .analyzePhotos else { return }
+            self.finishDemoAnalysis()
+        }
+    }
+
+    /// 测试与自动审核用：跳过教学节奏，直接落到分析完成态。
+    func completeDemoAnalysisImmediately() {
+        guard isDemoModeActive, firstCurationGuideStep == .analyzePhotos else { return }
+        demoAnalysisTask?.cancel()
+        demoAnalysisTask = nil
+        analysisCompleted = analysisTotal
+        finishDemoAnalysis()
+    }
+
+    private func finishDemoAnalysis() {
+        demoAnalysisTask = nil
+        isAnalyzing = false
+        analysisCompleted = analysisTotal
+        firstCurationGuideStep = .choosePeople
+        statusMessage = String(
+            localized:
+                "本地分析完成：4 张人物、4 张风景，各保留 2 张。现在在“照片类型”中选择“人物”。"
+        )
+    }
+
+    /// 教学此刻是否该指向"照片类型"分段控件。
+    ///
+    /// 第 6 步分两段：先指分段控件让用户切到风景，切过去之后指针转到侧栏的
+    /// "开始风景 AI评分"。
+    var isCurationScopeGuideTarget: Bool {
+        if firstCurationGuideStep == .choosePeople { return true }
+        return firstCurationGuideStep == .switchSceneryAndScore
+            && curationScope.category != .scenery
+    }
+
+    /// 教学此刻是否停在"采纳"这一步（人物或风景）。
+    ///
+    /// 放在这里而不是视图里：ContentView 那个大 VStack 再多几个布尔运算，
+    /// 类型检查就会超时。
+    var isAcceptGuideStep: Bool {
+        firstCurationGuideStep == .acceptPeopleResults
+            || firstCurationGuideStep == .acceptSceneryResults
     }
 
     /// 教学此刻允许评分的类型。
@@ -1017,15 +1063,12 @@ final class PhotoLibraryViewModel: ObservableObject {
     /// 一个不存在的流程。第 4 步评人物，第 5 步切到风景后再评风景。
     var demoScorableCategory: PhotoCurationCategory? {
         guard isDemoModeActive, demoModeSession != nil else { return nil }
-        guard let guidedKeeperPhotoID = demoGuidedKeeperPhotoID,
-              photos.first(where: { $0.id == guidedKeeperPhotoID })?.decision
-                == .keep else {
-            return nil
-        }
+        // 真实流程里 AI评分 不要求先手动保留任何照片，分析完就能直接评。
+        // 旧教学把"先保留一张"写成了评分的前置条件，教出来的因果是反的。
         switch firstCurationGuideStep {
-        case .runAIScoring:
+        case .runPeopleAIScoring:
             return .people
-        case .switchToScenery:
+        case .switchSceneryAndScore:
             return curationScope.category == .scenery ? .scenery : nil
         default:
             return nil
@@ -1176,40 +1219,41 @@ final class PhotoLibraryViewModel: ObservableObject {
             )
         )
         if category == .people {
-            firstCurationGuideStep = .switchToScenery
-            statusMessage = String(localized: "人物离线评分完成。现在点击顶部“风景”，再为风景评一次分。")
-        } else {
             firstCurationGuideStep = .viewScore
-            statusMessage = String(localized: "风景离线评分完成。打开任意一张照片，用底部的“查看评分”看它为什么得这个分。")
+            statusMessage = String(localized: "人物离线评分完成。打开任意一张照片，用底部的“查看评分”看它为什么得这个分。")
+        } else {
+            firstCurationGuideStep = .acceptSceneryResults
+            statusMessage = String(localized: "风景离线评分完成。点底部的“采纳”，把风景结果也变成保留。")
         }
     }
 
+    /// 离线结果不得覆盖人工已保留的照片。
+    ///
+    /// 教学不再强制"先保留一张"，但用户随时可以自己保留；真实评分靠
+    /// `AIFinalSelectionRunContext.lockedKeeperPhotoIDs` 做同一件事，
+    /// 示例必须保持一致，否则教学会演示出一个"AI 会覆盖你的决定"的假象。
     private func demoFinalSelectionPhotoIDsByCategory(
         for session: DemoModeSession
     ) -> [PhotoCurationCategory: Set<String>] {
-        guard let guidedKeeperPhotoID = demoGuidedKeeperPhotoID,
-              let category = photos.first(where: {
-                  $0.id == guidedKeeperPhotoID
-              })?.curationCategory else {
-            return session.finalSelectionPhotoIDsByCategory
-        }
-        let remainingIDs =
-            session.rankedPhotoIDsByCategory[category, default: []]
-                .filter {
-            $0 != guidedKeeperPhotoID
-        }
         var result = session.finalSelectionPhotoIDsByCategory
-        result[category] = Set(
-            [guidedKeeperPhotoID]
-                + Array(
-                    remainingIDs.prefix(
-                        max(
-                            0,
-                            session.selectionTargets[category] - 1
-                        )
+        for category in PhotoCurationCategory.allCases {
+            let manualKeeperIDs = photos
+                .filter {
+                    $0.curationCategory == category && $0.decision == .keep
+                }
+                .map(\.id)
+            guard !manualKeeperIDs.isEmpty else { continue }
+            let target = session.selectionTargets[category]
+            let remainingIDs = session
+                .rankedPhotoIDsByCategory[category, default: []]
+                .filter { !manualKeeperIDs.contains($0) }
+            result[category] = Set(
+                manualKeeperIDs.prefix(target)
+                    + remainingIDs.prefix(
+                        max(0, target - manualKeeperIDs.count)
                     )
-                )
-        )
+            )
+        }
         return result
     }
 
@@ -1300,6 +1344,8 @@ final class PhotoLibraryViewModel: ObservableObject {
         if wasDemoModeActive {
             demoAIScoringTask?.cancel()
             demoAIScoringTask = nil
+            demoAnalysisTask?.cancel()
+            demoAnalysisTask = nil
             demoModeSession = nil
             firstCurationGuideStep = nil
             isRunningDemoAIScoring = false
@@ -1568,12 +1614,6 @@ final class PhotoLibraryViewModel: ObservableObject {
                 )
                 return
             }
-            if firstCurationGuideStep == .inspectPhoto {
-                statusMessage = String(
-                    localized: "请先打开一张照片检查大图。"
-                )
-                return
-            }
         }
         guard let index = photoIndex(for: photoID), photos[index].decision != decision else {
             return
@@ -1593,13 +1633,6 @@ final class PhotoLibraryViewModel: ObservableObject {
             localized:
                 "已将 \(photos[index].filename) 标记为\(decision.title)。\(selectionProgressMessage)"
         )
-        if isDemoModeActive,
-           firstCurationGuideStep == .keepPhoto,
-           decision == .keep {
-            demoGuidedKeeperPhotoID = photoID
-            firstCurationGuideStep = .runAIScoring
-            statusMessage = String(localized: "人工决定已保留。下一步在左侧“AI评分”里点击“开始人物 AI评分”。")
-        }
     }
 
     func undo() {
@@ -1664,9 +1697,12 @@ final class PhotoLibraryViewModel: ObservableObject {
             localized:
                 "已采纳 \(pendingIDs.count) 张 AI评分结果。人物 \(keepers(in: .people).count)/\(selectionTargets.people)，风景 \(keepers(in: .scenery).count)/\(selectionTargets.scenery)。"
         )
-        if isDemoModeActive,
-           firstCurationGuideStep == .acceptResults {
-            firstCurationGuideStep = .exportCopies
+        if isDemoModeActive {
+            if firstCurationGuideStep == .acceptPeopleResults {
+                firstCurationGuideStep = .switchSceneryAndScore
+            } else if firstCurationGuideStep == .acceptSceneryResults {
+                firstCurationGuideStep = .exportCopies
+            }
         }
     }
 
@@ -2438,7 +2474,6 @@ final class PhotoLibraryViewModel: ObservableObject {
         aiFinalSelectionRunProgressByCategory = [:]
         firstCurationGuideStep = nil
         demoModeSession = nil
-        demoGuidedKeeperPhotoID = nil
         isRunningDemoAIScoring = false
         demoAIScoringCompletedBatchCount = 0
         demoAIScoringCompletedPhotoCount = 0

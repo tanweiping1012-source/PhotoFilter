@@ -79,8 +79,8 @@ rg -q 'PhotoCurationCategory\.allCases' "$export_service" ||
 
 rg -q 'case choosePeople' "$onboarding" ||
   fail "新手引导缺少选择人物步骤"
-rg -q 'case switchToScenery' "$onboarding" ||
-  fail "新手引导缺少切换风景步骤"
+rg -q 'case switchSceneryAndScore' "$onboarding" ||
+  fail "新手引导缺少切换风景并评分的步骤"
 rg -q 'static let taskCount = 8' "$onboarding" ||
   fail "新手引导不是八步"
 rg -Uq 'PhotoSelectionTargets\([[:space:]\n]*people: 2' \
