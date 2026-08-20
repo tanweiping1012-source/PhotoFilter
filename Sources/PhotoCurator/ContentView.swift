@@ -369,6 +369,10 @@ struct ContentView: View {
                         .accessibilityValue(analysisLabel)
                 }
                 .accessibilityIdentifier("analysis.progress")
+                .firstCurationGuideTarget(
+                    library.firstCurationGuideStep == .analyzePhotos,
+                    pointerSide: .trailing
+                )
             }
 
             if library.keeperDiversityConflictCount > 0 {
@@ -635,12 +639,6 @@ struct ContentView: View {
                         ProgressView()
                             .controlSize(.small)
                             .accessibilityLabel("正在扫描")
-                    }
-                    if let analysisLabel = library.analysisProgressLabel {
-                        ProgressView(value: library.analysisProgress)
-                            .frame(width: 92)
-                            .accessibilityLabel("本地分析进度")
-                            .accessibilityValue(analysisLabel)
                     }
                     Text(library.statusMessage)
                         .font(.subheadline)

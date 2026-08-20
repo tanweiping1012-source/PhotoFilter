@@ -43,7 +43,7 @@ rg -q 'allowsHitTesting\(false\)' "$target" ||
 #
 # 多数条件收在 ViewModel 里而不是直接写在视图上：ContentView 那个大 VStack
 # 再多几个布尔运算，Swift 类型检查就会超时。所以这里对源和视图两头都断言。
-for step in viewScore exportCopies; do
+for step in analyzePhotos viewScore exportCopies; do
   rg -q "firstCurationGuideStep == \.$step" "$content" ||
     fail "教学步骤缺少聚焦目标：$step"
 done
@@ -55,7 +55,13 @@ rg -q 'var isAcceptGuideStep' "$view_model" ||
   fail "缺少 acceptPeopleResults / acceptSceneryResults 的聚焦条件"
 rg -q 'library\.isAcceptGuideStep' "$content" ||
   fail "采纳按钮没有承接教学指针"
-# analyzePhotos 是自动步骤，没有可点的目标：任务条里的进度条本身就是它的呈现。
+# 第 1 步虽然是自动执行的，但红框的作用是"看这里"而不是"点这里"：
+# 没有它，用户不知道该盯着哪儿等分析结束。
+# 本地分析进度只允许有一条：工具栏和侧栏各画一条时，同一件事说了两遍，
+# 而旁边的状态文字已经在说同样的话。带张数的那条留在侧栏。
+analysis_bars="$(rg -c 'value: library\.analysisProgress' "$content" || true)"
+[[ "${analysis_bars:-0}" == "1" ]] ||
+  fail "本地分析进度条有 ${analysis_bars:-0} 条，应只保留侧栏那一条"
 
 # 教学必须驱动真实控件。
 #
