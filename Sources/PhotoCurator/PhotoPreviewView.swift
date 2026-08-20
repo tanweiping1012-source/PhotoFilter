@@ -431,7 +431,7 @@ struct FirstCurationGuideBar: View {
                         showScoringPicks()
                     } label: {
                         Label(
-                            "显示评分优先照片",
+                            "显示 AI 评分结果",
                             systemImage: "wand.and.stars"
                         )
                     }
@@ -651,7 +651,7 @@ private struct AestheticScoreDetailView: View {
         let category = recommendation.scope.category?.title
             ?? String(localized: "分类")
         return isScorePreferred
-            ? String(localized: "\(category)第 \(globalRank) 名 · 评分优先")
+            ? String(localized: "\(category)第 \(globalRank) 名 · AI 推荐保留")
             : String(localized: "\(category)第 \(globalRank) 名")
     }
 

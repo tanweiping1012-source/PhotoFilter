@@ -935,7 +935,7 @@ final class PhotoLibraryViewModel: ObservableObject {
         }
         curationScope = .all
         firstCurationGuideStep = .acceptResults
-        statusMessage = String(localized: "评分只提供解释和排序；请到“评分优先”确认最终结果。")
+        statusMessage = String(localized: "评分只提供解释和排序；用底部的“采纳”确认最终结果。")
     }
 
     func startDemoAIScoring() {
@@ -1433,9 +1433,8 @@ final class PhotoLibraryViewModel: ObservableObject {
         }
         storeUndoState(previousDecisionsByPhotoID: [photoID: photos[index].decision])
         photos[index].decision = decision
-        // 淘汰是对 AI 结果的明确否决：这张照片必须同时退出"评分优先"。
-        // 否则它一边显示"淘汰"，一边继续躺在 AI 选出的名单里，
-        // 用户会以为自己那一下没生效，或者以为它仍会被导出。
+        // 淘汰是对 AI 结果的明确否决：这张照片必须同时退出 AI 推荐名单，
+        // 否则"采纳"仍会把它算进去，用户会以为自己那一下没生效。
         if decision == .reject,
            let category = photos[index].curationCategory,
            aiFinalSelectionPhotoIDsByCategory[category]?.contains(photoID) == true {
@@ -1928,17 +1927,17 @@ final class PhotoLibraryViewModel: ObservableObject {
             title: String(localized: "\(context.category.title) AI评分完成"),
             message: String(
                 localized:
-                    "\(context.plan.candidatePhotoCount) 张已评分，\(acceptedPhotoIDs.count) 张进入评分优先。逐张看过后，用底部的“采纳”把它们标记为保留。"
+                    "\(context.plan.candidatePhotoCount) 张已按分数排序，AI 推荐保留其中 \(acceptedPhotoIDs.count) 张。逐张看过后，用底部的“采纳”确认。"
             )
         )
         statusMessage = conflicts.isEmpty
             ? String(
                 localized:
-                    "\(context.category.title) AI评分完成：已得到 \(acceptedPhotoIDs.count) 张评分优先照片。请在“评分优先”筛选中人工确认。"
+                    "\(context.category.title) AI评分完成：AI 推荐保留 \(acceptedPhotoIDs.count) 张。请逐张查看后用底部的“采纳”确认。"
             )
             : String(
                 localized:
-                    "\(context.category.title) AI评分完成：已得到 \(acceptedPhotoIDs.count) 张评分优先照片；\(conflicts.count) 张同场景重复已顺延。请在“评分优先”筛选中人工确认。"
+                    "\(context.category.title) AI评分完成：AI 推荐保留 \(acceptedPhotoIDs.count) 张；\(conflicts.count) 张同场景重复已顺延。请逐张查看后用底部的“采纳”确认。"
             )
     }
 

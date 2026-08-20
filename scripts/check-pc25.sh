@@ -39,9 +39,14 @@ rg -q 'case \.aiCandidates: String\(localized: "待AI评分"\)' \
 rg -q 'case \.aiScored: String\(localized: "已AI评分"\)' \
   Sources/PhotoCurator/PhotoGridFilter.swift ||
   fail "已评分筛选未统一为已AI评分"
-rg -q 'case \.aiSelected: String\(localized: "评分优先"\)' \
-  Sources/PhotoCurator/PhotoGridFilter.swift ||
-  fail "最终胜出筛选未统一为评分优先"
+# "评分优先"筛选已移除：它不落盘，重启后对该项目永久为空，是纯粹的理解负担。
+# 最终结果改由底部"采纳"命令承担，这里断言筛选枚举里不再出现它。
+if rg -q 'aiSelected|评分优先' Sources/PhotoCurator/PhotoGridFilter.swift; then
+  fail "评分优先筛选应已移除"
+fi
+rg -Fq '采纳 \(library.pendingAIFinalSelectionAcceptanceCount) 张评分结果' \
+  Sources/PhotoCurator/ContentView.swift ||
+  fail "最终结果缺少统一的采纳入口"
 rg -q 'title: "AI评分"' Sources/PhotoCurator/SupportInformationView.swift ||
   fail "帮助页未统一为 AI评分"
 rg -q 'Text\("AI评分设置"\)' Sources/PhotoCurator/AISettingsView.swift ||

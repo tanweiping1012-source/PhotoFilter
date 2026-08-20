@@ -88,7 +88,10 @@ rg -q 'case aiScored' "$filter" ||
   fail "筛选器缺少已AI评分"
 rg -q 'case \.aiScored: String\(localized: "已AI评分"\)' "$filter" ||
   fail "已评分筛选名称错误"
-rg -q 'case \.aiSelected: String\(localized: "评分优先"\)' "$filter" ||
+if rg -q 'aiSelected' "$filter"; then
+  fail "评分优先筛选应已移除"
+fi
+rg -q 'case \.aiScored: String\(localized: "已AI评分"\)' "$filter" ||
   fail "最终胜出筛选名称错误"
 rg -q 'photos\.filter \{ !\$0\.aestheticRecommendations\.isEmpty \}' "$filter" ||
   fail "已AI评分没有覆盖所有有效评分照片"

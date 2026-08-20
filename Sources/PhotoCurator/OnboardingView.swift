@@ -79,7 +79,7 @@ enum FirstCurationGuideStep: Int, CaseIterable, Identifiable {
         case .viewScore:
             String(localized: "检查总分、五维评分、具体评价和总结，然后点击“评分已查看，继续”。")
         case .acceptResults:
-            String(localized: "点击“显示评分优先照片”，检查后再采纳人物和风景结果。")
+            String(localized: "点击“显示 AI 评分结果”，按分数逐张看过后再采纳人物和风景结果。")
         case .exportCopies:
             String(localized: "导出 4 张后会得到“人物”和“风景”两个目录。原照片不会改变。")
         case .completed:

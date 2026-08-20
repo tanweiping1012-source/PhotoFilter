@@ -54,7 +54,7 @@ rg -q 'startingPhotos: startingPhotos' "$demo" ||
 rg -q 'session\.startingPhotos' "$view_model" ||
   fail "进入教学时仍直接载入评分结果"
 rg -q 'aiFinalSelectionPhotoIDsByCategory = \[:\]' "$view_model" ||
-  fail "进入教学时仍直接载入评分优先集合"
+  fail "进入教学时仍直接载入 AI 推荐结果"
 rg -q 'func startDemoAIScoring' "$view_model" ||
   fail "缺少用户主动触发的离线评分"
 rg -q 'Task\.sleep\(for: \.milliseconds\(450\)\)' "$view_model" ||

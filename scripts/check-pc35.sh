@@ -57,13 +57,13 @@ for step in \
 done
 
 rg -q 'guide\.show-scoring-picks' "$preview" ||
-  fail "确认结果步骤缺少显示评分优先照片的直接按钮"
+  fail "确认结果步骤缺少显示 AI 评分结果的直接按钮"
 rg -Uq 'case \.acceptResults:[[:space:]\n]*gridFilter = \.all' "$content" ||
   fail "确认结果步骤没有先清除遗留筛选"
-rg -Uq 'showScoringPicks:[[:space:]\n]*\{[[:space:]\n]*gridFilter = \.aiSelected' "$content" ||
-  fail "显示评分优先照片按钮没有切换到对应结果"
-rg -q 'gridFilter == \.aiSelected' "$content" ||
-  fail "显示评分优先照片后没有转移到采纳按钮"
+rg -Uq 'showScoringPicks:[[:space:]\n]*\{[[:space:]\n]*gridFilter = \.aiScored' "$content" ||
+  fail "显示 AI 评分结果按钮没有切换到评分列表"
+rg -q 'gridFilter == \.aiScored' "$content" ||
+  fail "显示 AI 评分结果后没有转移到采纳按钮"
 rg -q 'guide\.confirm-score-review' "$preview" ||
   fail "评分详情步骤缺少明确继续按钮"
 rg -q 'onChange\(of: library\.firstCurationGuideStep\)' "$preview" ||
@@ -73,7 +73,7 @@ rg -q 'shouldClosePhotoPreview' "$preview" \
   fail "第 5 步没有自动返回照片网格"
 rg -Uq 'Label\([[:space:]\n]*"评分已查看，继续"' "$preview" ||
   fail "评分详情继续按钮文案不明确"
-rg -Uq 'Label\([[:space:]\n]*"显示评分优先照片"' "$preview" ||
+rg -Uq 'Label\([[:space:]\n]*"显示 AI 评分结果"' "$preview" ||
   fail "确认结果直接按钮文案不明确"
 rg -Uq 'Label\([[:space:]\n]*"结束新手引导"' "$preview" ||
   fail "完成状态缺少结束新手引导主按钮"

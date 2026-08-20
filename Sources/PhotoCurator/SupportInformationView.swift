@@ -46,7 +46,7 @@ struct SupportInformationView: View {
                     SupportHelpRow(
                         icon: "list.number",
                         title: "评分与排序",
-                        detail: "模型按固定绝对标尺对每张照片独立评分，不做组内比较，也不返回名次。全部完成后只在人物或风景内按统一分数排序，取该类型前 N 张进入“评分优先”。"
+                        detail: "模型按固定绝对标尺对每张照片独立评分，不做组内比较，也不返回名次。全部完成后只在人物或风景内按统一分数排序，取该类型前 N 张作为推荐结果；是否保留由你用底部的“采纳”确认。"
                     )
                     SupportHelpRow(
                         icon: "clock.arrow.circlepath",

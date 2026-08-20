@@ -83,7 +83,7 @@ struct ContentView: View {
         .onChange(of: library.activeProjectID) { _, _ in
             showPhotoPreview = false
             // 筛选器是窗口级状态，会跨项目残留。新项目（尤其是从未评分开始的教学项目）
-            // 在“评分优先”下必然是 0 张，用户会既看不到照片也无法推进教学。
+            // 在“待AI评分”这类筛选下可能是 0 张，用户会既看不到照片也无法推进教学。
             gridFilter = .all
         }
         .onAppear {
@@ -596,8 +596,7 @@ struct ContentView: View {
         let scopedPhotos = library.photos(in: library.curationScope)
         let filteredPhotos = gridFilter.photos(
             from: scopedPhotos,
-            localAICandidateIDs: localAICandidateIDs,
-            aiFinalSelectionIDs: library.aiFinalSelectionPhotoIDs
+            localAICandidateIDs: localAICandidateIDs
         )
         return VStack(spacing: 0) {
             VStack(alignment: .leading, spacing: 8) {
@@ -685,10 +684,10 @@ struct ContentView: View {
                 FirstCurationGuideBar(
                     compact: false,
                     showScoringPicks: {
-                        gridFilter = .aiSelected
+                        gridFilter = .aiScored
                     },
                     isShowingScoringPicks:
-                        gridFilter == .aiSelected,
+                        gridFilter == .aiScored,
                     finishGuide: library.finishFirstCurationGuide,
                     startOwnPhotos: startOwnPhotosAfterGuide
                 )
@@ -819,9 +818,7 @@ struct ContentView: View {
             let visiblePhotos = newFilter.photos(
                 from: library.photos(in: library.curationScope),
                 localAICandidateIDs:
-                    library.localAestheticCandidatePhotoIDs,
-                aiFinalSelectionIDs:
-                    library.aiFinalSelectionPhotoIDs
+                    library.localAestheticCandidatePhotoIDs
             )
             selectFirstVisiblePhoto(from: visiblePhotos)
         }
@@ -829,9 +826,7 @@ struct ContentView: View {
             let visiblePhotos = gridFilter.photos(
                 from: library.photos(in: newScope),
                 localAICandidateIDs:
-                    library.localAestheticCandidatePhotoIDs,
-                aiFinalSelectionIDs:
-                    library.aiFinalSelectionPhotoIDs
+                    library.localAestheticCandidatePhotoIDs
             )
             selectFirstVisiblePhoto(from: visiblePhotos)
         }
@@ -843,23 +838,13 @@ struct ContentView: View {
             )
             selectFirstVisiblePhoto(from: candidates)
         }
-        .onChange(of: library.aiFinalSelectionPhotoIDs) { _, finalSelectionIDs in
-            guard gridFilter == .aiSelected else { return }
-            let selections = gridFilter.photos(
-                from: library.photos(in: library.curationScope),
-                localAICandidateIDs: library.localAestheticCandidatePhotoIDs,
-                aiFinalSelectionIDs: finalSelectionIDs
-            )
-            selectFirstVisiblePhoto(from: selections)
-        }
         .onChange(of: library.firstCurationGuideStep) { _, step in
             // 兜底：教学的每一步都要在网格里有可操作对象。
             // 任何让当前筛选变成 0 张的情况，都直接回到"全部照片"，不让教学卡在空网格上。
             if step != nil, gridFilter != .all {
                 let visible = gridFilter.photos(
                     from: library.photos(in: library.curationScope),
-                    localAICandidateIDs: library.localAestheticCandidatePhotoIDs,
-                    aiFinalSelectionIDs: library.aiFinalSelectionPhotoIDs
+                    localAICandidateIDs: library.localAestheticCandidatePhotoIDs
                 )
                 if visible.isEmpty {
                     gridFilter = .all
@@ -871,9 +856,7 @@ struct ContentView: View {
                 let scoredPhotos = PhotoGridFilter.aiScored.photos(
                     from: library.photos(in: library.curationScope),
                     localAICandidateIDs:
-                        library.localAestheticCandidatePhotoIDs,
-                    aiFinalSelectionIDs:
-                        library.aiFinalSelectionPhotoIDs
+                        library.localAestheticCandidatePhotoIDs
                 )
                 selectFirstVisiblePhoto(from: scoredPhotos)
             case .acceptResults:
@@ -895,8 +878,7 @@ struct ContentView: View {
                 selected,
                 visiblePhotos: gridFilter.photos(
                     from: library.photos(in: library.curationScope),
-                    localAICandidateIDs: library.localAestheticCandidatePhotoIDs,
-                    aiFinalSelectionIDs: library.aiFinalSelectionPhotoIDs
+                    localAICandidateIDs: library.localAestheticCandidatePhotoIDs
                 )
             )
         }
@@ -946,7 +928,7 @@ struct ContentView: View {
                 .accessibilityLabel("采纳 \(library.pendingAIFinalSelectionAcceptanceCount) 张评分结果")
                 .firstCurationGuideTarget(
                     library.firstCurationGuideStep == .acceptResults
-                        && gridFilter == .aiSelected,
+                        && gridFilter == .aiScored,
                     pointerSide: .leading
                 )
             }
@@ -1006,7 +988,7 @@ struct ContentView: View {
                 .help("采纳 \(library.pendingAIFinalSelectionAcceptanceCount) 张评分结果")
                 .firstCurationGuideTarget(
                     library.firstCurationGuideStep == .acceptResults
-                        && gridFilter == .aiSelected,
+                        && gridFilter == .aiScored,
                     pointerSide: .leading
                 )
             }
@@ -1067,7 +1049,6 @@ struct ContentView: View {
         switch gridFilter {
         case .aiCandidates: String(localized: "暂无待评分照片")
         case .aiScored: String(localized: "暂无已评分照片")
-        case .aiSelected: String(localized: "暂无评分优先照片")
         default: String(localized: "没有\(gridFilter.title)照片")
         }
     }
@@ -1078,9 +1059,6 @@ struct ContentView: View {
         }
         if gridFilter == .aiScored {
             return String(localized: "完成任一组 AI评分后，每张有效评分照片都会显示在这里。")
-        }
-        if gridFilter == .aiSelected {
-            return String(localized: "完成整轮 AI评分后，最终胜出照片会显示在这里。")
         }
         return String(localized: "切换到“全部照片”查看完整照片集。")
     }

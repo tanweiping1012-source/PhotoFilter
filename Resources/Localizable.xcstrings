@@ -22,6 +22,28 @@
         }
       }
     },
+    "%1$@ AI评分完成：AI 推荐保留 %2$lld 张。请逐张查看后用底部的“采纳”确认。": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ AI scoring complete: AI suggests keeping %2$lld photos. Review them, then confirm with Accept at the bottom."
+          }
+        }
+      }
+    },
+    "%1$@ AI评分完成：AI 推荐保留 %2$lld 张；%3$lld 张同场景重复已顺延。请逐张查看后用底部的“采纳”确认。": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ AI scoring complete: AI suggests keeping %2$lld photos; %3$lld same-scene duplicates were skipped. Review them, then confirm with Accept at the bottom."
+          }
+        }
+      }
+    },
     "%1$@中有 %2$lld 组相似照片被同时保留，请每组只留一张。": {
       "extractionState": "manual",
       "localizations": {
@@ -44,13 +66,24 @@
         }
       }
     },
-    "%1$lld 张已评分，%2$lld 张进入评分优先。逐张看过后，用底部的“采纳”把它们标记为保留。": {
+    "%1$@第 %2$lld 名 · AI 推荐保留": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "%1$lld photos scored; %2$lld made it into Top Scored. Look through them, then use Accept at the bottom to mark them as kept."
+            "value": "%1$@ rank %2$lld · AI suggests keeping"
+          }
+        }
+      }
+    },
+    "%1$lld 张已按分数排序，AI 推荐保留其中 %2$lld 张。逐张看过后，用底部的“采纳”确认。": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld photos ranked by score; AI suggests keeping %2$lld of them. Review them, then confirm with Accept at the bottom."
           }
         }
       }
@@ -72,33 +105,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@ AI scoring complete"
-          }
-        }
-      }
-    },
-    "%@ AI评分完成：已得到 %lld 张评分优先照片。请在“评分优先”筛选中人工确认。": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@ AI Scoring is complete with %2$lld preferred photos. Review them under Scoring Picks."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "new",
-            "value": "%1$@ AI评分完成：已得到 %2$lld 张评分优先照片。请在“评分优先”筛选中人工确认。"
-          }
-        }
-      }
-    },
-    "%@ AI评分完成：已得到 %lld 张评分优先照片；%lld 张同场景重复已顺延。请在“评分优先”筛选中人工确认。": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@ AI Scoring is complete with %2$lld preferred photos; %3$lld same-scene duplicates were deferred. Review them under Scoring Picks."
           }
         }
       }
@@ -258,22 +264,6 @@
           "stringUnit": {
             "state": "new",
             "value": "%1$@第 %2$lld 名"
-          }
-        }
-      }
-    },
-    "%@第 %lld 名 · 评分优先": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@ rank %2$lld · Scoring Pick"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "new",
-            "value": "%1$@第 %2$lld 名 · 评分优先"
           }
         }
       }
@@ -1915,16 +1905,6 @@
         }
       }
     },
-    "完成整轮 AI评分后，最终胜出照片会显示在这里。": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Final winners appear here after a complete AI scoring run."
-          }
-        }
-      }
-    },
     "完整 Chat Completions endpoint": {
       "localizations": {
         "en": {
@@ -2933,6 +2913,17 @@
         }
       }
     },
+    "显示 AI 评分结果": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show AI Scores"
+          }
+        }
+      }
+    },
     "显示全部照片": {
       "extractionState": "manual",
       "localizations": {
@@ -2974,16 +2965,6 @@
         }
       }
     },
-    "显示评分优先照片": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Show Scoring Picks"
-          }
-        }
-      }
-    },
     "智谱 GLM": {
       "localizations": {
         "en": {
@@ -3020,16 +3001,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "No Photos Awaiting AI Scoring"
-          }
-        }
-      }
-    },
-    "暂无评分优先照片": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "No Top-Scored Photos"
           }
         }
       }
@@ -3363,13 +3334,13 @@
         }
       }
     },
-    "模型按固定绝对标尺对每张照片独立评分，不做组内比较，也不返回名次。全部完成后只在人物或风景内按统一分数排序，取该类型前 N 张进入“评分优先”。": {
+    "模型按固定绝对标尺对每张照片独立评分，不做组内比较，也不返回名次。全部完成后只在人物或风景内按统一分数排序，取该类型前 N 张作为推荐结果；是否保留由你用底部的“采纳”确认。": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "The model scores each photo independently against a fixed absolute scale — no in-group comparison and no ranking. Once every photo is done, they are ranked by that single score within People or Scenery, and the top N of that type become Scoring Picks."
+            "value": "The model scores each photo independently on one fixed scale, without comparing photos in a request and without returning ranks. When a run finishes, the app sorts within People or Scenery and takes the top N as suggestions; whether to keep them is confirmed by you with Accept at the bottom."
           }
         }
       }
@@ -3777,12 +3748,13 @@
         }
       }
     },
-    "点击“显示评分优先照片”，检查后再采纳人物和风景结果。": {
+    "点击“显示 AI 评分结果”，按分数逐张看过后再采纳人物和风景结果。": {
+      "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Click Show Scoring Picks, review them, then accept the People and Scenery results."
+            "value": "Tap “Show AI Scores”, review them in score order, then accept the People and Scenery results."
           }
         }
       }
@@ -4348,22 +4320,13 @@
         }
       }
     },
-    "评分优先": {
+    "评分只提供解释和排序；用底部的“采纳”确认最终结果。": {
+      "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Top Score"
-          }
-        }
-      }
-    },
-    "评分只提供解释和排序；请到“评分优先”确认最终结果。": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Scores provide explanations and ranking only. Review the final result under Top Score."
+            "value": "Scoring only explains and ranks. Use Accept at the bottom to confirm the final result."
           }
         }
       }

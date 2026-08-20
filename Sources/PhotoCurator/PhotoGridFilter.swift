@@ -4,7 +4,6 @@ enum PhotoGridFilter: String, CaseIterable, Identifiable {
     case all
     case aiCandidates
     case aiScored
-    case aiSelected
     case keep
     case reject
     case undecided
@@ -16,7 +15,6 @@ enum PhotoGridFilter: String, CaseIterable, Identifiable {
         case .all: String(localized: "全部照片")
         case .aiCandidates: String(localized: "待AI评分")
         case .aiScored: String(localized: "已AI评分")
-        case .aiSelected: String(localized: "评分优先")
         case .keep: String(localized: "保留")
         case .reject: String(localized: "淘汰")
         case .undecided: String(localized: "待定")
@@ -28,7 +26,6 @@ enum PhotoGridFilter: String, CaseIterable, Identifiable {
         case .all: "photo.stack"
         case .aiCandidates: "line.3.horizontal.decrease.circle.fill"
         case .aiScored: "chart.bar.xaxis"
-        case .aiSelected: "wand.and.stars.inverse"
         case .keep: "checkmark.circle.fill"
         case .reject: "xmark.circle.fill"
         case .undecided: "circle"
@@ -37,8 +34,7 @@ enum PhotoGridFilter: String, CaseIterable, Identifiable {
 
     func photos(
         from photos: [PhotoItem],
-        localAICandidateIDs: Set<String>,
-        aiFinalSelectionIDs: Set<String> = []
+        localAICandidateIDs: Set<String>
     ) -> [PhotoItem] {
         switch self {
         case .all:
@@ -48,10 +44,6 @@ enum PhotoGridFilter: String, CaseIterable, Identifiable {
         case .aiScored:
             scoreOrdered(
                 photos.filter { !$0.aestheticRecommendations.isEmpty }
-            )
-        case .aiSelected:
-            scoreOrdered(
-                photos.filter { aiFinalSelectionIDs.contains($0.id) }
             )
         case .keep:
             photos.filter { $0.decision == .keep }

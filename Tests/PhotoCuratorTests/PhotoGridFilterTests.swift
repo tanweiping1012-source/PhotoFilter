@@ -42,25 +42,10 @@ final class PhotoGridFilterTests: XCTestCase {
 
         let filtered = PhotoGridFilter.aiScored.photos(
             from: photos,
-            localAICandidateIDs: Set(photos.map(\.id)),
-            aiFinalSelectionIDs: [photos[2].id]
+            localAICandidateIDs: Set(photos.map(\.id))
         )
 
         XCTAssertEqual(filtered.map(\.id), [photos[2].id, photos[0].id])
-    }
-
-    func testAISelectedFilterDoesNotConfuseScoredPhotosWithFinalSelection() {
-        let photos = makePhotos()
-        let candidates = Set(photos.map(\.id))
-        let finalSelection = Set([photos[1].id, photos[3].id])
-
-        let filtered = PhotoGridFilter.aiSelected.photos(
-            from: photos,
-            localAICandidateIDs: candidates,
-            aiFinalSelectionIDs: finalSelection
-        )
-
-        XCTAssertEqual(filtered.map(\.id), [photos[1].id, photos[3].id])
     }
 
     func testPrimaryScorePrefersFinalSelectionRecord() {
