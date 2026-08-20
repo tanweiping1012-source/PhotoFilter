@@ -36,7 +36,12 @@ jobs:
 
       - name: Build universal DMG
         id: dmg
-        run: echo "path=$(bash scripts/package-dmg.sh)" >> "$GITHUB_OUTPUT"
+        # 只取最后一行：即使脚本将来又往 stdout 多打了东西，
+        # $GITHUB_OUTPUT 的 key=value 也不接受多行。
+        run: |
+          dmg_path="$(bash scripts/package-dmg.sh | tail -n 1)"
+          test -f "$dmg_path" || { echo "打包脚本没有返回有效路径：$dmg_path" >&2; exit 1; }
+          echo "path=$dmg_path" >> "$GITHUB_OUTPUT"
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4

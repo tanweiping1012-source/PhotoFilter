@@ -77,12 +77,14 @@ cat > "$volume_directory/安装说明.txt" <<EOF
 EOF
 
 rm -f "$output_path"
+# hdiutil 会往 stdout 打进度和 "created: ..."；本脚本的 stdout 契约是
+# "只有最终 DMG 路径一行"，调用方（CI）要直接拿它当变量用，所以把噪声转到 stderr。
 hdiutil create \
   -volname "旅行照片筛选器" \
   -srcfolder "$volume_directory" \
   -format UDZO \
   -imagekey zlib-level=9 \
   -ov \
-  "$output_path"
+  "$output_path" >&2
 
 printf '%s\n' "$output_path"
