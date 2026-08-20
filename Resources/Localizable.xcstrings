@@ -1687,6 +1687,17 @@
         }
       }
     },
+    "只有你在确认弹窗中点击发送，App 才会发送评分照片。弹窗说明模型、张数和照片类型；当前供应商、模型与预览尺寸常驻侧栏 AI评分区。": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The app sends scoring photos only after you tap send in the confirmation dialog. The dialog states the model, photo count, and photo type; the current provider, model, and preview size stay visible in the sidebar AI Scoring section."
+          }
+        }
+      }
+    },
     "只有你点击“刷新账号模型”时，App 才会使用当前输入或已保存的 OpenAI / Anthropic Key 读取账号可见模型 ID；不会发送图片，也不会保存模型列表。": {
       "localizations": {
         "en": {
@@ -1703,16 +1714,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Only when you click Verify and Save or Verify Saved Key does the app send one built-in test image to the selected model to verify authentication, image input, and scoring output. The test image is not one of your photos."
-          }
-        }
-      }
-    },
-    "只有你确认供应商、模型、预览尺寸和照片数量后，App 才会发送评分照片。未配置 Key 时，本地筛选和导出仍可使用。": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "The app sends scoring photos only after you confirm the provider, model, preview size, and photo count. Local curation and export work without a key."
           }
         }
       }
@@ -3067,13 +3068,13 @@
         }
       }
     },
-    "未配置 API Key 时，本地筛选与导出仍可使用。AI评分只在你确认之后开始；确认弹窗说明模型、张数和照片类型，当前模型与图片尺寸常驻侧栏 AI评分区。": {
+    "未配置 API Key 时，本地筛选与导出仍可使用。配置后，AI评分也只在你确认之后才会开始。": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Local curation and export keep working without an API key. AI scoring starts only after you confirm; the dialog names the model, the number of photos, and the photo type, while the current model and image size stay visible in the sidebar."
+            "value": "Local curation and export work without an API key. Once a key is configured, AI scoring still starts only after you confirm."
           }
         }
       }
@@ -3678,13 +3679,13 @@
         }
       }
     },
-    "每次请求只发送 2–5 张同类型、去除 EXIF/GPS 的匿名 JPEG，最长边为你选择的小 512px、中 1024px 或大 1536px。不发送原图、文件名或本地路径。": {
+    "每次请求只发送 2–5 张同类型照片的匿名预览。完整的发送内容、预览尺寸和第三方处理方见「隐私与数据」。": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Each request sends only 2–5 same-type anonymous JPEGs with EXIF/GPS stripped, with the longest edge set to your choice of Small 512px, Medium 1024px, or Large 1536px. Originals, filenames, and local paths are never sent."
+            "value": "Each request sends only 2–5 anonymous previews of photos of the same type. See Privacy & Data for the full list of what is sent, the preview sizes, and the third-party processors."
           }
         }
       }

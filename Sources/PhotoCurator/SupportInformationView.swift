@@ -27,7 +27,7 @@ struct SupportInformationView: View {
                     SupportHelpRow(
                         icon: "wand.and.stars",
                         title: "AI评分",
-                        detail: "未配置 API Key 时，本地筛选与导出仍可使用。AI评分只在你确认之后开始；确认弹窗说明模型、张数和照片类型，当前模型与图片尺寸常驻侧栏 AI评分区。"
+                        detail: "未配置 API Key 时，本地筛选与导出仍可使用。配置后，AI评分也只在你确认之后才会开始。"
                     )
                     SupportHelpRow(
                         icon: "square.and.arrow.up",
@@ -41,7 +41,7 @@ struct SupportInformationView: View {
                     SupportHelpRow(
                         icon: "photo.on.rectangle.angled",
                         title: "发送内容",
-                        detail: "每次请求只发送 2–5 张同类型、去除 EXIF/GPS 的匿名 JPEG，最长边为你选择的小 512px、中 1024px 或大 1536px。不发送原图、文件名或本地路径。"
+                        detail: "每次请求只发送 2–5 张同类型照片的匿名预览。完整的发送内容、预览尺寸和第三方处理方见「隐私与数据」。"
                     )
                     SupportHelpRow(
                         icon: "list.number",

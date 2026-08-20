@@ -329,4 +329,7 @@
   ,"请先在 AI评分设置中完成自定义接口和模型 ID 配置。": "Complete the custom endpoint and model ID in AI Scoring Settings first."
   ,"请输入完整的 /chat/completions 地址和模型 ID。远程地址必须使用 HTTPS；HTTP 仅允许本机回环地址。": "Enter a full /chat/completions URL and model ID. Remote endpoints must use HTTPS; HTTP is allowed only for local loopback addresses."
   ,"阿里云百炼": "Alibaba Cloud Model Studio"
+  ,"只有你在确认弹窗中点击发送，App 才会发送评分照片。弹窗说明模型、张数和照片类型；当前供应商、模型与预览尺寸常驻侧栏 AI评分区。": "The app sends scoring photos only after you tap send in the confirmation dialog. The dialog states the model, photo count, and photo type; the current provider, model, and preview size stay visible in the sidebar AI Scoring section."
+  ,"未配置 API Key 时，本地筛选与导出仍可使用。配置后，AI评分也只在你确认之后才会开始。": "Local curation and export work without an API key. Once a key is configured, AI scoring still starts only after you confirm."
+  ,"每次请求只发送 2–5 张同类型照片的匿名预览。完整的发送内容、预览尺寸和第三方处理方见「隐私与数据」。": "Each request sends only 2–5 anonymous previews of photos of the same type. See Privacy & Data for the full list of what is sent, the preview sizes, and the third-party processors."
 }

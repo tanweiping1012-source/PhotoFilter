@@ -36,7 +36,7 @@ struct PrivacyInformationView: View {
                     PrivacyDisclosureRow(
                         icon: "hand.raised",
                         title: "每次发送前确认",
-                        detail: "只有你确认供应商、模型、预览尺寸和照片数量后，App 才会发送评分照片。未配置 Key 时，本地筛选和导出仍可使用。"
+                        detail: "只有你在确认弹窗中点击发送，App 才会发送评分照片。弹窗说明模型、张数和照片类型；当前供应商、模型与预览尺寸常驻侧栏 AI评分区。"
                     )
                     PrivacyDisclosureRow(
                         icon: "photo",
