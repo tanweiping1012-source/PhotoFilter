@@ -2237,6 +2237,28 @@
         }
       }
     },
+    "已将 %1$@ 归为%2$@。": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moved %1$@ to %2$@."
+          }
+        }
+      }
+    },
+    "已将 %1$@ 归为%2$@。相关的 AI评分结果已清除，需要重新评分。": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moved %1$@ to %2$@. The related AI scores were cleared and need to be run again."
+          }
+        }
+      }
+    },
     "已将 %@ 归为%@。人物与风景的评分结果已重新等待确认。": {
       "localizations": {
         "en": {

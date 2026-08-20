@@ -22,7 +22,17 @@ final class PhotoLibraryViewModel: ObservableObject {
     /// 当前需要展示的完成回执；用户确认或进入下一轮操作后清空。
     @Published private(set) var completionNotice: CurationCompletionNotice?
 
-    @Published private(set) var photos: [PhotoItem] = []
+    @Published private(set) var photos: [PhotoItem] = [] {
+        didSet {
+            // 候选池与"待评分"集合都是从 photos 派生的。任何就地改写——分析结果合并、
+            // 评分记录写入、人工决定、分类纠正——都必须让它们失效。
+            //
+            // 这里不逐个调用点去补，是因为已经漏过三次：相似家族计算结束时漏过一次
+            // （"待评分"长期显示 0），演示评分逐批写入时漏过一次（评分完了还显示"待评分"），
+            // 提交新一轮评分清除旧记录时也没有。把不变量放在源头，新增写入路径不必再记得接线。
+            invalidateCandidatePlans()
+        }
+    }
     @Published private(set) var projects: [PhotoProject] = []
     @Published private(set) var activeProjectID: UUID?
     @Published private(set) var isDemoModeActive = false
@@ -1419,17 +1429,29 @@ final class PhotoLibraryViewModel: ObservableObject {
             }
             return
         }
+        // 文案必须先于清除计算：清完之后就分不清"本来就没有"和"刚被我清掉"了。
+        // 失效范围仍然覆盖源类别和目标类别（分数不能跨类别复用），只是不再无条件宣称结果被重置。
+        let previousCategory = photos[index].curationCategory
+        let affectedCategories = Set([previousCategory, category].compactMap { $0 })
+        let hadScores = affectedCategories.contains { affected in
+            !(aiFinalSelectionPhotoIDsByCategory[affected] ?? []).isEmpty
+                || photos.contains {
+                    $0.curationCategory == affected && !$0.aestheticRecommendations.isEmpty
+                }
+        }
+
         photos[index].curationCategory = category
         photos[index].isCurationCategoryUserAssigned = true
         photos[index].aestheticRecommendations = []
         aiFinalSelectionPhotoIDsByCategory = [:]
         aiFinalSelectionRunProgressByCategory = [:]
-        invalidateCandidatePlans()
         persistActiveProjectState()
-        statusMessage = String(
-            localized:
-                "已将 \(photos[index].filename) 归为\(category.title)。人物与风景的评分结果已重新等待确认。"
-        )
+        statusMessage = hadScores
+            ? String(
+                localized:
+                    "已将 \(photos[index].filename) 归为\(category.title)。相关的 AI评分结果已清除，需要重新评分。"
+            )
+            : String(localized: "已将 \(photos[index].filename) 归为\(category.title)。")
     }
 
     func setSelectedCurationCategory(
