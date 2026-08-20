@@ -101,9 +101,9 @@ struct ContentView: View {
             VStack(alignment: .leading, spacing: 12) {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("照片筛选项目")
-                        .font(.title2.weight(.bold))
+                        .font(SidebarTypography.paneTitle)
                     Text("每个日期文件夹是一项独立任务")
-                        .font(.caption)
+                        .font(SidebarTypography.paneSubtitle)
                         .foregroundStyle(.secondary)
                 }
 
@@ -164,9 +164,7 @@ struct ContentView: View {
                         .padding(.vertical, 32)
                     } else {
                         Text("项目")
-                            .font(.caption.weight(.semibold))
-                            .foregroundStyle(.secondary)
-                            .padding(.horizontal, 4)
+                            .font(SidebarTypography.sectionTitle)
 
                         ForEach(library.projects) { project in
                             projectRow(project)
@@ -224,10 +222,14 @@ struct ContentView: View {
                         .foregroundStyle(project.accessState == .needsAuthorization ? Color.orange : (isActive ? Color.accentColor : .secondary))
                     VStack(alignment: .leading, spacing: 3) {
                         Text(project.displayName)
-                            .font(.subheadline.weight(isActive ? .semibold : .regular))
+                            .font(
+                                isActive
+                                    ? SidebarTypography.rowLabelActive
+                                    : SidebarTypography.rowLabel
+                            )
                             .lineLimit(2)
                         Text(projectStatusText(project))
-                            .font(.caption2)
+                            .font(SidebarTypography.detailNumeric)
                             .foregroundStyle(project.accessState == .needsAuthorization ? .orange : .secondary)
                     }
                     Spacer(minLength: 0)
@@ -367,7 +369,7 @@ struct ContentView: View {
 
             if library.keeperDiversityConflictCount > 0 {
                 Label("已有 \(library.keeperDiversityConflictCount) 组重复照片被同时保留，请每组只留一张。", systemImage: "exclamationmark.triangle.fill")
-                    .font(.caption)
+                    .font(SidebarTypography.detail)
                     .foregroundStyle(.orange)
             }
 
@@ -1240,23 +1242,26 @@ struct ContentView: View {
 
 }
 
-/// 侧栏入口按钮的统一排版：固定宽度的图标列 + 统一字号字重。
-///
-/// SF Symbols 的固有宽度各不相同（`folder.badge.plus` 明显比 `gearshape` 宽），
-/// 直接用 `Label` 的话，每个按钮的图标中心和文字起点都会差几个点；
-/// 五个按钮竖排在一起时这种参差非常显眼。
-/// 字号也显式固定：`.borderedProminent` 会把标题加粗，和相邻的 `.bordered` 不一致。
-/// 侧栏的四级字阶。
+/// 侧栏的字阶。
 ///
 /// 规则只有两条，但必须守住：同一角色在任何区块里都用同一级；
 /// 一行内配对的标签与数值也必须同级。之前"人物"用 subheadline、
 /// 右侧配对的"6 张"却用 caption，同为明细的"保留·淘汰·待定"是 caption2、
 /// "待评分 N 张"又是 caption——竖排在一起就像字号是随机挑的。
+///
+/// 建了字阶还不够，还得全栏都接进来：上一版只把"保留目标 → AI评分"接了，
+/// 顶部标题块和"项目"仍是裸写，于是"项目"（caption 灰）和它在同一个
+/// LazyVStack 里的兄弟"保留目标"（headline 主色）差了两级，还多缩进 4pt。
+/// 门禁也只卡了已经合规的那一段，等于自证清白。现在断言整个侧栏零裸写字号。
 private enum SidebarTypography {
-    /// 区块标题：保留目标 / AI评分
+    /// 面板标题：侧栏顶部"照片筛选项目"及其副标题，整栏只此一处
+    static let paneTitle = Font.title2.weight(.bold)
+    static let paneSubtitle = Font.caption
+    /// 区块标题：项目 / 保留目标 / AI评分
     static let sectionTitle = Font.headline
-    /// 行主体：类别名，以及它右侧配对的数值
+    /// 行主体：类别名、项目名，以及它右侧配对的数值
     static let rowLabel = Font.subheadline.weight(.medium)
+    static let rowLabelActive = Font.subheadline.weight(.semibold)
     static let rowValue = Font.subheadline.monospacedDigit()
     /// 明细：计数、进度、运行状态
     static let detail = Font.caption
@@ -1265,6 +1270,12 @@ private enum SidebarTypography {
     static let footnote = Font.caption2
 }
 
+/// 侧栏入口按钮的统一排版：固定宽度的图标列 + 统一字号字重。
+///
+/// SF Symbols 的固有宽度各不相同（`folder.badge.plus` 明显比 `gearshape` 宽），
+/// 直接用 `Label` 的话，每个按钮的图标中心和文字起点都会差几个点；
+/// 五个按钮竖排在一起时这种参差非常显眼。
+/// 字号也显式固定：`.borderedProminent` 会把标题加粗，和相邻的 `.bordered` 不一致。
 private struct SidebarEntryLabelStyle: LabelStyle {
     func makeBody(configuration: Configuration) -> some View {
         HStack(spacing: 8) {

@@ -127,16 +127,26 @@ sidebar_entry_count="$(
   fail "侧栏入口有 $sidebar_entry_count 个应用了统一排版，应为 5 个"
 
 # 侧栏字阶：同一角色跨区块必须同级，配对的标签与数值必须同级。
-# 这里断言"保留目标 → AI评分"整段没有裸写字号，全部走 SidebarTypography。
+# 范围必须盖住整个侧栏。上一版只卡 compactAIControls 起的那一段——也就是
+# 已经合规的那一段——顶部标题块和"项目"标签的裸写字号因此一直没被发现。
+# 字号名也不能枚举：漏网的正是没列进去的 .title2。
 rg -q 'enum SidebarTypography' Sources/PhotoCurator/ContentView.swift ||
   fail "缺少侧栏字阶定义"
 sidebar_raw_fonts="$(
-  awk '/private var compactAIControls/,/private var aiAccessibilityStatus/' \
+  awk '/private var projectSidebar/,/private var aiAccessibilityStatus/' \
     Sources/PhotoCurator/ContentView.swift |
-    rg -c 'font\(\.(caption|subheadline|headline|footnote)' || true
+    rg -c 'font\(\.' || true
 )"
 [[ "${sidebar_raw_fonts:-0}" == "0" ]] ||
-  fail "侧栏 AI 区块仍有 $sidebar_raw_fonts 处裸写字号，应改用 SidebarTypography"
+  fail "侧栏仍有 $sidebar_raw_fonts 处裸写字号，应改用 SidebarTypography"
+
+# 面板标题只有顶部一处；区块标题恰好三处：项目 / 保留目标 / AI评分。
+pane_title_uses="$(rg -c 'SidebarTypography\.paneTitle' Sources/PhotoCurator/ContentView.swift || true)"
+[[ "${pane_title_uses:-0}" == "1" ]] ||
+  fail "面板标题级被用了 ${pane_title_uses:-0} 次，整栏只应有 1 处"
+section_title_uses="$(rg -c 'SidebarTypography\.sectionTitle' Sources/PhotoCurator/ContentView.swift || true)"
+[[ "${section_title_uses:-0}" == "3" ]] ||
+  fail "区块标题有 ${section_title_uses:-0} 处，应为 3 处（项目 / 保留目标 / AI评分）"
 
 for identifier in \
   photo-curator.main \
