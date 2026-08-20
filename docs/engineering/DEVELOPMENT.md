@@ -3,7 +3,12 @@
 从源码运行、验证和打包的全部命令。模块地图与设计取舍见[代码结构](ARCHITECTURE.md)，
 改动前的硬约束见[项目规则](../../AGENTS.md)。
 
-需要 macOS 14+、Xcode 26 / Swift 6.2，以及 ripgrep（`brew install ripgrep`，门禁脚本依赖它）。
+需要 macOS 14+、Xcode 16.4 或更新版本，以及 ripgrep（`brew install ripgrep`，门禁脚本依赖它）。
+
+开发用 Xcode 26 / Swift 6.2，CI 在 Xcode 16.4 / Swift 6.1.2 上跑同一条 `scripts/check.sh`。
+两者的严格并发诊断有差异：`@MainActor` 类里覆写 `setUpWithError` 这类
+nonisolated 方法并写入 actor 隔离的存储属性，6.2 接受、6.1.2 报错。
+**本机编译通过不代表 CI 通过**，跨隔离域的写法要格外小心。
 
 ## 两套构建系统
 

@@ -162,7 +162,7 @@ macOS 14+ / SwiftUI / Swift 6.2 严格并发。无第三方依赖：图像走 Im
 
 ### 从源码运行
 
-需要 Xcode 26 / Swift 6.2。
+需要 Xcode 16.4 或更新版本。开发用的是 Xcode 26 / Swift 6.2，CI 每次推送都在 Xcode 16.4 / Swift 6.1.2 上跑完整门禁，两个版本都验证过。
 
 ```bash
 scripts/run-app.sh
