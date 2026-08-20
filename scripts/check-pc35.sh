@@ -19,9 +19,6 @@ screenshots=(
   "docs/interaction-screenshots/first-curation-spotlight-card-zh-Hans-920x640.png:1840 x 1280"
   "docs/interaction-screenshots/first-curation-spotlight-keep-zh-Hans.png:1920 x 1360"
   "docs/interaction-screenshots/first-curation-spotlight-keep-phase-b-zh-Hans.png:1920 x 1360"
-  "docs/interaction-screenshots/first-curation-score-continue-zh-Hans.png:1920 x 1360"
-  "docs/interaction-screenshots/first-curation-show-scoring-picks-zh-Hans-920x640.png:1840 x 1280"
-  "docs/interaction-screenshots/first-curation-show-scoring-picks-en-920x640.png:1840 x 1280"
   "docs/interaction-screenshots/first-curation-finish-zh-Hans-920x640.png:1840 x 1280"
   "docs/interaction-screenshots/first-curation-finish-en-920x640.png:1840 x 1280"
 )
@@ -42,11 +39,13 @@ rg -q 'var offset: CGSize' "$target" ||
 rg -q 'allowsHitTesting\(false\)' "$target" ||
   fail "聚焦 overlay 可能拦截真实控件"
 
+# runAIScoring 不在这个循环里：它的聚焦目标是侧栏那个真实入口，条件写成
+# `library.demoScorableCategory == category`（由下面单独断言），而不是直接
+# 比对步骤枚举——正因为要指向真实控件，条件才不能再写成 == .runAIScoring。
 for step in \
   choosePeople \
   inspectPhoto \
   keepPhoto \
-  runAIScoring \
   switchToScenery \
   viewScore \
   acceptResults \
@@ -56,25 +55,29 @@ for step in \
     fail "教学步骤缺少聚焦目标：$step"
 done
 
-rg -q 'guide\.show-scoring-picks' "$preview" ||
-  fail "确认结果步骤缺少显示 AI 评分结果的直接按钮"
-rg -Uq 'case \.acceptResults:[[:space:]\n]*gridFilter = \.all' "$content" ||
-  fail "确认结果步骤没有先清除遗留筛选"
-rg -Uq 'showScoringPicks:[[:space:]\n]*\{[[:space:]\n]*gridFilter = \.aiScored' "$content" ||
-  fail "显示 AI 评分结果按钮没有切换到评分列表"
-rg -q 'gridFilter == \.aiScored' "$content" ||
-  fail "显示 AI 评分结果后没有转移到采纳按钮"
-rg -q 'guide\.confirm-score-review' "$preview" ||
-  fail "评分详情步骤缺少明确继续按钮"
+# 教学必须驱动真实控件。
+#
+# 以前第 4、6、7 步各挂了一个只在教学期间渲染的按钮（演示 AI评分 / 评分已查看，
+# 继续 / 显示 AI 评分结果）。用户走完八步，学到的是一套用完就消失的界面：真实的
+# AI评分 入口在侧栏，教学从头到尾一次都没指向过侧栏，于是回到真实流程时，
+# "保留"之后眼前最显眼的前进按钮变成了"导出"。
+if rg -q 'guide\.run-ai-scoring|guide\.show-scoring-picks|guide\.confirm-score-review' \
+  "$preview" "$content"; then
+  fail "教学又出现了只在教学期间存在的专属按钮"
+fi
+rg -q 'library\.demoScorableCategory == category' "$content" ||
+  fail "侧栏 AI评分 入口没有承接教学指针"
+rg -q 'func demoScorableCategory|var demoScorableCategory' "$view_model" ||
+  fail "示例模式没有按类型开放真实的 AI评分 入口"
+rg -q 'startDemoAIScoring\(for: category\)' "$view_model" ||
+  fail "示例评分没有走真实的发送确认框"
+rg -Uq 'case \.acceptResults:[[:space:]\n]*gridFilter = \.aiScored' "$content" ||
+  fail "确认结果步骤应停在已AI评分列表，推荐结果就在那份列表里"
 rg -q 'onChange\(of: library\.firstCurationGuideStep\)' "$preview" ||
   fail "大图没有监听教学步骤切换"
 rg -q 'shouldClosePhotoPreview' "$preview" \
   Sources/PhotoCurator/OnboardingView.swift ||
   fail "第 5 步没有自动返回照片网格"
-rg -Uq 'Label\([[:space:]\n]*"评分已查看，继续"' "$preview" ||
-  fail "评分详情继续按钮文案不明确"
-rg -Uq 'Label\([[:space:]\n]*"显示 AI 评分结果"' "$preview" ||
-  fail "确认结果直接按钮文案不明确"
 rg -Uq 'Label\([[:space:]\n]*"结束新手引导"' "$preview" ||
   fail "完成状态缺少结束新手引导主按钮"
 rg -q 'buttonStyle\(\.borderedProminent\)' "$preview" ||

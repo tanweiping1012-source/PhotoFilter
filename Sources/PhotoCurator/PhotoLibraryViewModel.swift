@@ -712,7 +712,17 @@ final class PhotoLibraryViewModel: ObservableObject {
         }
 
         if isDemoModeActive {
-            return blocked(String(localized: "示例练习不会联网评分。"))
+            // 教学必须驱动真实控件。以前这里一刀切拦住侧栏入口，教学只好另做一个
+            // 只在教学期间存在的按钮——用户学完一套用完就消失的界面，回到真实流程
+            // 时根本不知道 AI评分 在哪，眼前最显眼的前进按钮变成了"导出"。
+            guard demoScorableCategory == category, !isRunningDemoAIScoring else {
+                return blocked(String(localized: "示例练习不会联网评分。"))
+            }
+            return AIFinalSelectionAvailability(
+                canStart: true,
+                candidatePhotoCount: demoCandidatePhotoCount(for: category),
+                blockedReason: nil
+            )
         }
         if isAnalyzing {
             return blocked(String(localized: "本地分析完成后即可开始。"))
@@ -960,12 +970,12 @@ final class PhotoLibraryViewModel: ObservableObject {
                   curationScope == .scenery {
             selectedPhotoID = photos.first {
                 $0.curationCategory == .scenery
-                    && !$0.aestheticRecommendations.isEmpty
             }?.id
-            firstCurationGuideStep = .viewScore
+            // 不在这里推进步骤：切换类型本身不产出任何结果。第 5 步要等风景
+            // 那一轮评分跑完才算完成——真实流程就是每个类型各评一次。
             statusMessage = String(
                 localized:
-                    "风景照片拥有独立排序。现在打开一张风景照片查看评分。"
+                    "风景照片已单独显示。现在在左侧点击“开始风景 AI评分”。"
             )
         }
     }
@@ -1001,16 +1011,49 @@ final class PhotoLibraryViewModel: ObservableObject {
         statusMessage = String(localized: "评分只提供解释和排序；用底部的“采纳”确认最终结果。")
     }
 
-    func startDemoAIScoring() {
-        guard isDemoModeActive,
-              firstCurationGuideStep == .runAIScoring,
-              !isRunningDemoAIScoring,
-              let session = demoModeSession,
-              let guidedKeeperPhotoID = demoGuidedKeeperPhotoID,
+    /// 教学此刻允许评分的类型。
+    ///
+    /// 真实流程是人物、风景各评一次；教学如果一次把两类都评完，用户学到的就是
+    /// 一个不存在的流程。第 4 步评人物，第 5 步切到风景后再评风景。
+    var demoScorableCategory: PhotoCurationCategory? {
+        guard isDemoModeActive, demoModeSession != nil else { return nil }
+        guard let guidedKeeperPhotoID = demoGuidedKeeperPhotoID,
               photos.first(where: { $0.id == guidedKeeperPhotoID })?.decision
                 == .keep else {
+            return nil
+        }
+        switch firstCurationGuideStep {
+        case .runAIScoring:
+            return .people
+        case .switchToScenery:
+            return curationScope.category == .scenery ? .scenery : nil
+        default:
+            return nil
+        }
+    }
+
+    func demoCandidatePhotoCount(for category: PhotoCurationCategory) -> Int {
+        photos.filter { $0.curationCategory == category }.count
+    }
+
+    /// 该类型在内置结果里对应的请求批次序号（从 1 开始）。
+    private func demoBatchNumbers(
+        for category: PhotoCurationCategory,
+        in session: DemoModeSession
+    ) -> [Int] {
+        session.scoreScopes.enumerated().compactMap { index, scope in
+            scope.category == category ? index + 1 : nil
+        }
+    }
+
+    func startDemoAIScoring(for category: PhotoCurationCategory) {
+        guard demoScorableCategory == category,
+              !isRunningDemoAIScoring,
+              let session = demoModeSession else {
             return
         }
+        let batchNumbers = demoBatchNumbers(for: category, in: session)
+        guard !batchNumbers.isEmpty else { return }
         isRunningDemoAIScoring = true
         demoAIScoringCompletedBatchCount = 0
         demoAIScoringCompletedPhotoCount = 0
@@ -1022,11 +1065,12 @@ final class PhotoLibraryViewModel: ObservableObject {
         demoAIScoringTask = Task { @MainActor [weak self] in
             guard let self else { return }
             do {
-                for batchNumber in 1...session.runProgress.totalBatchCount {
+                for batchNumber in batchNumbers {
                     try await Task.sleep(for: .milliseconds(450))
                     try Task.checkCancellation()
                     self.applyDemoAIScoringBatch(
                         batchNumber,
+                        category: category,
                         session: session
                     )
                 }
@@ -1040,26 +1084,36 @@ final class PhotoLibraryViewModel: ObservableObject {
 
     func completeDemoAIScoringImmediately() {
         guard isDemoModeActive, let session = demoModeSession else { return }
-        for batchNumber in 1...session.runProgress.totalBatchCount {
-            applyDemoAIScoringBatch(batchNumber, session: session)
+        for category in PhotoCurationCategory.allCases {
+            for batchNumber in demoBatchNumbers(for: category, in: session) {
+                applyDemoAIScoringBatch(
+                    batchNumber,
+                    category: category,
+                    session: session
+                )
+            }
         }
     }
 
     private func applyDemoAIScoringBatch(
         _ batchNumber: Int,
+        category: PhotoCurationCategory,
         session: DemoModeSession
     ) {
         guard (1...session.runProgress.totalBatchCount).contains(batchNumber) else {
             return
         }
-        let groupID = session.scoreScopes[batchNumber - 1].groupID
+        // 必须比整个 scope，不能只比 groupID：两个类型的计划各自从
+        // ai-score-window-001 开始编号，groupID 跨类型是重复的。只比 groupID
+        // 会让"评人物"这一批把风景的推荐也一并套上。
+        let scope = session.scoreScopes[batchNumber - 1]
         let scoredPhotoByID = Dictionary(
             uniqueKeysWithValues: session.photos.map { ($0.id, $0) }
         )
         for index in photos.indices {
             guard let scoredPhoto = scoredPhotoByID[photos[index].id],
                   let recommendation = scoredPhoto.aestheticRecommendations.first(
-                      where: { $0.scope.groupID == groupID }
+                      where: { $0.scope == scope }
                   ) else {
                 continue
             }
@@ -1081,37 +1135,52 @@ final class PhotoLibraryViewModel: ObservableObject {
         aiFinalSelectionRunProgress.completedPhotoCount =
             demoAIScoringCompletedPhotoCount
 
-        if demoAIScoringCompletedBatchCount
-            == session.runProgress.totalBatchCount {
-            isRunningDemoAIScoring = false
-            demoAIScoringTask = nil
-            aiFinalSelectionPhotoIDsByCategory =
-                demoFinalSelectionPhotoIDsByCategory(
-                for: session
-            )
-            aiFinalSelectionRunProgress = session.runProgress
-            for category in PhotoCurationCategory.allCases {
-                aiFinalSelectionRunProgressByCategory[category] =
-                    AIFinalSelectionRunProgress(
-                        phase: .completed,
-                        completedPhotoCount: session.startingPhotos
-                            .filter {
-                                $0.curationCategory == category
-                            }.count,
-                        candidatePhotoCount: session.startingPhotos
-                            .filter {
-                                $0.curationCategory == category
-                            }.count,
-                        targetWinnerCount:
-                            session.selectionTargets[category]
-                    )
-            }
-            firstCurationGuideStep = .switchToScenery
-            statusMessage = String(localized: "离线 AI评分完成，已返回照片网格。现在点击顶部“风景”。")
-        } else {
+        // 按类型判断是否跑完，不依赖批次编号：真实流程就是一类评完算一轮。
+        let categoryPhotoIDs = Set(
+            photos.filter { $0.curationCategory == category }.map(\.id)
+        )
+        let scoredInCategory = photos.filter {
+            categoryPhotoIDs.contains($0.id)
+                && !$0.aestheticRecommendations.isEmpty
+        }.count
+
+        guard scoredInCategory == categoryPhotoIDs.count else {
             statusMessage = String(
                 localized: "离线 AI评分：已评估 \(demoAIScoringCompletedPhotoCount) / \(session.runProgress.candidatePhotoCount) 张。"
             )
+            return
+        }
+
+        isRunningDemoAIScoring = false
+        demoAIScoringTask = nil
+        aiFinalSelectionPhotoIDsByCategory[category] =
+            demoFinalSelectionPhotoIDsByCategory(for: session)[category] ?? []
+        let categoryProgress = AIFinalSelectionRunProgress(
+            phase: .completed,
+            completedPhotoCount: categoryPhotoIDs.count,
+            candidatePhotoCount: categoryPhotoIDs.count,
+            targetWinnerCount: session.selectionTargets[category]
+        )
+        aiFinalSelectionRunProgressByCategory[category] = categoryProgress
+        aiFinalSelectionRunProgress = categoryProgress
+        // 和真实流程完全一致：切到该类型，给出完成回执。回执会把网格带到
+        // "已AI评分"，用户不需要自己回想该切哪个筛选。
+        curationScope = PhotoCurationScope(category)
+        completionNotice = CurationCompletionNotice(
+            id: UUID(),
+            kind: .aiScoring(category),
+            title: String(localized: "\(category.title) AI评分完成"),
+            message: String(
+                localized:
+                    "\(categoryPhotoIDs.count) 张已按分数排序，AI 推荐保留其中 \((aiFinalSelectionPhotoIDsByCategory[category] ?? []).count) 张。逐张看过后，用底部的“采纳”确认。"
+            )
+        )
+        if category == .people {
+            firstCurationGuideStep = .switchToScenery
+            statusMessage = String(localized: "人物离线评分完成。现在点击顶部“风景”，再为风景评一次分。")
+        } else {
+            firstCurationGuideStep = .viewScore
+            statusMessage = String(localized: "风景离线评分完成。打开任意一张照片，用底部的“查看评分”看它为什么得这个分。")
         }
     }
 
@@ -1529,7 +1598,7 @@ final class PhotoLibraryViewModel: ObservableObject {
            decision == .keep {
             demoGuidedKeeperPhotoID = photoID
             firstCurationGuideStep = .runAIScoring
-            statusMessage = String(localized: "人工决定已保留；下一步运行不联网的 AI评分演示。")
+            statusMessage = String(localized: "人工决定已保留。下一步在左侧“AI评分”里点击“开始人物 AI评分”。")
         }
     }
 
@@ -1629,6 +1698,10 @@ final class PhotoLibraryViewModel: ObservableObject {
 
     /// 只准备固定批次快照并展示确认弹窗；此方法不会读取图片、Keychain 或发送网络请求。
     func prepareAIFinalSelectionRun(for requestedCategory: PhotoCurationCategory? = nil) {
+        if isDemoModeActive {
+            prepareDemoAIFinalSelectionRun(for: requestedCategory)
+            return
+        }
         guard selectedAIModel.isReady else {
             statusMessage = String(localized: "请先在 AI评分设置中完成自定义接口和模型 ID 配置。")
             return
@@ -1667,6 +1740,35 @@ final class PhotoLibraryViewModel: ObservableObject {
         showAIFinalSelectionRunConfirmation = true
     }
 
+    /// 示例教学也走一遍真实的发送确认框。
+    ///
+    /// 第一次真实评分是要花钱的，用户不该到那一刻才第一次见到这个弹窗。
+    /// 内容用示例数值，文案写明不联网、不读取 Keychain、不消耗额度。
+    private func prepareDemoAIFinalSelectionRun(
+        for requestedCategory: PhotoCurationCategory?
+    ) {
+        guard let category = requestedCategory ?? curationScope.category,
+              demoScorableCategory == category,
+              !isRunningDemoAIScoring else {
+            return
+        }
+        let candidatePhotoIDs = photos
+            .filter { $0.curationCategory == category }
+            .map(\.id)
+        guard let plan = try? AIFinalSelectionRunPlanner.makePlan(
+            candidateLocalPhotoIDs: candidatePhotoIDs,
+            targetWinnerCount: selectionTargets[category],
+            category: category
+        ) else {
+            return
+        }
+        pendingAIFinalSelectionRunPlan = plan
+        pendingAIFinalSelectionModelSnapshot = selectedAIModel
+        pendingAIFinalSelectionPreviewSizeSnapshot = selectedAIPreviewSize
+        pendingAIFinalSelectionCategorySnapshot = category
+        showAIFinalSelectionRunConfirmation = true
+    }
+
     /// 只从批量确认弹窗调用。确认后才读取 Keychain，并逐批生成已锁定尺寸的内存预览。
     func submitConfirmedAIFinalSelectionRun() {
         guard let plan = pendingAIFinalSelectionRunPlan,
@@ -1682,6 +1784,10 @@ final class PhotoLibraryViewModel: ObservableObject {
         pendingAIFinalSelectionModelSnapshot = nil
         pendingAIFinalSelectionPreviewSizeSnapshot = nil
         pendingAIFinalSelectionCategorySnapshot = nil
+        if isDemoModeActive {
+            startDemoAIScoring(for: category)
+            return
+        }
         guard !isAIFinalSelectionRunActive else { return }
         guard let apiKey = readAPIKeyForReview(model: model) else { return }
 

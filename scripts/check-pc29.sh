@@ -78,7 +78,6 @@ rg -q 'FirstCurationGuideBar' "$preview" ||
   fail "大图预览没有接入任务条"
 for identifier in \
   first-curation.guide \
-  guide.run-ai-scoring \
   guide.start-own-photos \
   guide.finish \
   guide.exit; do
@@ -91,8 +90,9 @@ rg -q 'recordDemoScoreReviewFinished' "$preview" ||
   fail "查看评分没有推进教学"
 rg -q 'confirmDemoScoreReview' "$preview" "$view_model" ||
   fail "查看评分缺少明确继续命令"
-rg -q 'guide\.confirm-score-review' "$preview" ||
-  fail "评分查看继续按钮缺少稳定无障碍标识"
+# 看完评分后关掉大图就是"我看过了"，不再需要一个只在教学期间存在的"继续"按钮。
+rg -Uq 'onDismiss[^\n]*\n?[^\n]*library\.confirmDemoScoreReview\(\)|library\.confirmDemoScoreReview\(\)' "$content" ||
+  fail "关闭大图没有推进查看评分这一步"
 rg -q 'firstCurationGuideStep = \.exportCopies' "$view_model" ||
   fail "采纳结果没有推进到导出"
 rg -q 'firstCurationGuideStep = \.completed' "$view_model" ||

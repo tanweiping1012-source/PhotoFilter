@@ -55,8 +55,8 @@ enum FirstCurationGuideStep: Int, CaseIterable, Identifiable {
         case .choosePeople: String(localized: "先查看人物照片")
         case .inspectPhoto: String(localized: "打开任意一张照片")
         case .keepPhoto: String(localized: "先保留这张照片")
-        case .runAIScoring: String(localized: "运行离线 AI评分")
-        case .switchToScenery: String(localized: "切换到风景照片")
+        case .runAIScoring: String(localized: "为人物运行 AI评分")
+        case .switchToScenery: String(localized: "切换到风景并评分")
         case .viewScore: String(localized: "查看 AI 为什么这样评分")
         case .acceptResults: String(localized: "查看并采纳评分结果")
         case .exportCopies: String(localized: "导出保留照片的副本")
@@ -73,13 +73,13 @@ enum FirstCurationGuideStep: Int, CaseIterable, Identifiable {
         case .keepPhoto:
             String(localized: "在大图中点击“保留”。最终决定始终由你完成。")
         case .runAIScoring:
-            String(localized: "运行内置固定评分；人物和风景会使用不同重点分别排序，不会联网。")
+            String(localized: "在左侧“AI评分”里点击“开始人物 AI评分”，并在确认框中继续。使用内置结果，不会联网。")
         case .switchToScenery:
-            String(localized: "在“照片类型”中选择“风景”，查看独立的风景结果。")
+            String(localized: "在“照片类型”中选择“风景”，再点左侧“开始风景 AI评分”。两类分别评分、分别排序。")
         case .viewScore:
-            String(localized: "检查总分、五维评分、具体评价和总结，然后点击“评分已查看，继续”。")
+            String(localized: "选中一张已评分的照片，点底部“查看评分”；看过总分与五维评价后关掉大图即可。")
         case .acceptResults:
-            String(localized: "点击“显示 AI 评分结果”，按分数逐张看过后再采纳人物和风景结果。")
+            String(localized: "网格已切到“已AI评分”，按分数逐张看过后，用底部的“采纳”确认。")
         case .exportCopies:
             String(localized: "导出 4 张后会得到“人物”和“风景”两个目录。原照片不会改变。")
         case .completed:
@@ -87,8 +87,15 @@ enum FirstCurationGuideStep: Int, CaseIterable, Identifiable {
         }
     }
 
+    /// 需要回到网格才能继续的步骤。
+    ///
+    /// AI评分 的入口在侧栏，采纳的入口在底部命令条——大图盖着这两处时，
+    /// 教学让用户去点一个他看不见的按钮。
     var shouldClosePhotoPreview: Bool {
-        self == .switchToScenery
+        switch self {
+        case .runAIScoring, .switchToScenery, .acceptResults: true
+        default: false
+        }
     }
 }
 

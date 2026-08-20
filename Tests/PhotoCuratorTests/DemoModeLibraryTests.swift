@@ -204,18 +204,25 @@ final class DemoModeLibraryTests: XCTestCase {
         XCTAssertEqual(viewModel.firstCurationGuideStep, .runAIScoring)
 
         viewModel.completeDemoAIScoringImmediately()
-        XCTAssertEqual(
-            viewModel.firstCurationGuideStep,
-            .switchToScenery
+        // 人物、风景各评一次之后，教学才走到"查看评分"。
+        XCTAssertEqual(viewModel.firstCurationGuideStep, .viewScore)
+        // 第 4、5、7 步的入口分别在侧栏和底部命令条，大图盖着它们时必须先关掉；
+        // 第 6 步恰恰相反——它就是要留在大图里看评分。
+        XCTAssertTrue(
+            FirstCurationGuideStep.runAIScoring.shouldClosePhotoPreview
         )
         XCTAssertTrue(
-            try XCTUnwrap(
-                viewModel.firstCurationGuideStep
-            ).shouldClosePhotoPreview
+            FirstCurationGuideStep.switchToScenery.shouldClosePhotoPreview
+        )
+        XCTAssertTrue(
+            FirstCurationGuideStep.acceptResults.shouldClosePhotoPreview
+        )
+        XCTAssertFalse(
+            FirstCurationGuideStep.viewScore.shouldClosePhotoPreview
         )
         XCTAssertEqual(
             viewModel.statusMessage,
-            "离线 AI评分完成，已返回照片网格。现在点击顶部“风景”。"
+            "风景离线评分完成。打开任意一张照片，用底部的“查看评分”看它为什么得这个分。"
         )
         XCTAssertEqual(viewModel.aiFinalSelectionPhotoIDs.count, 4)
         XCTAssertTrue(viewModel.aiFinalSelectionPhotoIDs.contains(secondPhotoID))
@@ -290,23 +297,49 @@ final class DemoModeLibraryTests: XCTestCase {
         viewModel.recordDemoPhotoPreviewOpened()
         viewModel.mark(photoID: firstPhotoID, as: .keep)
 
-        viewModel.startDemoAIScoring()
+        // 第 4 步：教学必须驱动侧栏那个真实入口，而且只对人物可用——
+        // 真实流程就是一类评一次，一次评两类会教出一个不存在的流程。
+        XCTAssertEqual(viewModel.demoScorableCategory, .people)
+        XCTAssertTrue(
+            viewModel.aiFinalSelectionAvailability(for: .people).canStart
+        )
+        XCTAssertFalse(
+            viewModel.aiFinalSelectionAvailability(for: .scenery).canStart
+        )
+
+        // 并且要走一遍真实的发送确认框：第一次真实评分要花钱，
+        // 用户不该到那一刻才第一次见到它。
+        viewModel.prepareAIFinalSelectionRun(for: .people)
+        XCTAssertTrue(viewModel.showAIFinalSelectionRunConfirmation)
+        viewModel.submitConfirmedAIFinalSelectionRun()
 
         XCTAssertTrue(viewModel.isRunningDemoAIScoring)
         await waitUntil {
             viewModel.firstCurationGuideStep == .switchToScenery
         }
         XCTAssertFalse(viewModel.isRunningDemoAIScoring)
-        XCTAssertEqual(viewModel.demoAIScoringCompletedBatchCount, 2)
+        XCTAssertEqual(viewModel.demoAIScoringCompletedPhotoCount, 4)
+        XCTAssertTrue(
+            (viewModel.aiFinalSelectionPhotoIDsByCategory[.scenery] ?? [])
+                .isEmpty,
+            "只评了人物，风景不该出现推荐结果"
+        )
+        // 完成回执与真实流程一致，网格会被带到该类型的"已AI评分"。
+        XCTAssertNotNil(viewModel.completionNotice)
+
+        // 第 5 步：切到风景之后，风景的入口才出现。
+        XCTAssertNil(viewModel.demoScorableCategory)
+        viewModel.curationScope = .scenery
+        XCTAssertEqual(viewModel.demoScorableCategory, .scenery)
+
+        viewModel.prepareAIFinalSelectionRun(for: .scenery)
+        XCTAssertTrue(viewModel.showAIFinalSelectionRunConfirmation)
+        viewModel.submitConfirmedAIFinalSelectionRun()
+        await waitUntil {
+            viewModel.firstCurationGuideStep == .viewScore
+        }
+
         XCTAssertEqual(viewModel.demoAIScoringCompletedPhotoCount, 8)
-        XCTAssertEqual(
-            viewModel.aiFinalSelectionRunProgress.completedBatchCount,
-            2
-        )
-        XCTAssertEqual(
-            viewModel.aiFinalSelectionRunProgress.completedPhotoCount,
-            8
-        )
         XCTAssertEqual(viewModel.aiFinalSelectionPhotoIDs.count, 4)
     }
 

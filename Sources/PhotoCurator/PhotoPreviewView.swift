@@ -24,13 +24,6 @@ struct PhotoPreviewView: View {
                 Divider()
                 FirstCurationGuideBar(
                     compact: true,
-                    completeScoreReview: {
-                        library.confirmDemoScoreReview()
-                        if library.firstCurationGuideStep
-                            == .acceptResults {
-                            dismiss()
-                        }
-                    },
                     finishGuide: {
                         library.finishFirstCurationGuide()
                         dismiss()
@@ -370,9 +363,6 @@ struct FirstCurationGuideBar: View {
     @EnvironmentObject private var library: PhotoLibraryViewModel
 
     let compact: Bool
-    var completeScoreReview: (() -> Void)?
-    var showScoringPicks: (() -> Void)?
-    var isShowingScoringPicks = false
     var finishGuide: (() -> Void)?
     var startOwnPhotos: (() -> Void)?
     var exitGuide: (() -> Void)?
@@ -412,83 +402,7 @@ struct FirstCurationGuideBar: View {
 
                 Spacer(minLength: 10)
 
-                if step == .viewScore,
-                   let completeScoreReview {
-                    Button {
-                        completeScoreReview()
-                    } label: {
-                        Label(
-                            "评分已查看，继续",
-                            systemImage: "arrow.right.circle.fill"
-                        )
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .accessibilityIdentifier(
-                        "guide.confirm-score-review"
-                    )
-                    .firstCurationGuideTarget(
-                        true,
-                        pointerSide: .leading
-                    )
-                } else if step == .acceptResults,
-                          !isShowingScoringPicks,
-                          let showScoringPicks {
-                    Button {
-                        showScoringPicks()
-                    } label: {
-                        Label(
-                            "显示 AI 评分结果",
-                            systemImage: "wand.and.stars"
-                        )
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .accessibilityIdentifier(
-                        "guide.show-scoring-picks"
-                    )
-                    .firstCurationGuideTarget(
-                        true,
-                        pointerSide: .leading
-                    )
-                } else if step == .runAIScoring {
-                    if library.isRunningDemoAIScoring {
-                        VStack(alignment: .trailing, spacing: 5) {
-                            Text(
-                                "离线演示 \(library.demoAIScoringCompletedPhotoCount) / \(library.aiFinalSelectionRunProgress.candidatePhotoCount) 张"
-                            )
-                            .font(.caption.monospacedDigit())
-                            .foregroundStyle(.secondary)
-                            ProgressView(
-                                value: Double(
-                                    library.demoAIScoringCompletedPhotoCount
-                                ),
-                                total: Double(
-                                    max(
-                                        1,
-                                        library.aiFinalSelectionRunProgress
-                                            .candidatePhotoCount
-                                    )
-                                )
-                            )
-                            .frame(width: 120)
-                        }
-                        .firstCurationGuideTarget(
-                            true,
-                            pointerSide: .leading
-                        )
-                    } else {
-                        Button {
-                            library.startDemoAIScoring()
-                        } label: {
-                            Label("演示 AI评分", systemImage: "play.fill")
-                        }
-                        .buttonStyle(.borderedProminent)
-                        .accessibilityIdentifier("guide.run-ai-scoring")
-                        .firstCurationGuideTarget(
-                            true,
-                            pointerSide: .leading
-                        )
-                    }
-                } else if step == .completed {
+                if step == .completed {
                     if let startOwnPhotos {
                         Button {
                             startOwnPhotos()

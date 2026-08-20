@@ -71,6 +71,10 @@ struct ContentView: View {
             SupportInformationView(isDemoModeActive: library.isDemoModeActive)
         }
         .sheet(isPresented: $showPhotoPreview) {
+            // 看完评分后关掉大图，就是"我看过了"。以前这里需要一个只在教学期间
+            // 存在的"评分已查看，继续"按钮，用户学到的是一个用完就消失的控件。
+            library.confirmDemoScoreReview()
+        } content: {
             PhotoPreviewView(photoIDs: previewPhotoIDs)
                 .environmentObject(library)
         }
@@ -561,6 +565,10 @@ struct ContentView: View {
             }
             .disabled(!availability.canStart)
             .accessibilityIdentifier("ai.start.\(category.rawValue)")
+            .firstCurationGuideTarget(
+                library.demoScorableCategory == category,
+                pointerSide: .trailing
+            )
             .accessibilityHint(availability.blockedReason ?? "")
 
             if let reason = availability.blockedReason {
@@ -651,10 +659,13 @@ struct ContentView: View {
                     .accessibilityLabel("照片类型")
                     .accessibilityValue(library.curationScope.title)
                     .firstCurationGuideTarget(
-                        library.firstCurationGuideStep
-                            == .choosePeople
-                            || library.firstCurationGuideStep
-                                == .switchToScenery,
+                        library.firstCurationGuideStep == .choosePeople
+                            || (
+                                library.firstCurationGuideStep
+                                    == .switchToScenery
+                                    && library.curationScope.category
+                                        != .scenery
+                            ),
                         pointerSide: .trailing,
                         cornerRadius: 6
                     )
@@ -692,11 +703,6 @@ struct ContentView: View {
                 Divider()
                 FirstCurationGuideBar(
                     compact: false,
-                    showScoringPicks: {
-                        gridFilter = .aiScored
-                    },
-                    isShowingScoringPicks:
-                        gridFilter == .aiScored,
                     finishGuide: library.finishFirstCurationGuide,
                     startOwnPhotos: startOwnPhotosAfterGuide
                 )
@@ -759,12 +765,8 @@ struct ContentView: View {
                                     }
                                 )
                                 .firstCurationGuideTarget(
-                                    (
-                                        library.firstCurationGuideStep
-                                            == .inspectPhoto
-                                            || library.firstCurationGuideStep
-                                                == .viewScore
-                                    )
+                                    library.firstCurationGuideStep
+                                        == .inspectPhoto
                                         && photo.id
                                             == library.selectedPhotoID,
                                     pointerSide: .trailing,
@@ -845,7 +847,7 @@ struct ContentView: View {
             case .viewScore:
                 gridFilter = .aiScored
             case .acceptResults:
-                gridFilter = .all
+                gridFilter = .aiScored
             default:
                 break
             }
@@ -1135,6 +1137,10 @@ struct ContentView: View {
                     : String(localized: "查看评分")
             )
             .accessibilityIdentifier("photo.preview")
+            .firstCurationGuideTarget(
+                library.firstCurationGuideStep == .viewScore,
+                pointerSide: .leading
+            )
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 6)
@@ -1233,6 +1239,12 @@ struct ContentView: View {
     /// endpoint、预览尺寸在侧栏 AI评分区常驻可见，完整的请求、排序、重试与费用规则在"帮助与支持"。
     private var aiFinalSelectionConfirmationMessage: String {
         guard let plan = library.pendingAIFinalSelectionRunPlan else { return "" }
+        if library.isDemoModeActive {
+            return String(
+                localized:
+                    "离线示例：用内置结果为 \(plan.candidatePhotoCount) 张\(library.pendingAIFinalSelectionCategory.title)照片打分，不联网、不读取 Keychain、不消耗额度。"
+            )
+        }
         return String(
             localized:
                 "将使用\(library.pendingAIFinalSelectionModel.apiModelID)为 \(plan.candidatePhotoCount) 张\(library.pendingAIFinalSelectionCategory.title)照片打分。"

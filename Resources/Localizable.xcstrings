@@ -968,6 +968,17 @@
         }
       }
     },
+    "为人物运行 AI评分": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Score the people photos"
+          }
+        }
+      }
+    },
     "为控制请求频率，请在 %lld 秒后再发起下一组复核。": {
       "localizations": {
         "en": {
@@ -1018,12 +1029,13 @@
         }
       }
     },
-    "人工决定已保留；下一步运行不联网的 AI评分演示。": {
+    "人工决定已保留。下一步在左侧“AI评分”里点击“开始人物 AI评分”。": {
+      "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Your decision was kept. Next, run the offline AI scoring demo."
+            "value": "Kept by your own decision. Next, click “Start people AI scoring” in the sidebar under AI Scoring."
           }
         }
       }
@@ -1060,6 +1072,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "People photos are now shown separately. Open any People photo to inspect the large preview."
+          }
+        }
+      }
+    },
+    "人物离线评分完成。现在点击顶部“风景”，再为风景评一次分。": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Offline scoring for people is done. Click Scenery at the top and score that type too."
           }
         }
       }
@@ -1509,12 +1532,13 @@
         }
       }
     },
-    "切换到风景照片": {
+    "切换到风景并评分": {
+      "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Switch to Scenery"
+            "value": "Switch to scenery and score it"
           }
         }
       }
@@ -1760,12 +1784,13 @@
         }
       }
     },
-    "在“照片类型”中选择“风景”，查看独立的风景结果。": {
+    "在“照片类型”中选择“风景”，再点左侧“开始风景 AI评分”。两类分别评分、分别排序。": {
+      "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Choose Scenery under Photo Type to view its separate results."
+            "value": "Choose Scenery under Photo type, then click “Start scenery AI scoring” in the sidebar. Each type is scored and ranked separately."
           }
         }
       }
@@ -1776,6 +1801,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Click Keep in the large preview. You always make the final decision."
+          }
+        }
+      }
+    },
+    "在左侧“AI评分”里点击“开始人物 AI评分”，并在确认框中继续。使用内置结果，不会联网。": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In the sidebar under AI Scoring, click “Start people AI scoring” and continue in the confirmation dialog. It uses built-in results and never goes online."
           }
         }
       }
@@ -2927,17 +2963,6 @@
         }
       }
     },
-    "显示 AI 评分结果": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Show AI Scores"
-          }
-        }
-      }
-    },
     "显示全部照片": {
       "extractionState": "manual",
       "localizations": {
@@ -3298,16 +3323,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Review and Decide"
-          }
-        }
-      }
-    },
-    "检查总分、五维评分、具体评价和总结，然后点击“评分已查看，继续”。": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Review the total score, five dimensions, detailed feedback, and summary, then click “Score Reviewed, Continue.”"
           }
         }
       }
@@ -3752,17 +3767,6 @@
         }
       }
     },
-    "点击“显示 AI 评分结果”，按分数逐张看过后再采纳人物和风景结果。": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Tap “Show AI Scores”, review them in score order, then accept the People and Scenery results."
-          }
-        }
-      }
-    },
     "照片不可用": {
       "localizations": {
         "en": {
@@ -4023,16 +4027,6 @@
         }
       }
     },
-    "离线 AI评分完成，已返回照片网格。现在点击顶部“风景”。": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Offline AI Scoring is complete, and you are back in the photo grid. Now click Scenery at the top."
-          }
-        }
-      }
-    },
     "离线 AI评分：已评估 %lld / %lld 张。": {
       "localizations": {
         "en": {
@@ -4071,6 +4065,17 @@
           "stringUnit": {
             "state": "new",
             "value": "离线演示 %1$lld / %2$lld 张"
+          }
+        }
+      }
+    },
+    "离线示例：用内置结果为 %lld 张%@照片打分，不联网、不读取 Keychain、不消耗额度。": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Offline sample: scoring %1$lld %2$@ photos with built-in results. No network, no Keychain access, no credit used."
           }
         }
       }
@@ -4218,6 +4223,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "No local technical analysis; shown in capture order"
+          }
+        }
+      }
+    },
+    "网格已切到“已AI评分”，按分数逐张看过后，用底部的“采纳”确认。": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The grid is already on AI-scored. Review them in score order, then confirm with “Accept” at the bottom."
           }
         }
       }
@@ -4619,32 +4635,12 @@
         }
       }
     },
-    "运行内置固定评分；人物和风景会使用不同重点分别排序，不会联网。": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Run fixed built-in scores. People and Scenery use different criteria and separate rankings without connecting to the network."
-          }
-        }
-      }
-    },
     "运行模式": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Run Mode"
-          }
-        }
-      }
-    },
-    "运行离线 AI评分": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Run Offline AI Scoring"
           }
         }
       }
@@ -4794,6 +4790,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Best for distant scenes, small subjects, and texture; highest upload, wait time, and potential cost."
+          }
+        }
+      }
+    },
+    "选中一张已评分的照片，点底部“查看评分”；看过总分与五维评价后关掉大图即可。": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Select a scored photo and click “View score” at the bottom. Read the total and the five dimensions, then close the large view."
           }
         }
       }
@@ -5086,12 +5093,24 @@
         }
       }
     },
-    "风景照片拥有独立排序。现在打开一张风景照片查看评分。": {
+    "风景照片已单独显示。现在在左侧点击“开始风景 AI评分”。": {
+      "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Scenery photos have their own ranking. Open a Scenery photo to review its score."
+            "value": "Scenery photos are now shown on their own. Click “Start scenery AI scoring” in the sidebar."
+          }
+        }
+      }
+    },
+    "风景离线评分完成。打开任意一张照片，用底部的“查看评分”看它为什么得这个分。": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Offline scoring for scenery is done. Open any photo and use “View score” at the bottom to see why it scored that way."
           }
         }
       }
