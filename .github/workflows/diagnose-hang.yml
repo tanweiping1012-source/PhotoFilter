@@ -1,0 +1,62 @@
+name: Diagnose test hang
+
+# 手动触发的诊断工作流。scripts/check.sh 在 runner 上挂死过三次
+# （6h / 3h2m / 30m 超时），三次停在不同的纯值计算测试套件上，且都留下
+# xctest 孤儿进程。本地 Xcode 26 跑 5 秒，装不了 16.4，只能在这里取证。
+#
+# 一次同时验两个假设：
+#   1. 输出重定向到文件而不是 Actions 日志管道。若因此不再挂死，
+#      说明卡在日志管道背压（写端阻塞在 write()），与测试内容无关。
+#   2. 若仍然挂死，用 sample 抓 xctest 的完整堆栈——不用再猜。
+on:
+  workflow_dispatch:
+
+jobs:
+  diagnose:
+    runs-on: macos-15
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Show toolchain
+        run: |
+          swift --version
+          xcodebuild -version
+          sysctl -n hw.ncpu hw.memsize
+
+      - name: swift test 带看门狗
+        timeout-minutes: 20
+        run: |
+          set +e
+          swift test > test-output.log 2>&1 &
+          TEST_PID=$!
+          for i in $(seq 1 40); do
+            sleep 15
+            if ! kill -0 "$TEST_PID" 2>/dev/null; then
+              echo "swift test 已退出（第 $((i*15)) 秒）"
+              break
+            fi
+            printf '[%4ds] 仍在运行 | 最后一行: %s\n' "$((i*15))" "$(tail -1 test-output.log)"
+          done
+
+          if kill -0 "$TEST_PID" 2>/dev/null; then
+            echo "===== 判定为挂死 ====="
+            echo "--- 进程状态 ---"
+            ps -Ao pid,ppid,stat,etime,wq,command | grep -E "xctest|swift|PhotoCurator" | grep -v grep
+            for pid in $(pgrep -x xctest); do
+              echo "--- sample xctest $pid ---"
+              sample "$pid" 3 -mayDie 2>&1 | sed -n '1,250p'
+            done
+            for pid in $(pgrep -f "swift-package|swiftpm|swift-test"); do
+              echo "--- sample $pid ---"
+              sample "$pid" 2 -mayDie 2>&1 | sed -n '1,100p'
+            done
+            echo "--- 测试输出尾部 ---"
+            tail -40 test-output.log
+            kill -9 "$TEST_PID" 2>/dev/null
+            exit 1
+          fi
+
+          echo "===== 未挂死：重定向到文件后正常结束 ====="
+          echo "→ 这本身就是结论：卡的是 Actions 日志管道，不是测试。"
+          tail -25 test-output.log
