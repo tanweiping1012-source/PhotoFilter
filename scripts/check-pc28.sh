@@ -41,13 +41,14 @@ jq -e '
     .properties.reviews.items.required
     | contains([
         "photo_id",
-        "score",
         "dimensions",
         "reasons",
         "summary"
       ])
   )
   and (.properties.reviews.items.properties.rank == null)
+  and (.properties.reviews.items.properties.score == null)
+  and (.properties.reviews.items.required | index("score") == null)
   and
   (
     .properties.reviews.items.properties.dimensions.required
@@ -98,7 +99,7 @@ rg -q 'photos\.filter \{ !\$0\.aestheticRecommendations\.isEmpty \}' "$filter" |
 rg -q 'primaryAestheticRecommendation' \
   Sources/PhotoCurator/PhotoItem.swift "$content" ||
   fail "卡片没有按最终批次优先选择总分"
-rg -Fq 'String(localized: "AI \(recommendation.score) 分")' "$content" ||
+rg -Fq 'String(localized: "AI \(recommendation.total(with: weights)) 分")' "$content" ||
   fail "评分卡片没有显示总分"
 rg -q 'String\(localized: "查看评分"\)' "$content" ||
   fail "选中评分照片后缺少查看评分入口"

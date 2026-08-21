@@ -66,6 +66,20 @@ if rg -n '@Published private\\(set\\) var isAIModelKeyConfigured = AIProviderKey
   fail "ViewModel 不得在属性初始化阶段读取 Keychain"
 fi
 
+# 每一类都是独立的一轮，进度的分子和分母都必须属于当前类型。
+#
+# 分子有行为测试守着（testDemoAIScoringRunsOfflineRequestWindows 会持续采样，
+# 分子越过分母就失败）。分母守不住：内置样例恰好是人物 4 张、风景 4 张，
+# 沿用上一类留下的分母和正确取值完全一样，任何基于这份样例的测试都分辨不出来。
+# 所以这里用结构断言补上——两类张数一旦不同，缺了这一行就是错的。
+awk '/func startDemoAIScoring\(/,/^    }/' \
+  Sources/PhotoCurator/PhotoLibraryViewModel.swift |
+  rg -q 'aiFinalSelectionRunProgress.candidatePhotoCount =' ||
+  fail "演示每一轮开跑时没有把进度分母换成本类型的候选数"
+awk '/private func applyDemoAIScoringBatch\(/,/^    }/' \
+  Sources/PhotoCurator/PhotoLibraryViewModel.swift |
+  rg -q 'aiFinalSelectionRunProgress.completedPhotoCount = scoredInCategory' ||
+  fail "演示把全局已评张数塞进了按类型的进度分子"
 rg -q 'testDemoLaunchSkipsKeychainAndPersistence' \
   Tests/PhotoCuratorTests/DemoModeLibraryTests.swift ||
   fail "缺少演示零 Keychain/零持久化单测"

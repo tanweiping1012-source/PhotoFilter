@@ -163,7 +163,7 @@ struct ArkAestheticReviewClient {
             tools: [ArkResponseReviewTool(request: request)],
             toolChoice: "required",
             temperature: 0.1,
-            // 五维评分和总结会显著增加 JSON 长度，需给 5 张图的闭合结果留足空间。
+            // 五维评分和总结会显著增加 JSON 长度，需给闭合的 JSON 留足空间。
             maxOutputTokens: AestheticReviewPrompt.maximumOutputTokens,
             store: false
         )
@@ -294,11 +294,11 @@ enum AestheticReviewPrompt {
     static let maximumOutputTokens = 1_600
 
     static let systemPrompt = """
-    你是要求严格的旅行照片评分助手。必须使用固定的绝对标尺，独立评估每张图片的瞬间、构图、主体、光线和叙事表现，再给出总分。评分锚点是 80 分等同于专业摄影师的交付水准，普通旅行快照通常落在 60–75 分，不得因为画面讨喜或有纪念意义而抬分。一次附带多张图片只为传输效率，不代表候选组；不得比较图片，不得返回名次，不得在评价中使用“本组、相比、更好、更差、优先、候补”等相对表述。不得杜撰图片外的信息，不得评价人物身份或敏感属性。必须且只能调用 submit_photo_reviews 工具一次提交结果。
+    你是要求严格的旅行照片评分助手。必须使用固定的绝对标尺，独立评估每张图片的瞬间、构图、主体、光线和叙事表现这五个维度。只给出这五个维度分，不要给出总分、综合分或加权分——总分由 App 按用户自己设定的权重在本地计算。评分锚点是 80 分等同于专业摄影师的交付水准，普通旅行快照通常落在 60–75 分，不得因为画面讨喜或有纪念意义而抬分。若一次附带多张图片，那只是为了传输效率，不代表候选组；不得比较图片，不得返回名次，不得在评价中使用“本组、相比、更好、更差、优先、候补”等相对表述。不得杜撰图片外的信息，不得评价人物身份或敏感属性。必须且只能调用 submit_photo_reviews 工具一次提交结果。
     """
 
     static let jsonSystemPrompt = """
-    你是要求严格的旅行照片评分助手。必须使用固定的绝对标尺，独立评估每张图片的瞬间、构图、主体、光线和叙事表现，再给出总分。评分锚点是 80 分等同于专业摄影师的交付水准，普通旅行快照通常落在 60–75 分，不得因为画面讨喜或有纪念意义而抬分。一次附带多张图片只为传输效率，不代表候选组；不得比较图片，不得返回名次，不得在评价中使用“本组、相比、更好、更差、优先、候补”等相对表述。不得杜撰图片外的信息，不得评价人物身份或敏感属性。只返回用户要求的 JSON 对象，不要添加 Markdown 或解释。
+    你是要求严格的旅行照片评分助手。必须使用固定的绝对标尺，独立评估每张图片的瞬间、构图、主体、光线和叙事表现这五个维度。只给出这五个维度分，不要给出总分、综合分或加权分——总分由 App 按用户自己设定的权重在本地计算。评分锚点是 80 分等同于专业摄影师的交付水准，普通旅行快照通常落在 60–75 分，不得因为画面讨喜或有纪念意义而抬分。若一次附带多张图片，那只是为了传输效率，不代表候选组；不得比较图片，不得返回名次，不得在评价中使用“本组、相比、更好、更差、优先、候补”等相对表述。不得杜撰图片外的信息，不得评价人物身份或敏感属性。只返回用户要求的 JSON 对象，不要添加 Markdown 或解释。
     """
 
     static func userPrompt(for request: AestheticReviewRequest) -> String {
@@ -308,15 +308,21 @@ enum AestheticReviewPrompt {
                 localized:
                     "本次未指定人物或风景类型；只按照片自身内容使用固定标尺评分。"
             )
+        // 生产路径每次只送一张。仍然保留多张的措辞分支，因为契约本身允许多张，
+        // 而对着一张图说"不要让其中任何一张影响另一张"只会让模型困惑。
+        let subject = request.photos.count == 1
+            ? "请评分下面这一张匿名照片：\(identifiers)。图片附在文本之后。"
+            : "请独立评分以下 \(request.photos.count) 张匿名照片：\(identifiers)。图片会按此顺序附在文本后。不要让其中任何一张照片影响另一张的分数或评价。"
         return """
-        请独立评分以下 \(request.photos.count) 张匿名照片：\(identifiers)。图片会按此顺序附在文本后。不要让其中任何一张照片影响另一张的分数或评价。
+        \(subject)
         \(categoryInstruction)
-        评分必须严格。锚点：80 分等同于专业摄影师在同类题材上的交付水准——主体、光线、构图和瞬间都经得起挑剔，可以直接用于作品集或出版。普通旅行快照即使观感讨喜，通常也应落在 60–75 之间；不要因为画面漂亮、色彩鲜艳或有纪念意义就抬高分数。
-        所有请求统一使用以下绝对标尺：90–100 为极少见的杰作，构图、光线、瞬间与叙事同时达到发表级；80–89 为专业摄影师水准，明显优秀且几乎没有可挑剔的硬伤；70–79 为高于平均的合格旅行照片，有亮点但存在明确不足；60–69 为普通记录性快照，能看出场景但缺少摄影层面的表达；0–59 为存在明显技术问题，或缺少有效主体与表达。
-        绝大多数照片应落在 60–79；给出 80 分以上必须能在具体评价中指出使其达到专业水准的具体理由。
+        评分必须严格，五个维度各自独立打分。锚点：80 分等同于专业摄影师在同类题材上的交付水准——主体、光线、构图和瞬间都经得起挑剔，可以直接用于作品集或出版。普通旅行快照即使观感讨喜，通常也应落在 60–75 之间；不要因为画面漂亮、色彩鲜艳或有纪念意义就抬高分数。
+        以下绝对标尺同时适用于五个维度中的每一个：90–100 为极少见的发表级表现；80–89 为专业摄影师水准，明显优秀且几乎没有可挑剔的硬伤；70–79 为高于平均的合格水准，有亮点但存在明确不足；60–69 为普通记录性快照的水准，能看出场景但缺少摄影层面的表达；0–59 为存在明显技术问题，或缺少有效主体与表达。
+        绝大多数维度分应落在 60–79；给出 80 分以上必须能在具体评价中指出使其达到专业水准的具体理由。
+        只返回五个维度分。不要返回总分、综合分、加权分或名次——总分由 App 按用户设定的权重在本地计算，你给出的任何总分都会被丢弃。
         返回且仅返回此 JSON：
-        {"reviews":[{"photo_id":"photo_001","score":90,"dimensions":{"moment":92,"composition":88,"subject":93,"lighting":86,"storytelling":89},"reasons":["主体明确且层次清楚","瞬间具有旅途感"],"summary":"主体、光线和叙事表现完整，画面完成度高。"}]}
-        规则：每个 photo_id 必须恰好出现一次；不得返回 rank 或任何名次字段；score 和 dimensions 的五项分数都必须是 0 到 100 的整数；score 是基于固定标尺的综合判断，不要求等于五维平均值；reasons 必须包含 1 到 3 条、每条 2 到 80 个字符的具体中文评价；summary 必须是 4 到 120 个字符的中文总结，且只能评价当前照片自身。不得增加任何其它字段。
+        {"reviews":[{"photo_id":"photo_001","dimensions":{"moment":92,"composition":88,"subject":93,"lighting":86,"storytelling":89},"reasons":["主体明确且层次清楚","瞬间具有旅途感"],"summary":"主体、光线和叙事表现完整，画面完成度高。"}]}
+        规则：每个 photo_id 必须恰好出现一次；不得返回 score、rank 或任何总分与名次字段；dimensions 的五项分数都必须是 0 到 100 的整数；reasons 必须包含 1 到 3 条、每条 2 到 80 个字符的具体中文评价；summary 必须是 4 到 120 个字符的中文总结，且只能评价当前照片自身。不得增加任何其它字段。
         """
     }
 
@@ -408,7 +414,6 @@ private struct ArkResponseReviewTool: Encodable {
         let properties: ReviewProperties
         let required = [
             "photo_id",
-            "score",
             "dimensions",
             "reasons",
             "summary",
@@ -427,7 +432,6 @@ private struct ArkResponseReviewTool: Encodable {
 
     struct ReviewProperties: Encodable {
         let photoID: PhotoID
-        let score = IntegerRange(minimum: 0, maximum: 100)
         let dimensions = Dimensions()
         let reasons = Reasons()
         let summary = StringRange(minLength: 4, maxLength: 120)
@@ -438,7 +442,7 @@ private struct ArkResponseReviewTool: Encodable {
 
         enum CodingKeys: String, CodingKey {
             case photoID = "photo_id"
-            case score, dimensions, reasons, summary
+            case dimensions, reasons, summary
         }
     }
 

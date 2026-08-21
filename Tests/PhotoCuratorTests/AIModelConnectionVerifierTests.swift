@@ -159,7 +159,7 @@ private final class InvalidConnectionURLProtocol:
 
     override func startLoading() {
         let content = """
-        {"reviews":[{"photo_id":"photo_001","score":188,"dimensions":{"moment":87,"composition":89,"subject":90,"lighting":86,"storytelling":88},"reasons":["主体清楚且构图稳定"],"summary":"主体、光线和叙事表现完整，画面完成度高。"}]}
+        {"reviews":[{"photo_id":"photo_001","dimensions":{"moment":187,"composition":89,"subject":90,"lighting":86,"storytelling":88},"reasons":["主体清楚且构图稳定"],"summary":"主体、光线和叙事表现完整，画面完成度高。"}]}
         """
         let escaped = try! String(
             data: JSONEncoder().encode(content),

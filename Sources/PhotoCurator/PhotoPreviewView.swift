@@ -256,7 +256,8 @@ struct PhotoPreviewView: View {
     private func sortedAestheticRecommendations(
         for photo: PhotoItem
     ) -> [AestheticRecommendation] {
-        photo.aestheticRecommendations.sorted { lhs, rhs in
+        let weights = library.aestheticScoreWeights
+        return photo.aestheticRecommendations.sorted { lhs, rhs in
             if lhs.scope.kind == .finalSelection,
                rhs.scope.kind != .finalSelection {
                 return true
@@ -265,7 +266,7 @@ struct PhotoPreviewView: View {
                rhs.scope.kind == .finalSelection {
                 return false
             }
-            return lhs.score > rhs.score
+            return lhs.total(with: weights) > rhs.total(with: weights)
         }
     }
 
@@ -461,9 +462,18 @@ struct FirstCurationGuideBar: View {
 }
 
 private struct AestheticScoreDetailView: View {
+    @EnvironmentObject private var library: PhotoLibraryViewModel
     let recommendation: AestheticRecommendation
     let globalRank: Int?
     let isScorePreferred: Bool
+
+    private var weights: AestheticScoreWeights {
+        library.aestheticScoreWeights
+    }
+
+    private var total: Int {
+        recommendation.total(with: weights)
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -481,7 +491,7 @@ private struct AestheticScoreDetailView: View {
             }
 
             HStack(alignment: .lastTextBaseline, spacing: 5) {
-                Text("\(recommendation.score)")
+                Text("\(total)")
                     .font(Typography.scoreDisplay)
                     .monospacedDigit()
                 Text("/ 100")
@@ -494,13 +504,15 @@ private struct AestheticScoreDetailView: View {
             }
             .accessibilityElement(children: .ignore)
             .accessibilityLabel("总分")
-            .accessibilityValue("\(recommendation.score) / 100")
+            .accessibilityValue("\(total) / 100")
 
             VStack(spacing: 8) {
                 ForEach(AestheticScoreDimension.allCases) { dimension in
                     let score = dimension.score(
                         in: recommendation.dimensions
                     )
+                    let weight = weights.weight(for: dimension)
+                    let isExcluded = !weights.isDegenerate && weight == 0
                     HStack(spacing: 8) {
                         Text(dimension.title)
                             .font(Typography.detail)
@@ -516,14 +528,27 @@ private struct AestheticScoreDetailView: View {
                             .foregroundStyle(.secondary)
                             .frame(width: 26, alignment: .trailing)
                     }
+                    .opacity(isExcluded ? 0.4 : 1)
                     .accessibilityElement(children: .ignore)
                     .accessibilityLabel(dimension.title)
-                    .accessibilityValue("\(score) / 100")
+                    .accessibilityValue(
+                        isExcluded
+                            ? String(localized: "\(score) / 100，权重为 0，未计入总分")
+                            : String(localized: "\(score) / 100")
+                    )
                     .accessibilityIdentifier(
                         "photo-preview.score.\(dimension.rawValue)"
                     )
                 }
             }
+
+            // 只放路标，不放第二个控件：权重是全局的，塞进单张照片的面板会让人
+            // 以为只影响这一张；而这里又是总分和五维分并排、因果关系最强的地方。
+            Text("总分按你设定的权重计算，可在侧栏「评分权重」调整。")
+                .font(Typography.footnote)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+                .accessibilityIdentifier("photo-preview.score.weights-hint")
 
             VStack(alignment: .leading, spacing: 6) {
                 Text("具体评价")

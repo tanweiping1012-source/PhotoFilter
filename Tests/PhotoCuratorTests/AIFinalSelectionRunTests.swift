@@ -3,7 +3,8 @@ import XCTest
 @testable import PhotoCurator
 
 final class AIFinalSelectionRunTests: XCTestCase {
-    func testFortyEightCandidatesUseMaximumSizedTransferWindows() throws {
+    /// 生产配置：每张照片单独一次请求，同一请求内不可能出现第二张照片。
+    func testEveryCandidateBecomesItsOwnRequest() throws {
         let ids = (1...48).map { "photo-\($0)" }
 
         let plan = try AIFinalSelectionRunPlanner.makePlan(
@@ -11,22 +12,41 @@ final class AIFinalSelectionRunTests: XCTestCase {
             targetWinnerCount: 12
         )
 
-        XCTAssertEqual(plan.requestCount, 10)
-        XCTAssertEqual(plan.groups.map(\.photoCount), Array(repeating: 5, count: 9) + [3])
+        XCTAssertEqual(AIReviewConfiguration.maximumPhotosPerReview, 1)
+        XCTAssertEqual(plan.requestCount, 48)
+        XCTAssertEqual(plan.groups.map(\.photoCount), Array(repeating: 1, count: 48))
         XCTAssertEqual(plan.coveredPhotoIDs, Set(ids))
         XCTAssertEqual(plan.transmittedPhotoCount, 48)
         XCTAssertEqual(plan.targetWinnerCount, 12)
-        // 请求间隔从固定 60 秒降到 4 秒后，48 张候选的最短耗时从约 9 分钟降到 1 分钟以内。
-        XCTAssertEqual(plan.estimatedMinimumMinutes, 1)
         XCTAssertTrue(plan.groups.allSatisfy { $0.scope.kind == .finalSelection })
+        XCTAssertEqual(plan.photoRange(forGroupAt: 0), 1...1)
+        XCTAssertEqual(plan.photoRange(forGroupAt: 47), 48...48)
+        XCTAssertNil(plan.photoRange(forGroupAt: 48))
     }
 
+    /// 窗口容量为 1 时，"避免最后落单一张"这条规则会算出 windowSize = 0。
+    /// 一旦它没有被关掉，游标永远停在原地，规划就会死循环——这条断言守住它不会回来。
+    func testSinglePhotoWindowTerminatesForEveryCandidateCount() throws {
+        for count in 1...12 {
+            let ids = (1...count).map { "photo-\($0)" }
+            let plan = try AIFinalSelectionRunPlanner.makePlan(
+                candidateLocalPhotoIDs: ids,
+                targetWinnerCount: max(1, count / 2),
+                maximumPhotosPerReview: 1
+            )
+            XCTAssertEqual(plan.requestCount, count)
+            XCTAssertEqual(plan.coveredPhotoIDs, Set(ids))
+        }
+    }
+
+    /// 窗口容量 ≥ 2 时"避免最后落单一张"仍然成立。契约允许多张，规则必须留在规划器里。
     func testTransferWindowsAvoidSinglePhotoTail() throws {
         let ids = (1...38).map { "photo-\($0)" }
 
         let plan = try AIFinalSelectionRunPlanner.makePlan(
             candidateLocalPhotoIDs: ids,
-            targetWinnerCount: 10
+            targetWinnerCount: 10,
+            maximumPhotosPerReview: 5
         )
 
         XCTAssertEqual(plan.groups.map(\.photoCount), [5, 5, 5, 5, 5, 5, 5, 3])
@@ -183,7 +203,8 @@ final class AIFinalSelectionRunTests: XCTestCase {
 
         let ranked = try AIFinalSelectionRunValidator.rankedCandidatePhotoIDs(
             scores: scores,
-            candidatePhotoIDs: candidateIDs
+            candidatePhotoIDs: candidateIDs,
+            weights: .balanced
         )
 
         XCTAssertEqual(
@@ -201,38 +222,50 @@ final class AIFinalSelectionRunTests: XCTestCase {
         )
     }
 
-    func testGlobalRankingUsesDimensionsForEqualTotalScores() throws {
-        let lowerDimensions = AestheticScoreDimensions(
+    /// 加权总分打平时用未加权的维度总和决胜。
+    /// 只要某一维权重为 0，两张照片就可能同分而实力不同——这正是这条决胜规则要覆盖的情形。
+    func testGlobalRankingUsesDimensionSumWhenWeightedTotalsTie() throws {
+        let weights = AestheticScoreWeights(
+            moment: 3,
+            composition: 3,
+            subject: 3,
+            lighting: 3,
+            storytelling: 0
+        )
+        let weakerStorytelling = AestheticScoreDimensions(
             moment: 80,
             composition: 80,
             subject: 80,
             lighting: 80,
-            storytelling: 80
+            storytelling: 60
         )
-        let higherDimensions = AestheticScoreDimensions(
-            moment: 82,
-            composition: 82,
-            subject: 82,
-            lighting: 82,
-            storytelling: 82
+        let strongerStorytelling = AestheticScoreDimensions(
+            moment: 80,
+            composition: 80,
+            subject: 80,
+            lighting: 80,
+            storytelling: 90
         )
         let scores = [
             AIFinalSelectionScore(
                 photoID: "photo-a",
-                score: 88,
-                dimensions: lowerDimensions
+                dimensions: weakerStorytelling
             ),
             AIFinalSelectionScore(
                 photoID: "photo-b",
-                score: 88,
-                dimensions: higherDimensions
+                dimensions: strongerStorytelling
             ),
         ]
 
         XCTAssertEqual(
+            AestheticScoreTotal.total(dimensions: weakerStorytelling, weights: weights),
+            AestheticScoreTotal.total(dimensions: strongerStorytelling, weights: weights)
+        )
+        XCTAssertEqual(
             try AIFinalSelectionRunValidator.rankedCandidatePhotoIDs(
                 scores: scores,
-                candidatePhotoIDs: Set(scores.map(\.photoID))
+                candidatePhotoIDs: Set(scores.map(\.photoID)),
+                weights: weights
             ),
             ["photo-b", "photo-a"]
         )
@@ -242,7 +275,8 @@ final class AIFinalSelectionRunTests: XCTestCase {
         XCTAssertThrowsError(
             try AIFinalSelectionRunValidator.rankedCandidatePhotoIDs(
                 scores: [score("photo-a", 90)],
-                candidatePhotoIDs: ["photo-a", "photo-b"]
+                candidatePhotoIDs: ["photo-a", "photo-b"],
+                weights: .balanced
             )
         ) { error in
             XCTAssertEqual(
@@ -360,7 +394,6 @@ final class AIFinalSelectionRunTests: XCTestCase {
     ) -> AIFinalSelectionScore {
         AIFinalSelectionScore(
             photoID: photoID,
-            score: score,
             dimensions: dimensions(score)
         )
     }
@@ -371,7 +404,6 @@ final class AIFinalSelectionRunTests: XCTestCase {
     ) -> AestheticReviewEntry {
         AestheticReviewEntry(
             photoID: photoID,
-            score: score,
             dimensions: dimensions(score),
             reasons: ["主体和画面关系清楚"],
             summary: "画面完成度稳定，主体和叙事表达清楚。"

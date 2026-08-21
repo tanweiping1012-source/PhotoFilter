@@ -13,6 +13,7 @@ global_score_translations="$project_root/scripts/localization-pc33-en.json"
 brand_model_translations="$project_root/scripts/localization-pc34-en.json"
 guide_spotlight_translations="$project_root/scripts/localization-pc35-en.json"
 people_scenery_translations="$project_root/scripts/localization-pc36-en.json"
+score_weight_translations="$project_root/scripts/localization-pc41-en.json"
 temporary_file="$(mktemp "$project_root/Resources/.Localizable.xcstrings.XXXXXX")"
 trap 'rm -f "$temporary_file"' EXIT
 
@@ -27,7 +28,8 @@ missing="$(
     --slurpfile global_score_translations "$global_score_translations" \
     --slurpfile brand_model_translations "$brand_model_translations" \
     --slurpfile guide_spotlight_translations "$guide_spotlight_translations" \
-    --slurpfile people_scenery_translations "$people_scenery_translations" '
+    --slurpfile people_scenery_translations "$people_scenery_translations" \
+    --slurpfile score_weight_translations "$score_weight_translations" '
     (
       $translations[0]
       * $protocol_translations[0]
@@ -39,6 +41,7 @@ missing="$(
       * $brand_model_translations[0]
       * $guide_spotlight_translations[0]
       * $people_scenery_translations[0]
+      * $score_weight_translations[0]
     ) as $all_translations
     |
     [
@@ -68,7 +71,8 @@ jq \
   --slurpfile global_score_translations "$global_score_translations" \
   --slurpfile brand_model_translations "$brand_model_translations" \
   --slurpfile guide_spotlight_translations "$guide_spotlight_translations" \
-  --slurpfile people_scenery_translations "$people_scenery_translations" '
+  --slurpfile people_scenery_translations "$people_scenery_translations" \
+  --slurpfile score_weight_translations "$score_weight_translations" '
   (
     $translations[0]
     * $protocol_translations[0]
@@ -80,6 +84,7 @@ jq \
     * $brand_model_translations[0]
     * $guide_spotlight_translations[0]
     * $people_scenery_translations[0]
+    * $score_weight_translations[0]
   ) as $all_translations
   |
   .strings |= with_entries(

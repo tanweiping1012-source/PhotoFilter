@@ -93,8 +93,9 @@ final class DemoModeLibraryTests: XCTestCase {
         )
         XCTAssertEqual(session.finalSelectionPhotoIDs.count, 4)
         XCTAssertEqual(session.runProgress.phase, .completed)
-        XCTAssertEqual(session.runProgress.completedBatchCount, 2)
-        XCTAssertEqual(session.runProgress.totalBatchCount, 2)
+        // 每张照片单独一次请求，8 张示例照片就是 8 个批次。
+        XCTAssertEqual(session.runProgress.completedBatchCount, 8)
+        XCTAssertEqual(session.runProgress.totalBatchCount, 8)
         XCTAssertEqual(session.runProgress.completedPhotoCount, 8)
         XCTAssertEqual(
             session.photos.filter {
@@ -219,9 +220,15 @@ final class DemoModeLibraryTests: XCTestCase {
         XCTAssertFalse(
             FirstCurationGuideStep.viewScore.shouldClosePhotoPreview
         )
-        XCTAssertEqual(
-            viewModel.statusMessage,
-            "风景离线评分完成。点底部的“采纳”，把风景结果也变成保留。"
+        // 教学旁白已经并入任务条：这一步"该做什么、意味着什么"由 detail 交代，
+        // 而不是再往顶部那行通用状态里写一遍。顶部状态行只留结果不在屏幕上的事。
+        XCTAssertTrue(
+            FirstCurationGuideStep.acceptSceneryResults.detail.contains("采纳"),
+            "任务条必须自己说清这一步要做什么"
+        )
+        XCTAssertNotNil(
+            viewModel.completionNotice,
+            "评分完成由完成回执横幅负责交代，不再另有一行通用状态"
         )
         XCTAssertEqual(viewModel.aiFinalSelectionPhotoIDs.count, 4)
         for category in PhotoCurationCategory.allCases {
@@ -353,10 +360,40 @@ final class DemoModeLibraryTests: XCTestCase {
         viewModel.prepareAIFinalSelectionRun(for: .scenery)
         XCTAssertTrue(viewModel.showAIFinalSelectionRunConfirmation)
         viewModel.submitConfirmedAIFinalSelectionRun()
+
+        // 第二轮开跑的瞬间，分母必须已经换成风景自己的候选数，分子必须归零。
+        // 此前这里沿用上一类留下的分母，只有在两类张数恰好相同时才看不出来。
+        XCTAssertEqual(
+            viewModel.displayedAIFinalSelectionRunProgress.candidatePhotoCount,
+            viewModel.demoCandidatePhotoCount(for: .scenery)
+        )
+        XCTAssertEqual(
+            viewModel.displayedAIFinalSelectionRunProgress.completedPhotoCount,
+            0
+        )
+
+        // 运行期间持续采样：本轮进度的分子一旦越过分母，侧栏会显示 6/4，
+        // 并且 fractionCompleted > 1 让进度条在没评完时就跑满。
+        var worstOverflow = 0
+        while viewModel.isRunningDemoAIScoring {
+            let progress = viewModel.displayedAIFinalSelectionRunProgress
+            worstOverflow = max(
+                worstOverflow,
+                progress.completedPhotoCount - progress.candidatePhotoCount
+            )
+            try? await Task.sleep(for: .milliseconds(20))
+        }
+        XCTAssertLessThanOrEqual(
+            worstOverflow,
+            0,
+            "本轮进度的分子不得超过分母：全局已评张数不能塞进按类型的进度里"
+        )
+
         await waitUntil {
             viewModel.firstCurationGuideStep == .acceptSceneryResults
         }
 
+        // 顶部横幅问的是"整个示例评了多少"，分母是 8 张全集，这个数仍然是全局的。
         XCTAssertEqual(viewModel.demoAIScoringCompletedPhotoCount, 8)
         XCTAssertEqual(viewModel.aiFinalSelectionPhotoIDs.count, 4)
     }

@@ -43,6 +43,42 @@ struct ContentView: View {
         } message: {
             Text(aiFinalSelectionConfirmationMessage)
         }
+        // 操作没生效的原因，紧挨着动作本身给出——而不是塞进屏幕另一头的状态行。
+        .alert(
+            "操作未生效",
+            isPresented: Binding(
+                get: { library.actionFailureMessage != nil },
+                set: { presented in
+                    if !presented { library.actionFailureMessage = nil }
+                }
+            ),
+            presenting: library.actionFailureMessage
+        ) { _ in
+            Button("知道了", role: .cancel) {}
+        } message: { reason in
+            Text(reason)
+        }
+        // 改类型会清空两个类型的全部 AI评分结果，而且不进撤销栈。
+        // 事后回执救不回已经花掉的钱，所以在动手之前问。
+        .alert(
+            "改变类型会清除已有 AI评分",
+            isPresented: Binding(
+                get: { library.pendingCurationCategoryChange != nil },
+                set: { presented in
+                    if !presented { library.cancelPendingCurationCategoryChange() }
+                }
+            ),
+            presenting: library.pendingCurationCategoryChange
+        ) { pending in
+            Button("改为\(pending.category.title)", role: .destructive) {
+                library.confirmPendingCurationCategoryChange()
+            }
+            Button("取消", role: .cancel) {
+                library.cancelPendingCurationCategoryChange()
+            }
+        } message: { pending in
+            Text("把“\(pending.filename)”改为\(pending.category.title)后，人物和风景已有的 AI评分结果都会被清除，需要重新评分并再次产生费用。这一步不能撤销。")
+        }
         .alert("删除筛选项目？", isPresented: $library.showProjectDeletionConfirmation) {
             Button("取消", role: .cancel) { library.cancelProjectDeletion() }
             Button("删除项目", role: .destructive) { library.confirmDeleteProject() }
@@ -477,7 +513,7 @@ struct ContentView: View {
                             .fractionCompleted
                     )
                     Text(
-                        "正在评估 · \(library.demoAIScoringCompletedPhotoCount)/\(library.displayedAIFinalSelectionRunProgress.candidatePhotoCount) 张"
+                        "正在评估 · \(library.displayedAIFinalSelectionRunProgress.completedPhotoCount)/\(library.displayedAIFinalSelectionRunProgress.candidatePhotoCount) 张"
                     )
                     .font(Typography.detailNumeric)
                 } else {
@@ -524,6 +560,16 @@ struct ContentView: View {
                 ProgressView(value: library.displayedAIFinalSelectionRunProgress.fractionCompleted)
                 Text("\(library.displayedAIFinalSelectionRunProgress.phase.title) · \(library.displayedAIFinalSelectionRunProgress.completedPhotoCount)/\(library.displayedAIFinalSelectionRunProgress.candidatePhotoCount) 张")
                     .font(Typography.detailNumeric)
+                // 说明必须贴着它描述的进度条。此前这句写在顶部的项目状态行里，
+                // 和进度条隔了大半个窗口，用户要在两处之间来回找才能对上。
+                if let activity = library.displayedAIFinalSelectionRunProgress.activity {
+                    Text(activity)
+                        .font(Typography.detail)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(3)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .accessibilityIdentifier("ai.run.activity")
+                }
                 if library.displayedAIFinalSelectionRunProgress.waitingSeconds > 0 {
                     Text("下一次请求约 \(library.displayedAIFinalSelectionRunProgress.waitingSeconds) 秒后发送")
                         .font(Typography.detailNumeric)
@@ -558,6 +604,10 @@ struct ContentView: View {
                 }
             }
 
+            AestheticScoreWeightsControl()
+
+            // 模型档位和 token 用量是只读明细，永远排在可交互内容之后。
+            // 把控件夹在两行灰色明细中间，等于让它自我宣告"我也是明细"。
             if !library.isDemoModeActive {
                 Text("\(library.selectedAIModel.providerAndModelDisplayName) · \(library.selectedAIPreviewSize.displayName)")
                     .font(Typography.footnote)
@@ -612,7 +662,7 @@ struct ContentView: View {
         if library.isDemoModeActive {
             if library.isRunningDemoAIScoring {
                 return String(
-                    localized: "正在评估 · \(library.demoAIScoringCompletedPhotoCount)/\(library.displayedAIFinalSelectionRunProgress.candidatePhotoCount) 张"
+                    localized: "正在评估 · \(library.displayedAIFinalSelectionRunProgress.completedPhotoCount)/\(library.displayedAIFinalSelectionRunProgress.candidatePhotoCount) 张"
                 )
             }
             return String(localized: "示例筛选进行中")
@@ -641,7 +691,8 @@ struct ContentView: View {
         let scopedPhotos = library.photos(in: library.curationScope)
         let filteredPhotos = gridFilter.photos(
             from: scopedPhotos,
-            localAICandidateIDs: localAICandidateIDs
+            localAICandidateIDs: localAICandidateIDs,
+            weights: library.aestheticScoreWeights
         )
         return VStack(spacing: 0) {
             VStack(alignment: .leading, spacing: 8) {
@@ -651,13 +702,6 @@ struct ContentView: View {
                             .controlSize(.small)
                             .accessibilityLabel("正在扫描")
                     }
-                    Text(library.statusMessage)
-                        .font(Typography.rowLabel)
-                        .foregroundStyle(.secondary)
-                        .lineLimit(2)
-                        .accessibilityIdentifier("photo.status")
-                        .accessibilityLabel("项目状态")
-                        .accessibilityValue(library.statusMessage)
                     Spacer(minLength: 0)
                 }
 
@@ -763,6 +807,7 @@ struct ContentView: View {
                                     photo: photo,
                                     isSelected: photo.id == library.selectedPhotoID,
                                     isLocalAICandidate: localAICandidateIDs.contains(photo.id),
+                                    aestheticScoreWeights: library.aestheticScoreWeights,
                                     curationScope: library.curationScope,
                                     gridFilter: gridFilter,
                                     accessibilityIdentifier: "photo.card.\(index)",
@@ -845,7 +890,8 @@ struct ContentView: View {
             if step != nil, gridFilter != .all {
                 let visible = gridFilter.photos(
                     from: library.photos(in: library.curationScope),
-                    localAICandidateIDs: library.localAestheticCandidatePhotoIDs
+                    localAICandidateIDs: library.localAestheticCandidatePhotoIDs,
+                    weights: library.aestheticScoreWeights
                 )
                 if visible.isEmpty {
                     gridFilter = .all
@@ -872,7 +918,8 @@ struct ContentView: View {
                 selected,
                 visiblePhotos: gridFilter.photos(
                     from: library.photos(in: library.curationScope),
-                    localAICandidateIDs: library.localAestheticCandidatePhotoIDs
+                    localAICandidateIDs: library.localAestheticCandidatePhotoIDs,
+                    weights: library.aestheticScoreWeights
                 )
             )
         }
@@ -1079,7 +1126,11 @@ struct ContentView: View {
             summaries.append(risk.title)
         }
         if let recommendation = photo.primaryAestheticRecommendation {
-            summaries.append(String(localized: "AI \(recommendation.score) 分"))
+            summaries.append(
+                String(
+                    localized: "AI \(recommendation.total(with: library.aestheticScoreWeights)) 分"
+                )
+            )
         }
         return summaries.isEmpty
             ? String(localized: "双击可查看大图")
@@ -1286,6 +1337,7 @@ private struct PhotoCard: View {
     let photo: PhotoItem
     let isSelected: Bool
     let isLocalAICandidate: Bool
+    let aestheticScoreWeights: AestheticScoreWeights
     /// 当前网格的作用域与筛选：用来判断哪些徽章在这个上下文里是恒等信息。
     let curationScope: PhotoCurationScope
     let gridFilter: PhotoGridFilter
@@ -1388,7 +1440,10 @@ private struct PhotoCard: View {
     /// 当前筛选已经蕴含的信息不再重复出现——例如筛到"待AI评分"时不再给每张挂"待评分"。
     private var informationBadges: [IdentifiedBadge] {
         var badges: [IdentifiedBadge] = []
-        if let badgeText = aestheticRecommendationBadge(for: photo) {
+        if let badgeText = aestheticRecommendationBadge(
+            for: photo,
+            weights: aestheticScoreWeights
+        ) {
             badges.append(IdentifiedBadge(view: AnyView(AestheticRecommendationBadge(text: badgeText))))
         }
         if let risk = photo.technicalQuality?.primaryRisk {
@@ -1455,7 +1510,10 @@ private struct PhotoCard: View {
         if isLocalAICandidate {
             details.append(String(localized: "待评分"))
         }
-        if let recommendation = aestheticRecommendationBadge(for: photo) {
+        if let recommendation = aestheticRecommendationBadge(
+            for: photo,
+            weights: aestheticScoreWeights
+        ) {
             details.append(recommendation)
         }
         return details.formatted(.list(type: .and))
@@ -1475,11 +1533,114 @@ private struct CandidatePoolBadge: View {
     }
 }
 
-private func aestheticRecommendationBadge(for photo: PhotoItem) -> String? {
+private func aestheticRecommendationBadge(
+    for photo: PhotoItem,
+    weights: AestheticScoreWeights
+) -> String? {
     guard let recommendation = photo.primaryAestheticRecommendation else {
         return nil
     }
-    return String(localized: "AI \(recommendation.score) 分")
+    return String(localized: "AI \(recommendation.total(with: weights)) 分")
+}
+
+/// 五维权重滑杆。
+///
+/// 位置刻意放在 AI评分区块里：评分前可以先定好偏好，评分后同样可以随时调整——
+/// 维度分已经买断，总分是本地算出来的，重新拖动不会再发一次请求。
+private struct AestheticScoreWeightsControl: View {
+    @EnvironmentObject private var library: PhotoLibraryViewModel
+    @State private var isExpanded = false
+
+    /// 折叠状态下也要看得出权重动过没有，否则收起来就完全没有状态。
+    private var isCustomized: Bool {
+        library.aestheticScoreWeights != .balanced
+    }
+
+    var body: some View {
+        DisclosureGroup(isExpanded: $isExpanded) {
+            VStack(alignment: .leading, spacing: 6) {
+                ForEach(AestheticScoreDimension.allCases) { dimension in
+                    weightRow(for: dimension)
+                }
+                Text("调整权重只重新计算总分和排序，不会重新评分，也不产生任何费用。")
+                    .font(Typography.footnote)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                if library.aestheticScoreWeights.isDegenerate {
+                    Text("五项权重不能全为 0；当前按等权计算。")
+                        .font(Typography.footnote)
+                        .foregroundStyle(.orange)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .accessibilityIdentifier("ai.weight.degenerate")
+                }
+                if library.aestheticScoreWeights != .balanced {
+                    Button("恢复等权") {
+                        library.aestheticScoreWeights = .balanced
+                    }
+                    .buttonStyle(.link)
+                    .font(Typography.footnote)
+                    .accessibilityIdentifier("ai.weight.reset")
+                }
+            }
+            .padding(.top, 6)
+        } label: {
+            // 这是一行"你的偏好设定"，和保留目标里的人物/风景同一个角色，
+            // 因此必须同一个字阶。此前用的是 detail + secondary——那是只读明细的字阶，
+            // 结果它混进相邻两行灰字里，既不像标题也不像控件。
+            HStack(spacing: 8) {
+                Label("评分权重", systemImage: "slider.horizontal.3")
+                    .font(Typography.rowLabel)
+                Spacer()
+                if isCustomized {
+                    Text("已自定义")
+                        .font(Typography.detail)
+                        .foregroundStyle(.secondary)
+                }
+            }
+        }
+        .accessibilityIdentifier("ai.weights")
+        .accessibilityLabel("评分权重")
+        .accessibilityValue(
+            isCustomized
+                ? String(localized: "已自定义")
+                : String(localized: "五维等权")
+        )
+    }
+
+    @ViewBuilder
+    private func weightRow(for dimension: AestheticScoreDimension) -> some View {
+        let weight = library.aestheticScoreWeights.weight(for: dimension)
+        HStack(spacing: 8) {
+            Text(dimension.title)
+                .font(Typography.detail)
+                .frame(width: 60, alignment: .leading)
+            Slider(
+                value: binding(for: dimension),
+                in: Double(AestheticScoreWeights.minimumWeight)
+                    ... Double(AestheticScoreWeights.maximumWeight),
+                step: 1
+            )
+            .controlSize(.small)
+            Text("\(weight)")
+                .font(Typography.detailNumeric)
+                .foregroundStyle(.secondary)
+                .frame(width: 14, alignment: .trailing)
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(dimension.title)
+        .accessibilityValue("权重 \(weight)")
+        .accessibilityIdentifier("ai.weight.\(dimension.rawValue)")
+    }
+
+    private func binding(for dimension: AestheticScoreDimension) -> Binding<Double> {
+        Binding(
+            get: { Double(library.aestheticScoreWeights.weight(for: dimension)) },
+            set: { newValue in
+                library.aestheticScoreWeights = library.aestheticScoreWeights
+                    .setting(Int(newValue.rounded()), for: dimension)
+            }
+        )
+    }
 }
 
 private struct RiskBadge: View {

@@ -177,11 +177,6 @@ struct AnthropicAestheticReviewClient {
                                 "type": "string",
                                 "enum": request.photos.map(\.photoID),
                             ],
-                            "score": [
-                                "type": "integer",
-                                "minimum": 0,
-                                "maximum": 100,
-                            ],
                             "dimensions": scoreDimensionsSchema,
                             "reasons": [
                                 "type": "array",
@@ -201,7 +196,6 @@ struct AnthropicAestheticReviewClient {
                         ],
                         "required": [
                             "photo_id",
-                            "score",
                             "dimensions",
                             "reasons",
                             "summary",

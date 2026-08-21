@@ -135,7 +135,7 @@ enum LocalAestheticCandidatePlanner {
         let requestedCandidateCount = min(
             collapsedEligible.count,
             candidateCapacity(remainingSelectionCount: remainingSelectionCount),
-            remainingSelectionCount * AIReviewConfiguration.maximumPhotosPerReview,
+            remainingSelectionCount * AIReviewConfiguration.candidatePoolMultiplier,
             desiredCount
         )
 

@@ -249,7 +249,7 @@ final class ProtocolAdapterTests: XCTestCase {
             model: AIModelCatalog.model(for: .openAIGPT54Mini)
         ).decodeResponse(data, request: request)
 
-        XCTAssertEqual(result.response.reviews.map(\.score), [92, 80])
+        XCTAssertEqual(result.response.reviews.map { $0.total(with: .balanced) }, [92, 80])
         XCTAssertEqual(result.response.reviews.first?.dimensions.moment, 94)
         XCTAssertEqual(result.usage.inputTokens, 800)
         XCTAssertEqual(result.usage.outputTokens, 90)
@@ -364,7 +364,7 @@ final class ProtocolAdapterTests: XCTestCase {
             )
         ).decodeResponse(data, request: request)
 
-        XCTAssertEqual(result.response.reviews.map(\.score), [94, 79])
+        XCTAssertEqual(result.response.reviews.map { $0.total(with: .balanced) }, [94, 79])
         XCTAssertEqual(result.usage.inputTokens, 900)
         XCTAssertEqual(result.usage.outputTokens, 100)
     }

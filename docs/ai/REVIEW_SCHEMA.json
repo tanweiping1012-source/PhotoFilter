@@ -1,11 +1,11 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Travel Photo Filter Categorized Independent Aesthetic Score v3",
+  "title": "Travel Photo Filter Categorized Independent Aesthetic Score v4",
   "type": "object",
   "additionalProperties": false,
   "required": ["version", "requestID", "scope", "reviews"],
   "properties": {
-    "version": { "const": "v3" },
+    "version": { "const": "v4" },
     "requestID": { "type": "string", "minLength": 1 },
     "scope": {
       "type": "object",
@@ -19,20 +19,18 @@
     },
     "reviews": {
       "type": "array",
-      "minItems": 2,
+      "minItems": 1,
       "items": {
         "type": "object",
         "additionalProperties": false,
         "required": [
           "photo_id",
-          "score",
           "dimensions",
           "reasons",
           "summary"
         ],
         "properties": {
           "photo_id": { "type": "string", "pattern": "^photo_[0-9]{3}$" },
-          "score": { "type": "integer", "minimum": 0, "maximum": 100 },
           "dimensions": {
             "type": "object",
             "additionalProperties": false,

@@ -1029,8 +1029,8 @@ enum AIReviewURLSession {
         configuration.httpCookieStorage = nil
         configuration.httpShouldSetCookies = false
         configuration.httpCookieAcceptPolicy = .never
-        // 5 张 1536px 图片加结构化 JSON 输出，在较慢的模型上会超过 60 秒的系统默认值。
-        // 超时会触发自动重试，等于把同一批图片重新发一遍、重新付一次费，所以宁可等久一点。
+        // 1536px 图片加结构化 JSON 输出，在较慢的模型上会超过 60 秒的系统默认值。
+        // 超时会触发自动重试，等于把同一张图片重新发一遍、重新付一次费，所以宁可等久一点。
         configuration.timeoutIntervalForRequest = 180
         configuration.timeoutIntervalForResource = 600
         return URLSession(configuration: configuration)
@@ -1038,7 +1038,19 @@ enum AIReviewURLSession {
 }
 
 enum AIReviewConfiguration {
-    static let maximumPhotosPerReview = 5
+    /// 每次请求只送一张照片。
+    ///
+    /// 一次请求里的多张照片共享同一个上下文窗口，无论提示词怎么强调"独立评分"，
+    /// 模型看到的邻居都会影响它给出的分数——这是模型结构决定的，指令消不掉。
+    /// 而候选池随用户的保留/排除决定变化，同一张照片下一轮就会换一批邻居，
+    /// 于是分数跟着变。每次只送一张，从根上去掉这个变量。
+    /// 代价是请求数变成候选张数，串行节奏下总时长明显变长。
+    static let maximumPhotosPerReview = 1
+    /// 候选池规模上限相对于保留目标的倍数。
+    ///
+    /// 这个值曾经复用 `maximumPhotosPerReview`，纯属巧合——两者语义毫无关系。
+    /// 传输窗口一旦改小，候选池会跟着塌缩到和保留目标一样大，AI 将失去挑选空间。
+    static let candidatePoolMultiplier = 5
     /// 请求之间的基础间隔。固定 60 秒会让 48 张候选跑掉十分钟，而绝大多数供应商并不需要这么保守；
     /// 真正遇到限流时由 `AIFinalSelectionRetryPolicy` 按 `Retry-After` 或指数退避收紧节奏。
     static let minimumReviewInterval: TimeInterval = 4

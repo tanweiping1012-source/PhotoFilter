@@ -34,7 +34,8 @@ enum PhotoGridFilter: String, CaseIterable, Identifiable {
 
     func photos(
         from photos: [PhotoItem],
-        localAICandidateIDs: Set<String>
+        localAICandidateIDs: Set<String>,
+        weights: AestheticScoreWeights
     ) -> [PhotoItem] {
         switch self {
         case .all:
@@ -43,7 +44,8 @@ enum PhotoGridFilter: String, CaseIterable, Identifiable {
             photos.filter { localAICandidateIDs.contains($0.id) }
         case .aiScored:
             scoreOrdered(
-                photos.filter { !$0.aestheticRecommendations.isEmpty }
+                photos.filter { !$0.aestheticRecommendations.isEmpty },
+                weights: weights
             )
         case .keep:
             photos.filter { $0.decision == .keep }
@@ -54,7 +56,10 @@ enum PhotoGridFilter: String, CaseIterable, Identifiable {
         }
     }
 
-    private func scoreOrdered(_ photos: [PhotoItem]) -> [PhotoItem] {
+    private func scoreOrdered(
+        _ photos: [PhotoItem],
+        weights: AestheticScoreWeights
+    ) -> [PhotoItem] {
         photos.sorted { lhs, rhs in
             guard let lhsScore = lhs.primaryAestheticRecommendation else {
                 return false
@@ -66,7 +71,8 @@ enum PhotoGridFilter: String, CaseIterable, Identifiable {
                 lhsScore,
                 photoID: lhs.id,
                 rhsScore,
-                photoID: rhs.id
+                photoID: rhs.id,
+                weights: weights
             )
         }
     }

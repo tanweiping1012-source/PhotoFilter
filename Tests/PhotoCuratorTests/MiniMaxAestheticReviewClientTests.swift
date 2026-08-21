@@ -106,7 +106,7 @@ final class MiniMaxAestheticReviewClientTests: XCTestCase {
 
         XCTAssertEqual(result.response.requestID, request.requestID)
         XCTAssertEqual(result.response.scope, request.scope)
-        XCTAssertEqual(result.response.reviews.map(\.score), [92, 81])
+        XCTAssertEqual(result.response.reviews.map { $0.total(with: .balanced) }, [92, 81])
         XCTAssertEqual(result.response.reviews.first?.dimensions.subject, 95)
         XCTAssertEqual(result.usage.inputTokens, 1200)
         XCTAssertEqual(result.usage.outputTokens, 120)
@@ -163,7 +163,7 @@ final class MiniMaxAestheticReviewClientTests: XCTestCase {
             legacyRanking,
             request: request
         )
-        XCTAssertEqual(result.response.reviews.map(\.score), [92, 81])
+        XCTAssertEqual(result.response.reviews.map { $0.total(with: .balanced) }, [92, 81])
     }
 
     func testExtractsOnlySafeMiniMaxErrorCode() throws {

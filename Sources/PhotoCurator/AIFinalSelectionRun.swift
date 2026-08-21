@@ -56,7 +56,8 @@ enum AIFinalSelectionRunPlanError: LocalizedError, Equatable {
     }
 }
 
-/// 把候选池切成 2–5 张的传输窗口。窗口不代表比较组，也不产生局部胜者。
+/// 把候选池切成传输窗口。窗口不代表比较组，也不产生局部胜者。
+/// 窗口容量为 1 时每张照片单独成为一次请求，彻底消除同一请求内照片互相影响的可能。
 enum AIFinalSelectionRunPlanner {
     static func makePlan(
         candidateLocalPhotoIDs: [String],
@@ -80,14 +81,20 @@ enum AIFinalSelectionRunPlanner {
         // 用"候选必须达到目标的 2 倍"把用户挡在门外，是把内部偏好当成了硬性前置条件。
         let effectiveWinnerCount = min(targetWinnerCount, candidateLocalPhotoIDs.count)
 
+        // 容量必须至少为 1，否则游标永远不前进。
+        let windowCapacity = max(1, maximumPhotosPerReview)
+        // "避免最后落单一张"只有在窗口装得下 2 张以上时才有意义。窗口本来就是 1 张时
+        // 套用这条规则会算出 windowSize = 0，游标停在原地，整个规划陷入死循环。
+        let avoidsTrailingSinglePhoto = windowCapacity >= 2
+
         var cursor = 0
         var groups: [AestheticReviewCandidateGroup] = []
-        while candidateLocalPhotoIDs.count - cursor > maximumPhotosPerReview {
+        while candidateLocalPhotoIDs.count - cursor > windowCapacity {
             let remainingAfterFullWindow =
-                candidateLocalPhotoIDs.count - (cursor + maximumPhotosPerReview)
-            let windowSize = remainingAfterFullWindow == 1
-                ? maximumPhotosPerReview - 1
-                : maximumPhotosPerReview
+                candidateLocalPhotoIDs.count - (cursor + windowCapacity)
+            let windowSize = (avoidsTrailingSinglePhoto && remainingAfterFullWindow == 1)
+                ? windowCapacity - 1
+                : windowCapacity
             let ids = Array(
                 candidateLocalPhotoIDs[cursor..<(cursor + windowSize)]
             )
@@ -133,21 +140,23 @@ enum AIFinalSelectionRunPlanner {
 
 struct AIFinalSelectionScore: Equatable {
     let photoID: String
-    let score: Int
     let dimensions: AestheticScoreDimensions
 }
 
 enum AestheticScoreRanking {
     static func precedes(
-        score lhsScore: Int,
         dimensions lhs: AestheticScoreDimensions,
         photoID lhsID: String,
-        score rhsScore: Int,
         dimensions rhs: AestheticScoreDimensions,
-        photoID rhsID: String
+        photoID rhsID: String,
+        weights: AestheticScoreWeights
     ) -> Bool {
-        if lhsScore != rhsScore { return lhsScore > rhsScore }
+        let lhsTotal = AestheticScoreTotal.total(dimensions: lhs, weights: weights)
+        let rhsTotal = AestheticScoreTotal.total(dimensions: rhs, weights: weights)
+        if lhsTotal != rhsTotal { return lhsTotal > rhsTotal }
 
+        // 加权总分打平时依次用未加权总和、固定的维度顺序、照片 ID 决胜。
+        // 这几步与权重无关，保证任何权重下的排序都是全序且可复现。
         let lhsDimensionTotal = lhs.scores.reduce(0, +)
         let rhsDimensionTotal = rhs.scores.reduce(0, +)
         if lhsDimensionTotal != rhsDimensionTotal {
@@ -178,15 +187,15 @@ enum AestheticScoreRanking {
         _ lhs: AestheticRecommendation,
         photoID lhsID: String,
         _ rhs: AestheticRecommendation,
-        photoID rhsID: String
+        photoID rhsID: String,
+        weights: AestheticScoreWeights
     ) -> Bool {
         precedes(
-            score: lhs.score,
             dimensions: lhs.dimensions,
             photoID: lhsID,
-            score: rhs.score,
             dimensions: rhs.dimensions,
-            photoID: rhsID
+            photoID: rhsID,
+            weights: weights
         )
     }
 }
@@ -272,7 +281,6 @@ enum AIFinalSelectionRetryPolicy {
         switch validationError {
         case .duplicatePhotoID,
              .photoIDMismatch,
-             .invalidScore,
              .invalidDimensions,
              .invalidReasons,
              .invalidSummary,
@@ -308,7 +316,6 @@ enum AIFinalSelectionRunValidator {
             }
             return AIFinalSelectionScore(
                 photoID: localID,
-                score: entry.score,
                 dimensions: entry.dimensions
             )
         }
@@ -316,7 +323,8 @@ enum AIFinalSelectionRunValidator {
 
     static func rankedCandidatePhotoIDs(
         scores: [AIFinalSelectionScore],
-        candidatePhotoIDs: Set<String>
+        candidatePhotoIDs: Set<String>,
+        weights: AestheticScoreWeights
     ) throws -> [String] {
         let returnedPhotoIDs = scores.map(\.photoID)
         guard Set(returnedPhotoIDs).count == returnedPhotoIDs.count else {
@@ -331,12 +339,11 @@ enum AIFinalSelectionRunValidator {
 
         return scores.sorted { lhs, rhs in
             AestheticScoreRanking.precedes(
-                score: lhs.score,
                 dimensions: lhs.dimensions,
                 photoID: lhs.photoID,
-                score: rhs.score,
                 dimensions: rhs.dimensions,
-                photoID: rhs.photoID
+                photoID: rhs.photoID,
+                weights: weights
             )
         }.map(\.photoID)
     }
@@ -401,6 +408,11 @@ struct AIFinalSelectionRunProgress: Equatable {
     var inputTokens = 0
     var outputTokens = 0
     var waitingSeconds = 0
+    /// 本轮此刻正在做什么，例如"正在生成大图预览"。
+    ///
+    /// 它必须紧挨着进度条显示，而不是写进顶部的项目状态行——那行离进度条隔了大半个窗口，
+    /// 用户要在两处之间来回找，才能把"1/18 张"和"正在评估第 2 张"对上。
+    var activity: String?
     var failureMessage: String?
 
     var fractionCompleted: Double {
@@ -412,4 +424,14 @@ struct AIFinalSelectionRunProgress: Equatable {
         guard inputTokens > 0 || outputTokens > 0 else { return nil }
         return String(localized: "本轮：输入 \(inputTokens) tokens，输出 \(outputTokens) tokens。费用以所选供应商账单为准。")
     }
+}
+
+/// 一次待确认的照片类型改动。
+///
+/// 改类型会清空人物和风景两边全部 AI评分结果，而且不进撤销栈——用户为这些结果
+/// 付过费。所以有结果可清时必须先问，而不是事后在某处补一句"已清除"。
+struct PendingCurationCategoryChange: Equatable {
+    let photoID: String
+    let filename: String
+    let category: PhotoCurationCategory
 }

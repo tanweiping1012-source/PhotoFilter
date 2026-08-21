@@ -35,14 +35,57 @@ rg -Fq '开始\(category.title) AI评分（\(availability.candidatePhotoCount) �
   fail "开始操作没有显示总照片数"
 rg -q 'completedPhotoCount.*candidatePhotoCount.*张' "$content" ||
   fail "主状态没有按照片显示"
+
+# 说明必须贴着它描述的进度条。此前"正在评估第 N 张，共 M 张…"写在顶部的项目状态行里，
+# 和侧栏进度条隔了大半个窗口，用户要在两处之间来回找，才能把两个数字对上。
+rg -q 'var activity: String\?' "$progress" ||
+  fail "运行状态没有承载"此刻在做什么""
+rg -q 'ai\.run\.activity' "$content" ||
+  fail "进度条下方没有渲染当前动作说明"
+# 只取首次出现：phase.title 在无障碍摘要里还会再出现一次，取最后一次会把顺序判反。
+awk '/displayedAIFinalSelectionRunProgress.phase.title/{if (!count) count = NR}
+     /ai\.run\.activity/{if (!activity) activity = NR}
+     /library.pauseAIFinalSelectionRun\(\)/{if (!pause) pause = NR}
+     END{exit (count && activity && pause && count < activity && activity < pause) ? 0 : 1}' \
+  "$content" ||
+  fail "当前动作说明没有紧跟在进度计数之后"
+
+# 顶部那行 statusMessage 曾经是个通用容器，塞过 60 条消息：扫描、分析、决定回执、
+# AI 进度、导出、授权失败共用一行，绝大多数时候在说用户已经从别处知道的事。
+# 逐条查证后它一条都不剩：空状态和空网格有 ContentUnavailableView，导出结果有完成
+# 回执横幅（还带"在访达中显示"），AI 运行阶段有侧栏进度块，操作没生效有紧挨动作的弹窗，
+# 教学该说的话归任务条。这个容器已整体移除——它不该以任何形式回来。
+if rg -q '@Published.*var statusMessage' "$view_model"; then
+  fail "通用状态行又回来了；新消息应就近显示，而不是共用一行"
+fi
+if rg -q 'photo\.status' "$content"; then
+  fail "通用状态行的界面残留仍在"
+fi
+
+rg -q '@Published var actionFailureMessage: String\?' "$view_model" ||
+  fail "缺少紧挨动作的失败反馈"
+rg -q 'actionFailureMessage' "$content" ||
+  fail "动作失败反馈没有在界面上呈现"
+
+# 改类型会清空两个类型的全部 AI评分结果，而且不进撤销栈。必须先问再动手。
+rg -q 'pendingCurationCategoryChange' "$view_model" "$content" ||
+  fail "改照片类型清除已付费评分前没有确认"
+rg -q '改变类型会清除已有 AI评分' "$content" ||
+  fail "确认框没有说清会清除什么"
+
+# 逐张进度不得再回到顶部的项目状态行。顶部只留一次性的项目级事件（开始、完成、中断）。
+if rg -q 'statusMessage = String\(localized: "正在评估第|statusMessage = String\(localized: "AI评分已评估|statusMessage = String\(localized: "正在重新评估第 \\\(rangeLabel\)|statusMessage = String\(localized: "离线 AI评分：已评估' \
+  "$view_model"; then
+  fail "逐张评分进度又被写回顶部项目状态行"
+fi
 # 发送边界只在隐私页写一次。
 # 这条断言原本要求帮助页也出现一遍——两页各写一份，就是重复的来源，而且
 # 它们已经漂移过：帮助页写"模型、张数和照片类型"，隐私页写"供应商、模型、
 # 预览尺寸和照片数量"，弹窗实际只有前者。发送什么数据属于数据披露，
 # 归隐私页；帮助页只讲怎么跑、跑多久、花多少钱。
-rg -q '每次请求发送 2–5 张' "$privacy" ||
+rg -q '每次请求只发送 1 张' "$privacy" ||
   fail "隐私说明仍未按每次请求照片数表达"
-if rg -q '2–5 张' Sources/PhotoCurator/SupportInformationView.swift; then
+if rg -q '每次请求只发送|张同类型照片' Sources/PhotoCurator/SupportInformationView.swift; then
   fail "帮助页又开始复述发送边界，它只应出现在隐私页"
 fi
 

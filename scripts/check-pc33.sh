@@ -18,13 +18,13 @@ content="Sources/PhotoCurator/ContentView.swift"
 schema="docs/ai/REVIEW_SCHEMA.json"
 tests="Tests/PhotoCuratorTests/AIFinalSelectionRunTests.swift"
 
-rg -q 'static let version = "v3"' "$contract" ||
-  fail "独立评分契约没有保留在当前 v3"
+rg -q 'static let version = "v4"' "$contract" ||
+  fail "独立评分契约没有保留在当前 v4"
 if rg -q 'let rank: Int|case rank|invalidRanks' "$contract"; then
   fail "统一评分契约仍包含请求内名次"
 fi
 jq -e '
-  .properties.version.const == "v3"
+  .properties.version.const == "v4"
   and (.properties.reviews.items.properties.rank == null)
   and (.properties.reviews.items.required | index("rank") == null)
 ' "$schema" >/dev/null ||
@@ -40,7 +40,7 @@ for client in \
   fi
 done
 
-rg -q '一次附带多张图片只为传输效率，不代表候选组' "$prompt" ||
+rg -q '只是为了传输效率，不代表候选组' "$prompt" ||
   fail "Prompt 没有说明多图只是传输窗口"
 rg -q '不得比较图片，不得返回名次' "$prompt" ||
   fail "Prompt 没有禁止组内比较和名次"
@@ -74,7 +74,7 @@ rg -q 'testRejectsRelativeComparisonCommentary' \
   Tests/PhotoCuratorTests/AestheticReviewContractTests.swift ||
   fail "缺少相对评价拦截测试"
 rg -q 'testTransferWindowsAvoidSinglePhotoTail' "$tests" ||
-  fail "缺少 2–5 张传输窗口测试"
+  fail "缺少多张传输窗口的落单尾部测试"
 
 for document in \
   docs/ai/SCORING.md \

@@ -24,7 +24,7 @@
    ↓  TechnicalQualityAnalyzer.assigningSharpnessRisks   家族内相对判定清晰度风险
    ↓  LocalCandidateRanker                   家族内排出本地技术顺序
    ↓  LocalAestheticCandidatePlanner         每类生成待评分池（每家族最多一个代表）
-   ↓  AIFinalSelectionRunPlanner             候选切成 2–5 张的传输窗口
+   ↓  AIFinalSelectionRunPlanner             候选切成每次 1 张的传输窗口
    ↓  AestheticReviewClient（按协议分发）     发送无元数据 JPEG，严格校验响应
    ↓  AIFinalSelectionRunValidator           类别内全局排序 → AI 推荐保留
    ↓  ExportService.copyCategorized          只复制，写 selection.json / csv

@@ -127,11 +127,17 @@ final class AestheticReviewContractTests: XCTestCase {
 
         XCTAssertEqual(applied[0].decision, .keep)
         XCTAssertEqual(applied[1].decision, .reject)
-        XCTAssertEqual(applied[0].aestheticRecommendations.first?.score, 68)
-        XCTAssertEqual(applied[1].aestheticRecommendations.first?.score, 91)
+        XCTAssertEqual(
+            applied[0].aestheticRecommendations.first?.total(with: .balanced),
+            68
+        )
+        XCTAssertEqual(
+            applied[1].aestheticRecommendations.first?.total(with: .balanced),
+            91
+        )
         XCTAssertEqual(
             applied[1].aestheticRecommendations.first?.dimensions.subject,
-            86
+            91
         )
     }
 
@@ -169,38 +175,42 @@ final class AestheticReviewContractTests: XCTestCase {
         }
     }
 
-    func testRejectsScoreOutsideAllowedRange() {
-        let scope = AestheticReviewScope(
-            kind: .similarity,
-            groupID: "similar-9"
+    /// 契约里已经没有 score 字段，但模型仍可能自作主张返回一个。
+    /// 它必须被完全丢弃：总分只能由五个维度分和用户权重在本地算出。
+    func testModelSuppliedTotalScoreIsIgnored() throws {
+        let entry = makeEntry(
+            photoID: "photo_001",
+            score: 0,
+            dimensions: AestheticScoreDimensions(
+                moment: 82,
+                composition: 83,
+                subject: 86,
+                lighting: 81,
+                storytelling: 84
+            ),
+            reasons: ["故事表达完整"]
         )
-        let request = makeRequest(scope: scope, requestID: "request-3")
-        let response = AestheticReviewResponse(
-            version: AestheticReviewContract.version,
-            requestID: "request-3",
-            scope: scope,
-            reviews: [
-                makeEntry(
-                    photoID: "photo_001",
-                    score: 101,
-                    reasons: ["故事表达完整"]
-                ),
-                makeEntry(
-                    photoID: "photo_002",
-                    score: 78,
-                    reasons: ["构图关系自然"]
-                ),
-            ]
+        var object = try XCTUnwrap(
+            JSONSerialization.jsonObject(
+                with: try JSONEncoder().encode(entry)
+            ) as? [String: Any]
+        )
+        object["score"] = 5
+        let decoded = try JSONDecoder().decode(
+            AestheticReviewEntry.self,
+            from: try JSONSerialization.data(withJSONObject: object)
         )
 
-        XCTAssertThrowsError(
-            try AestheticReviewValidator.validate(response, for: request)
-        ) { error in
-            XCTAssertEqual(
-                error as? AestheticReviewValidationError,
-                .invalidScore
-            )
-        }
+        XCTAssertEqual(decoded, entry)
+
+        let recommendation = AestheticRecommendation(
+            scope: AestheticReviewScope(kind: .similarity, groupID: "similar-9"),
+            dimensions: decoded.dimensions,
+            reasons: decoded.reasons,
+            summary: decoded.summary
+        )
+        // (82 + 83 + 86 + 81 + 84) / 5 = 83.2
+        XCTAssertEqual(recommendation.total(with: .balanced), 83)
     }
 
     func testRejectsInvalidDimensionOrSummary() {
@@ -399,7 +409,7 @@ final class AestheticReviewContractTests: XCTestCase {
             ["similarity", "finalSelection"]
         )
         XCTAssertEqual(
-            finalApplied[0].primaryAestheticRecommendation?.score,
+            finalApplied[0].primaryAestheticRecommendation?.total(with: .balanced),
             84
         )
     }
@@ -418,23 +428,24 @@ final class AestheticReviewContractTests: XCTestCase {
         )
     }
 
+    /// `score` 是"期望总分"的简写：五维取同一个值时，任何权重下的加权平均都等于该值。
+    /// 需要检验维度之间的差异时显式传 `dimensions`。
     private func makeEntry(
         photoID: String,
         score: Int,
-        dimensions: AestheticScoreDimensions = AestheticScoreDimensions(
-            moment: 82,
-            composition: 83,
-            subject: 86,
-            lighting: 81,
-            storytelling: 84
-        ),
+        dimensions: AestheticScoreDimensions? = nil,
         reasons: [String],
         summary: String = "画面表现稳定，主体和叙事信息清楚。"
     ) -> AestheticReviewEntry {
         AestheticReviewEntry(
             photoID: photoID,
-            score: score,
-            dimensions: dimensions,
+            dimensions: dimensions ?? AestheticScoreDimensions(
+                moment: score,
+                composition: score,
+                subject: score,
+                lighting: score,
+                storytelling: score
+            ),
             reasons: reasons,
             summary: summary
         )

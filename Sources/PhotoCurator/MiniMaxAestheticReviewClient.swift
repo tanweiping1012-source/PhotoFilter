@@ -437,7 +437,6 @@ private struct MiniMaxReviewTool: Encodable {
         let properties: ReviewProperties
         let required = [
             "photo_id",
-            "score",
             "dimensions",
             "reasons",
             "summary",
@@ -456,7 +455,6 @@ private struct MiniMaxReviewTool: Encodable {
 
     struct ReviewProperties: Encodable {
         let photoID: StringProperty
-        let score: IntegerProperty
         let dimensions: DimensionsProperty
         let reasons: ReasonsProperty
         let summary: StringProperty
@@ -467,7 +465,6 @@ private struct MiniMaxReviewTool: Encodable {
                 minLength: nil,
                 maxLength: nil
             )
-            score = IntegerProperty(minimum: 0, maximum: 100)
             dimensions = DimensionsProperty()
             reasons = ReasonsProperty()
             summary = StringProperty(
@@ -479,7 +476,7 @@ private struct MiniMaxReviewTool: Encodable {
 
         enum CodingKeys: String, CodingKey {
             case photoID = "photo_id"
-            case score, dimensions, reasons, summary
+            case dimensions, reasons, summary
         }
     }
 

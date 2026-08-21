@@ -9,7 +9,8 @@ final class PhotoGridFilterTests: XCTestCase {
 
         let filtered = PhotoGridFilter.aiCandidates.photos(
             from: photos,
-            localAICandidateIDs: candidateIDs
+            localAICandidateIDs: candidateIDs,
+            weights: .balanced
         )
 
         XCTAssertEqual(filtered.map(\.id), [photos[0].id, photos[2].id])
@@ -22,15 +23,15 @@ final class PhotoGridFilterTests: XCTestCase {
         photos[1].decision = .reject
 
         XCTAssertEqual(
-            PhotoGridFilter.keep.photos(from: photos, localAICandidateIDs: []).map(\.id),
+            PhotoGridFilter.keep.photos(from: photos, localAICandidateIDs: [], weights: .balanced).map(\.id),
             [photos[0].id]
         )
         XCTAssertEqual(
-            PhotoGridFilter.reject.photos(from: photos, localAICandidateIDs: []).map(\.id),
+            PhotoGridFilter.reject.photos(from: photos, localAICandidateIDs: [], weights: .balanced).map(\.id),
             [photos[1].id]
         )
         XCTAssertEqual(
-            PhotoGridFilter.undecided.photos(from: photos, localAICandidateIDs: []).count,
+            PhotoGridFilter.undecided.photos(from: photos, localAICandidateIDs: [], weights: .balanced).count,
             2
         )
     }
@@ -42,7 +43,8 @@ final class PhotoGridFilterTests: XCTestCase {
 
         let filtered = PhotoGridFilter.aiScored.photos(
             from: photos,
-            localAICandidateIDs: Set(photos.map(\.id))
+            localAICandidateIDs: Set(photos.map(\.id)),
+            weights: .balanced
         )
 
         XCTAssertEqual(filtered.map(\.id), [photos[2].id, photos[0].id])
@@ -63,7 +65,10 @@ final class PhotoGridFilterTests: XCTestCase {
             ),
         ]
 
-        XCTAssertEqual(photo.primaryAestheticRecommendation?.score, 84)
+        XCTAssertEqual(
+            photo.primaryAestheticRecommendation?.total(with: .balanced),
+            84
+        )
         XCTAssertEqual(
             photo.primaryAestheticRecommendation?.scope.kind,
             .finalSelection
@@ -87,13 +92,12 @@ final class PhotoGridFilterTests: XCTestCase {
                 kind: kind,
                 groupID: groupID
             ),
-            score: score,
             dimensions: AestheticScoreDimensions(
-                moment: 86,
-                composition: 87,
-                subject: 88,
-                lighting: 89,
-                storytelling: 90
+                moment: score,
+                composition: score,
+                subject: score,
+                lighting: score,
+                storytelling: score
             ),
             reasons: ["主体清楚"],
             summary: "整体表现稳定，适合继续保留。"

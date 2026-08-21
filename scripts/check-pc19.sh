@@ -36,6 +36,11 @@ missing_english="$(
 [[ "$missing_english" == "0" ]] ||
   fail "Localizable.xcstrings 仍有 $missing_english 个键缺少英文"
 
+# PC-19 原本只验证"每个键都有英文"。反方向从来没人查：源码里新写一句中文却忘了
+# 加进 String Catalog，编译不会报错，中文环境也看不出来——只有英文环境会直接漏中文。
+python3 scripts/check-missing-localizations.py ||
+  fail "有中文源串没有加入 String Catalog（上方列出）"
+
 stale_count="$(
   jq '[.strings | to_entries[] | select(.value.extractionState == "stale")] | length' \
     "$catalog"
@@ -173,7 +178,6 @@ section_title_uses="$(printf '%s' "$sidebar" | rg -c 'Typography\.sectionTitle' 
 for identifier in \
   photo-curator.main \
   photo.filter \
-  photo.status \
   photo.visible-count \
   ai.status \
   decision.actions \

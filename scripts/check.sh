@@ -34,6 +34,7 @@ bash scripts/check-pc36.sh
 bash scripts/check-pc37.sh
 bash scripts/check-pc38.sh
 bash scripts/check-pc39.sh
+bash scripts/check-pc41.sh
 
 xcodebuild \
   -project PhotoCurator.xcodeproj \

@@ -64,7 +64,14 @@ final class PhotoLibraryViewModel: ObservableObject {
             persistActiveProjectState()
         }
     }
-    @Published private(set) var statusMessage = String(localized: "选择一个旅行照片文件夹开始筛选。")
+    /// 刚刚那个操作为什么没生效。
+    ///
+    /// 这类反馈必须紧挨着动作本身，而不是塞进顶部那一行通用状态：用户点了一下，
+    /// 界面没有任何变化，他不会想到去屏幕另一头找原因。凡是有第二份说明的
+    /// （按钮置灰理由、导航锁定原因）都不该走这里——那是重复，不是反馈。
+    @Published var actionFailureMessage: String?
+    /// 等待确认的分类改动：只有当它会清掉已有 AI评分时才会出现。
+    @Published var pendingCurationCategoryChange: PendingCurationCategoryChange?
     @Published var showExportConfirmation = false
     @Published private(set) var pendingExportDirectory: URL?
     @Published var showAIFinalSelectionRunConfirmation = false
@@ -81,6 +88,13 @@ final class PhotoLibraryViewModel: ObservableObject {
         didSet {
             guard selectedAIPreviewSize != oldValue else { return }
             AIReviewPreviewSizeStore.save(selectedAIPreviewSize)
+        }
+    }
+    /// 五维权重。改动只会重新计算总分与排序，不会重新调用模型，也不产生任何费用。
+    @Published var aestheticScoreWeights: AestheticScoreWeights {
+        didSet {
+            guard aestheticScoreWeights != oldValue else { return }
+            AestheticScoreWeightsStore.save(aestheticScoreWeights)
         }
     }
     @Published private(set) var isAIModelKeyConfigured = false
@@ -150,7 +164,6 @@ final class PhotoLibraryViewModel: ObservableObject {
         let selectedPhotoID: String?
         let curationScope: PhotoCurationScope
         let selectionTargets: PhotoSelectionTargets
-        let statusMessage: String
         let latestAIUsageMessage: String?
         /// 回执必须跟着项目走：它描述的是"这个项目刚发生了什么"。
         /// 作为全局单值时，真实项目评分完成后切到示例，示例第 1 步头上会顶着
@@ -180,6 +193,7 @@ final class PhotoLibraryViewModel: ObservableObject {
         bookmarkAccess: any SecurityScopedBookmarkAccessing = SystemSecurityScopedBookmarkAccess(),
         initialAIModelID: AIModelID = AIModelSelectionStore.load(),
         initialAIPreviewSize: AIReviewPreviewSize = AIReviewPreviewSizeStore.load(),
+        initialAestheticScoreWeights: AestheticScoreWeights = AestheticScoreWeightsStore.load(),
         apiKeyConfigurationCheck: @escaping (AIProviderID) -> Bool = AIProviderKeyStore.hasSavedKey,
         modelVerificationCheck: @escaping (AIModelDescriptor) -> Bool = {
             AIModelVerificationStore.isVerified($0)
@@ -191,6 +205,7 @@ final class PhotoLibraryViewModel: ObservableObject {
         self.bookmarkAccess = bookmarkAccess
         self.selectedAIModelID = initialAIModelID
         self.selectedAIPreviewSize = initialAIPreviewSize
+        self.aestheticScoreWeights = initialAestheticScoreWeights
         self.apiKeyConfigurationCheck = apiKeyConfigurationCheck
         self.modelVerificationCheck = modelVerificationCheck
         restorePersistedProjects()
@@ -370,7 +385,8 @@ final class PhotoLibraryViewModel: ObservableObject {
                 lhs.1,
                 photoID: lhs.0.id,
                 rhs.1,
-                photoID: rhs.0.id
+                photoID: rhs.0.id,
+                weights: aestheticScoreWeights
             )
         }.map(\.0.id)
     }
@@ -392,13 +408,6 @@ final class PhotoLibraryViewModel: ObservableObject {
 
     var selectionTargetStatus: SelectionTargetStatus {
         SelectionTarget.status(keptCount: keepers.count, targetCount: targetSelectionCount)
-    }
-
-    private var selectionProgressMessage: String {
-        String(
-            localized:
-                "人物 \(keepers(in: .people).count)/\(selectionTargets.people)，风景 \(keepers(in: .scenery).count)/\(selectionTargets.scenery)"
-        )
     }
 
     var keeperDiversityConflicts: [[String]] {
@@ -883,19 +892,21 @@ final class PhotoLibraryViewModel: ObservableObject {
 
     func startDemoMode(resourceDirectory: URL? = DemoModeLibrary.resourceDirectory()) {
         guard !isProjectNavigationLocked else {
-            statusMessage = String(localized: "请等待当前分析完成，或先停止 AI 任务，再进入示例筛选。")
             return
         }
         guard let resourceDirectory else {
-            statusMessage = DemoModeError.resourcesUnavailable.localizedDescription
+            actionFailureMessage = DemoModeError.resourcesUnavailable.localizedDescription
             return
         }
 
         let session: DemoModeSession
         do {
-            session = try DemoModeLibrary.makeSession(resourceDirectory: resourceDirectory)
+            session = try DemoModeLibrary.makeSession(
+                resourceDirectory: resourceDirectory,
+                weights: aestheticScoreWeights
+            )
         } catch {
-            statusMessage = String(localized: "无法进入示例筛选：\(error.localizedDescription)")
+            actionFailureMessage = String(localized: "无法进入示例筛选：\(error.localizedDescription)")
             return
         }
 
@@ -948,10 +959,6 @@ final class PhotoLibraryViewModel: ObservableObject {
         analysisCompleted = 0
         analysisTotal = session.startingPhotos.count
         startDemoAnalysisPacing()
-        statusMessage = String(
-            localized:
-                "正在本地分析示例照片；完成后就能开始筛选。"
-        )
     }
 
     private func advanceDemoForCurationScope() {
@@ -962,10 +969,6 @@ final class PhotoLibraryViewModel: ObservableObject {
                 $0.curationCategory == .people
             }?.id
             firstCurationGuideStep = .runPeopleAIScoring
-            statusMessage = String(
-                localized:
-                    "人物照片已单独显示。现在在左侧点击“开始人物 AI评分”。"
-            )
         } else if firstCurationGuideStep == .switchSceneryAndScore,
                   curationScope == .scenery {
             selectedPhotoID = photos.first {
@@ -973,10 +976,6 @@ final class PhotoLibraryViewModel: ObservableObject {
             }?.id
             // 不在这里推进步骤：切换类型本身不产出任何结果。第 5 步要等风景
             // 那一轮评分跑完才算完成——真实流程就是每个类型各评一次。
-            statusMessage = String(
-                localized:
-                    "风景照片已单独显示。现在在左侧点击“开始风景 AI评分”。"
-            )
         }
     }
 
@@ -991,7 +990,6 @@ final class PhotoLibraryViewModel: ObservableObject {
             return
         }
         firstCurationGuideStep = .acceptPeopleResults
-        statusMessage = String(localized: "评分只提供解释和排序。点底部的“采纳”，被采纳的照片就成为保留。")
     }
 
     /// 示例的本地分析进度按教学节奏走完，不是算力开销。
@@ -1032,10 +1030,6 @@ final class PhotoLibraryViewModel: ObservableObject {
         isAnalyzing = false
         analysisCompleted = analysisTotal
         firstCurationGuideStep = .choosePeople
-        statusMessage = String(
-            localized:
-                "本地分析完成：4 张人物、4 张风景，各保留 2 张。现在在“照片类型”中选择“人物”。"
-        )
     }
 
     /// 教学进行中不显示完成回执。
@@ -1109,10 +1103,16 @@ final class PhotoLibraryViewModel: ObservableObject {
         isRunningDemoAIScoring = true
         demoAIScoringCompletedBatchCount = 0
         demoAIScoringCompletedPhotoCount = 0
+        // 分母必须在开跑时换成本类型的候选数。此前这里只清零分子，
+        // candidatePhotoCount 沿用上一类留下的值——人物和风景各 4 张时看不出来，
+        // 两类张数一旦不同，第二类的进度分母就是错的。
         aiFinalSelectionRunProgress.phase = .running
         aiFinalSelectionRunProgress.completedBatchCount = 0
+        aiFinalSelectionRunProgress.totalBatchCount = batchNumbers.count
         aiFinalSelectionRunProgress.completedPhotoCount = 0
-        statusMessage = String(localized: "正在演示 AI评分：使用内置固定结果，不联网、不读取 Keychain。")
+        aiFinalSelectionRunProgress.candidatePhotoCount =
+            demoCandidatePhotoCount(for: category)
+        aiFinalSelectionRunProgress.targetWinnerCount = selectionTargets[category]
 
         demoAIScoringTask = Task { @MainActor [weak self] in
             guard let self else { return }
@@ -1179,13 +1179,6 @@ final class PhotoLibraryViewModel: ObservableObject {
             demoAIScoringCompletedBatchCount,
             batchNumber
         )
-        aiFinalSelectionRunProgress.completedBatchCount =
-            demoAIScoringCompletedBatchCount
-        demoAIScoringCompletedPhotoCount = photos.filter {
-            !$0.aestheticRecommendations.isEmpty
-        }.count
-        aiFinalSelectionRunProgress.completedPhotoCount =
-            demoAIScoringCompletedPhotoCount
 
         // 按类型判断是否跑完，不依赖批次编号：真实流程就是一类评完算一轮。
         let categoryPhotoIDs = Set(
@@ -1196,10 +1189,20 @@ final class PhotoLibraryViewModel: ObservableObject {
                 && !$0.aestheticRecommendations.isEmpty
         }.count
 
+        // 这个数字是"整个示例已评估多少张"，只给顶部横幅用，分母是 8 张全集。
+        demoAIScoringCompletedPhotoCount = photos.filter {
+            !$0.aestheticRecommendations.isEmpty
+        }.count
+        // 而 aiFinalSelectionRunProgress 是"本轮"，分子分母都必须属于当前类型。
+        // 把全局张数塞进来，评完人物再评风景就会显示 6/4，
+        // 并且 fractionCompleted > 1，进度条在还没评完时就跑满。
+        aiFinalSelectionRunProgress.completedBatchCount =
+            demoBatchNumbers(for: category, in: session)
+                .filter { $0 <= demoAIScoringCompletedBatchCount }
+                .count
+        aiFinalSelectionRunProgress.completedPhotoCount = scoredInCategory
+
         guard scoredInCategory == categoryPhotoIDs.count else {
-            statusMessage = String(
-                localized: "离线 AI评分：已评估 \(demoAIScoringCompletedPhotoCount) / \(session.runProgress.candidatePhotoCount) 张。"
-            )
             return
         }
 
@@ -1229,10 +1232,8 @@ final class PhotoLibraryViewModel: ObservableObject {
         )
         if category == .people {
             firstCurationGuideStep = .viewScore
-            statusMessage = String(localized: "人物离线评分完成。打开任意一张照片，用底部的“查看评分”看它为什么得这个分。")
         } else {
             firstCurationGuideStep = .acceptSceneryResults
-            statusMessage = String(localized: "风景离线评分完成。点底部的“采纳”，把风景结果也变成保留。")
         }
     }
 
@@ -1272,9 +1273,6 @@ final class PhotoLibraryViewModel: ObservableObject {
             return
         }
         firstCurationGuideStep = .completed
-        statusMessage = String(
-            localized: "第一次筛选已完成。点击“结束新手引导”返回。"
-        )
     }
 
     func finishFirstCurationGuide() {
@@ -1300,7 +1298,6 @@ final class PhotoLibraryViewModel: ObservableObject {
            projects.contains(where: { $0.id == returnProjectID }) {
             activateProject(returnProjectID)
         } else {
-            statusMessage = String(localized: "已退出示例筛选。选择一个旅行照片文件夹开始筛选。")
         }
     }
 
@@ -1327,7 +1324,6 @@ final class PhotoLibraryViewModel: ObservableObject {
         guard projectID != activeProjectID,
               let project = projects.first(where: { $0.id == projectID }) else { return }
         guard !isProjectNavigationLocked else {
-            statusMessage = String(localized: "请等待当前分析完成，或先停止 AI 任务，再切换项目。")
             return
         }
 
@@ -1412,7 +1408,6 @@ final class PhotoLibraryViewModel: ObservableObject {
             resetWorkspace()
         }
         persistProjectCatalog()
-        statusMessage = String(localized: "项目已从 App 中删除，缩略图缓存已释放；原照片没有被删除或修改。")
     }
 
     func cancelProjectDeletion() {
@@ -1423,14 +1418,13 @@ final class PhotoLibraryViewModel: ObservableObject {
     private func openProject(folder: URL) {
         if let existingProject = PhotoProjectCatalog.project(for: folder, in: projects) {
             if existingProject.id == activeProjectID {
-                statusMessage = String(localized: "该文件夹已经是当前项目。")
+                actionFailureMessage = String(localized: "该文件夹已经是当前项目。")
             } else {
                 activateProject(existingProject.id)
             }
             return
         }
         guard !isProjectNavigationLocked else {
-            statusMessage = String(localized: "请等待当前分析完成，或先停止 AI 任务，再新建项目。")
             return
         }
 
@@ -1441,7 +1435,7 @@ final class PhotoLibraryViewModel: ObservableObject {
         }
         let project = PhotoProject(folderURL: folder)
         guard let bookmarkData = try? bookmarkAccess.makeReadOnlyBookmark(for: folder) else {
-            statusMessage = String(localized: "无法保存该文件夹的安全授权，请重新选择文件夹。")
+            actionFailureMessage = String(localized: "无法保存该文件夹的安全授权，请重新选择文件夹。")
             return
         }
         beginSecurityScope(for: project.id, url: folder)
@@ -1490,7 +1484,6 @@ final class PhotoLibraryViewModel: ObservableObject {
         isGroupingCandidates = false
         analysisCompleted = 0
         analysisTotal = 0
-        statusMessage = String(localized: "正在扫描 \(activeProject?.displayName ?? folder.lastPathComponent)…")
 
         let extensions = supportedExtensions
         let restoredDecisions = persistedProjects[projectID]?.decisionsByRelativePath ?? [:]
@@ -1533,7 +1526,6 @@ final class PhotoLibraryViewModel: ObservableObject {
                 } ?? items.first?.id
                 self.isScanning = false
                 guard !items.isEmpty else {
-                    self.statusMessage = String(localized: "没有找到 JPG、JPEG、PNG、WebP、HEIC 或 TIFF 图片。")
                     self.updateProject(projectID) { $0.isAnalysisComplete = true }
                     self.persistActiveProjectState()
                     return
@@ -1541,7 +1533,6 @@ final class PhotoLibraryViewModel: ObservableObject {
 
                 self.analysisTotal = items.count
                 self.isAnalyzing = true
-                self.statusMessage = String(localized: "已显示 \(items.count) 张照片；分析会在后台逐步完成。现在即可开始手动选片。")
                 self.persistActiveProjectState()
                 self.startAnalysis(of: items, sessionID: sessionID)
             }
@@ -1579,18 +1570,44 @@ final class PhotoLibraryViewModel: ObservableObject {
                 }
         }
 
+        // 这一步会清掉人物和风景两边全部 AI评分结果，而且不进撤销栈。
+        // 事后再说一句"已清除"没有任何用处——钱已经花了，结果已经没了。
+        // 所以有东西可清时先问，没有可清时直接改。
+        guard !hadScores else {
+            pendingCurationCategoryChange = PendingCurationCategoryChange(
+                photoID: photoID,
+                filename: photos[index].filename,
+                category: category
+            )
+            return
+        }
+        applyCurationCategory(category, at: index)
+    }
+
+    func confirmPendingCurationCategoryChange() {
+        guard let pending = pendingCurationCategoryChange,
+              let index = photoIndex(for: pending.photoID) else {
+            pendingCurationCategoryChange = nil
+            return
+        }
+        pendingCurationCategoryChange = nil
+        applyCurationCategory(pending.category, at: index)
+    }
+
+    func cancelPendingCurationCategoryChange() {
+        pendingCurationCategoryChange = nil
+    }
+
+    private func applyCurationCategory(
+        _ category: PhotoCurationCategory,
+        at index: Int
+    ) {
         photos[index].curationCategory = category
         photos[index].isCurationCategoryUserAssigned = true
         photos[index].aestheticRecommendations = []
         aiFinalSelectionPhotoIDsByCategory = [:]
         aiFinalSelectionRunProgressByCategory = [:]
         persistActiveProjectState()
-        statusMessage = hadScores
-            ? String(
-                localized:
-                    "已将 \(photos[index].filename) 归为\(category.title)。相关的 AI评分结果已清除，需要重新评分。"
-            )
-            : String(localized: "已将 \(photos[index].filename) 归为\(category.title)。")
     }
 
     func setSelectedCurationCategory(
@@ -1611,14 +1628,14 @@ final class PhotoLibraryViewModel: ObservableObject {
     func mark(photoID: String, as decision: PhotoDecision) {
         if let category = activeAIFinalSelectionCategory,
            isPhotoLockedByActiveAIFinalSelectionRun(photoID) {
-            statusMessage = String(
+            actionFailureMessage = String(
                 localized: "这张照片属于正在评分的\(category.title)；请先停止本轮任务，或先处理另一类照片。"
             )
             return
         }
         if isDemoModeActive {
             if firstCurationGuideStep == .choosePeople {
-                statusMessage = String(
+                actionFailureMessage = String(
                     localized: "请先在照片类型中选择“人物”。"
                 )
                 return
@@ -1638,22 +1655,17 @@ final class PhotoLibraryViewModel: ObservableObject {
         }
         invalidateCandidatePlans()
         persistActiveProjectState()
-        statusMessage = String(
-            localized:
-                "已将 \(photos[index].filename) 标记为\(decision.title)。\(selectionProgressMessage)"
-        )
     }
 
     func undo() {
         guard let previous = undoStack.last else {
-            statusMessage = String(localized: "没有可以撤销的操作。")
             return
         }
         if let category = activeAIFinalSelectionCategory,
            previous.previousDecisionsByPhotoID.keys.contains(
                where: isPhotoLockedByActiveAIFinalSelectionRun
            ) {
-            statusMessage = String(
+            actionFailureMessage = String(
                 localized: "上一步改动的是正在评分的\(category.title)照片；请先停止本轮任务再撤销。"
             )
             return
@@ -1665,17 +1677,12 @@ final class PhotoLibraryViewModel: ObservableObject {
         }
         invalidateCandidatePlans()
         persistActiveProjectState()
-        statusMessage = String(
-            localized:
-                "已撤销上一次标记操作。\(selectionProgressMessage)"
-        )
     }
 
     func acceptPendingAIFinalSelection() {
         guard !isAIFinalSelectionRunActive else { return }
         let pendingIDs = Array(pendingAIFinalSelectionPhotoIDs)
         guard !pendingIDs.isEmpty else {
-            statusMessage = String(localized: "当前没有待确认的 AI评分结果。")
             return
         }
         let pendingIDSet = Set(pendingIDs)
@@ -1686,7 +1693,7 @@ final class PhotoLibraryViewModel: ObservableObject {
             }.count
             guard keepers(in: category).count + pendingCategoryCount
                     <= selectionTargets[category] else {
-                statusMessage = String(
+                actionFailureMessage = String(
                     localized:
                         "采纳后会超过\(category.title)目标 \(selectionTargets[category]) 张，请先调整已有保留项。"
                 )
@@ -1702,10 +1709,6 @@ final class PhotoLibraryViewModel: ObservableObject {
         invalidateCandidatePlans()
         persistActiveProjectState()
         completionNotice = nil
-        statusMessage = String(
-            localized:
-                "已采纳 \(pendingIDs.count) 张 AI评分结果。人物 \(keepers(in: .people).count)/\(selectionTargets.people)，风景 \(keepers(in: .scenery).count)/\(selectionTargets.scenery)。"
-        )
         if isDemoModeActive {
             if firstCurationGuideStep == .acceptPeopleResults {
                 firstCurationGuideStep = .switchSceneryAndScore
@@ -1728,7 +1731,6 @@ final class PhotoLibraryViewModel: ObservableObject {
             to: photos
         )
         replacePhotos(updated)
-        statusMessage = String(localized: "已载入 \(localPhotoIDs.count) 张照片的 AI评分。最终取舍仍由你决定。")
     }
 
     func refreshAIConfiguration() {
@@ -1748,19 +1750,16 @@ final class PhotoLibraryViewModel: ObservableObject {
             return
         }
         guard selectedAIModel.isReady else {
-            statusMessage = String(localized: "请先在 AI评分设置中完成自定义接口和模型 ID 配置。")
             return
         }
         guard isAIModelKeyConfigured else {
-            statusMessage = String(localized: "请先在 AI评分设置中验证\(selectedAIModel.providerAndModelDisplayName)及其 API Key。")
             return
         }
         guard !isAIFinalSelectionRunActive else {
-            statusMessage = String(localized: "已有 AI评分任务正在运行。")
             return
         }
         guard let category = requestedCategory ?? curationScope.category else {
-            statusMessage = String(
+            actionFailureMessage = String(
                 localized:
                     "请先在“照片类型”中选择人物或风景，再开始该类型的 AI评分。"
             )
@@ -1768,14 +1767,13 @@ final class PhotoLibraryViewModel: ObservableObject {
         }
         let conflicts = keeperDiversityConflicts(in: category)
         guard conflicts.isEmpty else {
-            statusMessage = String(
+            actionFailureMessage = String(
                 localized:
                     "\(category.title)中已有 \(conflicts.count) 组相似照片被同时保留；请先确认是否都要保留。"
             )
             return
         }
         guard let plan = aiFinalSelectionRunPlan(for: category) else {
-            statusMessage = String(localized: "当前待评分照片无法安全收敛到目标张数；请调整保留目标。")
             return
         }
         pendingAIFinalSelectionRunPlan = plan
@@ -1870,10 +1868,9 @@ final class PhotoLibraryViewModel: ObservableObject {
             waitingSeconds: 0,
             failureMessage: nil
         )
-        statusMessage = String(
-            localized:
-                "\(category.title) AI评分已开始：共 \(plan.candidatePhotoCount) 张；限流或网络中断会自动退避重试，仍失败则停在当前进度。"
-        )
+        // 开跑这件事侧栏已经完整交代了：类型、进度条、张数、暂停/停止都在那儿。
+        // "共 N 张"是重复计数，"会自动退避重试"是规则说明而不是状态——规则属于帮助页。
+        // 顶部这一行留着上一次操作的回执反而更糟，所以清空。
         startAIFinalSelectionRunTask(apiKey: apiKey)
     }
 
@@ -1881,13 +1878,12 @@ final class PhotoLibraryViewModel: ObservableObject {
     func pauseAIFinalSelectionRun() {
         guard aiFinalSelectionRunProgress.phase == .running else { return }
         aiFinalSelectionRunProgress.phase = .paused
-        statusMessage = String(localized: "AI评分已暂停；不会继续评估后面的照片。")
+        aiFinalSelectionRunProgress.activity = nil
     }
 
     func resumeAIFinalSelectionRun() {
         guard aiFinalSelectionRunProgress.phase == .paused else { return }
         aiFinalSelectionRunProgress.phase = .running
-        statusMessage = String(localized: "AI评分已继续。")
     }
 
     func retryFailedAIFinalSelectionRun() {
@@ -1901,9 +1897,13 @@ final class PhotoLibraryViewModel: ObservableObject {
         aiFinalSelectionRunProgress.phase = .running
         aiFinalSelectionRunProgress.failureMessage = nil
         if let label = failedRangeLabel {
-            statusMessage = String(localized: "正在重新评估第 \(label) 张。")
+            aiFinalSelectionRunProgress.activity = String(
+                localized: "正在重新评估第 \(label) 张。"
+            )
         } else {
-            statusMessage = String(localized: "正在重新评估失败的照片。")
+            aiFinalSelectionRunProgress.activity = String(
+                localized: "正在重新评估失败的照片。"
+            )
         }
         startAIFinalSelectionRunTask(apiKey: apiKey)
     }
@@ -1913,6 +1913,7 @@ final class PhotoLibraryViewModel: ObservableObject {
             return
         }
         aiFinalSelectionRunProgress.phase = .stopped
+        aiFinalSelectionRunProgress.activity = nil
         aiFinalSelectionRunProgress.waitingSeconds = 0
         aiFinalSelectionRunProgressByCategory[context.category] =
             aiFinalSelectionRunProgress
@@ -1920,7 +1921,6 @@ final class PhotoLibraryViewModel: ObservableObject {
         aiFinalSelectionRunTask = nil
         aiFinalSelectionRunTaskID = nil
         aiFinalSelectionRunContext = nil
-        statusMessage = String(localized: "AI评分已停止；已完成照片的评分仍保留，但不会形成最终结果。")
     }
 
     private func startAIFinalSelectionRunTask(apiKey: String) {
@@ -1957,12 +1957,17 @@ final class PhotoLibraryViewModel: ObservableObject {
                     scope: group.scope,
                     localPhotoIDs: group.localPhotoIDs
                 )
-                let rangeLabel = photoRangeLabel(photoRange)
-                statusMessage = String(localized: "正在评估第 \(rangeLabel) 张，共 \(context.plan.candidatePhotoCount) 张；正在生成\(context.previewSize.displayName)安全图片…")
+                // 张数和总数由进度条那一行负责，这里只说"此刻在做什么"，不重复数字。
+                aiFinalSelectionRunProgress.activity = String(
+                    localized: "正在生成\(context.previewSize.displayName)大图预览…"
+                )
                 let previews = try await makeAestheticReviewPreviews(
                     candidateGroup: group,
                     request: request,
                     previewSize: context.previewSize
+                )
+                aiFinalSelectionRunProgress.activity = String(
+                    localized: "已发送，正在等待模型返回…"
                 )
                 let result = try await requestAIFinalSelectionReview(
                     request: request,
@@ -2004,15 +2009,14 @@ final class PhotoLibraryViewModel: ObservableObject {
                 aiFinalSelectionRunProgress.inputTokens += result.usage.inputTokens ?? 0
                 aiFinalSelectionRunProgress.outputTokens += result.usage.outputTokens ?? 0
                 latestAIUsageMessage = aiFinalSelectionRunProgress.usageSummary
-                statusMessage = String(localized: "AI评分已评估 \(photoRange.upperBound) / \(updatedContext.plan.candidatePhotoCount) 张。")
             }
             try completeAIFinalSelectionRun(runID: runID)
         } catch is CancellationError {
             guard aiFinalSelectionRunContext?.runID == runID else { return }
             if aiFinalSelectionRunProgress.phase != .stopped {
                 aiFinalSelectionRunProgress.phase = .stopped
+                aiFinalSelectionRunProgress.activity = nil
                 aiFinalSelectionRunContext = nil
-                statusMessage = String(localized: "AI评分已停止；不会形成不完整的评分结果。")
             }
         } catch {
             guard let context = aiFinalSelectionRunContext,
@@ -2022,14 +2026,13 @@ final class PhotoLibraryViewModel: ObservableObject {
             // 失败时保留 context：已经评过（已经付过钱）的照片留在 scoredCandidates 里，
             // 用户可以从失败的那一批继续，而不是从头再跑一遍。
             aiFinalSelectionRunProgress.phase = .failed
+            aiFinalSelectionRunProgress.activity = nil
             aiFinalSelectionRunProgress.waitingSeconds = 0
             aiFinalSelectionRunProgress.failureMessage = error.localizedDescription
             aiFinalSelectionRunProgressByCategory[context.category] =
                 aiFinalSelectionRunProgress
             if context.nextBatchIndex > 0 {
-                statusMessage = String(localized: "AI评分已中断：\(error.localizedDescription) 已完成 \(aiFinalSelectionRunProgress.completedPhotoCount) 张的评分已保留，可以从中断处继续。")
             } else {
-                statusMessage = String(localized: "AI评分失败并停止：\(error.localizedDescription)")
             }
         }
     }
@@ -2074,12 +2077,14 @@ final class PhotoLibraryViewModel: ObservableObject {
                         max(adaptiveReviewInterval * 2, delay)
                     )
                 }
-                let rangeLabel = photoRangeLabel(photoRange)
-                statusMessage = String(localized: "第 \(rangeLabel) 张评分失败：\(error.localizedDescription) 将在 \(Int(delay.rounded(.up))) 秒后自动重试（\(completedRetryCount)/\(AIFinalSelectionRetryPolicy.maximumAutomaticRetryCount)）。")
+                // 何时重试由下面那行"下一次请求约 N 秒后发送"负责，这里只说失败原因和第几次。
+                aiFinalSelectionRunProgress.activity = String(
+                    localized: "评分失败：\(error.localizedDescription) 自动重试 \(completedRetryCount)/\(AIFinalSelectionRetryPolicy.maximumAutomaticRetryCount)"
+                )
                 aiFinalSelectionRunProgress.waitingSeconds = Int(delay.rounded(.up))
                 try await Task.sleep(for: .seconds(delay))
                 try await waitForAIFinalSelectionBatchSlot(runID: runID)
-                statusMessage = String(localized: "正在重新评估第 \(rangeLabel) 张，共 \(totalPhotoCount) 张…")
+                aiFinalSelectionRunProgress.activity = String(localized: "正在重新评估…")
             }
         }
     }
@@ -2121,7 +2126,8 @@ final class PhotoLibraryViewModel: ObservableObject {
         let rankedCandidatePhotoIDs =
             try AIFinalSelectionRunValidator.rankedCandidatePhotoIDs(
                 scores: context.scoredCandidates,
-                candidatePhotoIDs: context.plan.coveredPhotoIDs
+                candidatePhotoIDs: context.plan.coveredPhotoIDs,
+                weights: aestheticScoreWeights
             )
         let finalSelectionPhotoIDs = try AIFinalSelectionRunValidator.finalSelectionIDs(
             rankedCandidatePhotoIDs: rankedCandidatePhotoIDs,
@@ -2144,6 +2150,7 @@ final class PhotoLibraryViewModel: ObservableObject {
         aiFinalSelectionPhotoIDsByCategory[context.category] =
             acceptedPhotoIDs
         aiFinalSelectionRunProgress.phase = .completed
+        aiFinalSelectionRunProgress.activity = nil
         aiFinalSelectionRunProgress.completedPhotoCount =
             context.plan.candidatePhotoCount
         aiFinalSelectionRunProgress.waitingSeconds = 0
@@ -2157,20 +2164,16 @@ final class PhotoLibraryViewModel: ObservableObject {
             id: UUID(),
             kind: .aiScoring(context.category),
             title: String(localized: "\(context.category.title) AI评分完成"),
-            message: String(
-                localized:
-                    "\(context.plan.candidatePhotoCount) 张已按分数排序，AI 推荐保留其中 \(acceptedPhotoIDs.count) 张。逐张看过后，用底部的“采纳”确认。"
-            )
+            message: conflicts.isEmpty
+                ? String(
+                    localized:
+                        "\(context.plan.candidatePhotoCount) 张已按分数排序，AI 推荐保留其中 \(acceptedPhotoIDs.count) 张。逐张看过后，用底部的“采纳”确认。"
+                )
+                : String(
+                    localized:
+                        "\(context.plan.candidatePhotoCount) 张已按分数排序，AI 推荐保留其中 \(acceptedPhotoIDs.count) 张；\(conflicts.count) 张同场景重复已顺延。逐张看过后，用底部的“采纳”确认。"
+                )
         )
-        statusMessage = conflicts.isEmpty
-            ? String(
-                localized:
-                    "\(context.category.title) AI评分完成：AI 推荐保留 \(acceptedPhotoIDs.count) 张。请逐张查看后用底部的“采纳”确认。"
-            )
-            : String(
-                localized:
-                    "\(context.category.title) AI评分完成：AI 推荐保留 \(acceptedPhotoIDs.count) 张；\(conflicts.count) 张同场景重复已顺延。请逐张查看后用底部的“采纳”确认。"
-            )
     }
 
     /// 同一家族只保留名次最高的一张（人工保留的照片优先级最高），冲突的其余照片让位给后面的候选。
@@ -2225,19 +2228,19 @@ final class PhotoLibraryViewModel: ObservableObject {
         model: AIModelDescriptor
     ) -> String? {
         guard model.isReady else {
-            statusMessage = String(localized: "当前 AI 模型配置不完整，未发送请求。")
+            actionFailureMessage = String(localized: "当前 AI 模型配置不完整，未发送请求。")
             return nil
         }
         do {
             guard let apiKey = try AIProviderKeyStore.read(for: model.providerID) else {
                 refreshAIConfiguration()
-                statusMessage = String(localized: "无法读取\(model.providerID.displayName) API Key，请在 AI 设置中重新保存。")
+                actionFailureMessage = String(localized: "无法读取\(model.providerID.displayName) API Key，请在 AI 设置中重新保存。")
                 return nil
             }
             return apiKey
         } catch {
             refreshAIConfiguration()
-            statusMessage = String(localized: "无法读取\(model.providerID.displayName) API Key，请在 AI 设置中重新保存。")
+            actionFailureMessage = String(localized: "无法读取\(model.providerID.displayName) API Key，请在 AI 设置中重新保存。")
             return nil
         }
     }
@@ -2311,7 +2314,6 @@ final class PhotoLibraryViewModel: ObservableObject {
 
     func requestExport() {
         guard canExport else {
-            statusMessage = String(localized: "还没有保留任何照片，先保留至少一张再导出。")
             return
         }
 
@@ -2329,7 +2331,7 @@ final class PhotoLibraryViewModel: ObservableObject {
         presentPanel(panel, purpose: .export) { [weak self] directory in
             guard let self else { return }
             guard !self.isInsideActiveProjectFolder(directory) else {
-                self.statusMessage = String(
+                self.actionFailureMessage = String(
                     localized: "导出目录不能选在原照片文件夹内部；请选择项目目录之外的位置。"
                 )
                 return
@@ -2355,13 +2357,11 @@ final class PhotoLibraryViewModel: ObservableObject {
         guard let destinationParent = pendingExportDirectory, canExport else {
             pendingExportDirectory = nil
             showExportConfirmation = false
-            statusMessage = String(localized: "还没有保留任何照片，先保留至少一张再导出。")
             return
         }
         let exportPhotos = keepers
         pendingExportDirectory = nil
         showExportConfirmation = false
-        statusMessage = String(localized: "正在安全复制 \(exportPhotos.count) 张精选照片…")
 
         DispatchQueue.global(qos: .userInitiated).async { [weak self] in
             do {
@@ -2370,7 +2370,6 @@ final class PhotoLibraryViewModel: ObservableObject {
                     to: destinationParent
                 )
                 DispatchQueue.main.async {
-                    self?.statusMessage = String(localized: "导出完成：\(exportURL.lastPathComponent)。原图未被修改。")
                     self?.completionNotice = CurationCompletionNotice(
                         id: UUID(),
                         kind: .export(exportURL),
@@ -2384,7 +2383,7 @@ final class PhotoLibraryViewModel: ObservableObject {
                 }
             } catch {
                 DispatchQueue.main.async {
-                    self?.statusMessage = String(localized: "导出失败：\(error.localizedDescription)")
+                    self?.actionFailureMessage = String(localized: "导出失败：\(error.localizedDescription)")
                 }
             }
         }
@@ -2405,7 +2404,6 @@ final class PhotoLibraryViewModel: ObservableObject {
             selectedPhotoID: selectedPhotoID,
             curationScope: curationScope,
             selectionTargets: selectionTargets,
-            statusMessage: statusMessage,
             latestAIUsageMessage: latestAIUsageMessage,
             completionNotice: completionNotice,
             aiFinalSelectionPhotoIDsByCategory:
@@ -2423,7 +2421,6 @@ final class PhotoLibraryViewModel: ObservableObject {
         selectedPhotoID = snapshot.selectedPhotoID ?? snapshot.photos.first?.id
         curationScope = snapshot.curationScope
         selectionTargets = snapshot.selectionTargets
-        statusMessage = snapshot.statusMessage
         latestAIUsageMessage = snapshot.latestAIUsageMessage
         completionNotice = snapshot.completionNotice
         aiFinalSelectionPhotoIDsByCategory =
@@ -2518,7 +2515,6 @@ final class PhotoLibraryViewModel: ObservableObject {
             guard let loaded = try projectStore.load() else { return }
             catalog = loaded
         } catch {
-            statusMessage = String(localized: "无法恢复项目状态；原照片未受影响。")
             return
         }
 
@@ -2569,7 +2565,6 @@ final class PhotoLibraryViewModel: ObservableObject {
               }),
               let folderURL = project.folderURL else {
             if !projects.isEmpty {
-                statusMessage = String(localized: "已恢复项目列表；需要时点按项目重新授权或继续筛选。")
             }
             return
         }
@@ -2605,7 +2600,7 @@ final class PhotoLibraryViewModel: ObservableObject {
     private func completeReauthorization(of projectID: UUID, with folder: URL) {
         guard let index = projects.firstIndex(where: { $0.id == projectID }) else { return }
         guard let bookmarkData = try? bookmarkAccess.makeReadOnlyBookmark(for: folder) else {
-            statusMessage = String(localized: "无法保存新的文件夹授权，请重试。")
+            actionFailureMessage = String(localized: "无法保存新的文件夹授权，请重试。")
             return
         }
 
@@ -2714,7 +2709,6 @@ final class PhotoLibraryViewModel: ObservableObject {
         do {
             try projectStore.save(catalog)
         } catch {
-            statusMessage = String(localized: "项目状态保存失败；原照片未受影响。")
         }
     }
 
@@ -2847,10 +2841,6 @@ final class PhotoLibraryViewModel: ObservableObject {
                         project.isAnalysisComplete = true
                     }
                 }
-                self.statusMessage = String(
-                    localized:
-                        "分析完成：发现 \(self.similarityGroupCount) 组相似照片和 \(self.technicalRiskPhotoCount) 张技术风险提示。"
-                )
                 self.persistActiveProjectState()
             }
         }

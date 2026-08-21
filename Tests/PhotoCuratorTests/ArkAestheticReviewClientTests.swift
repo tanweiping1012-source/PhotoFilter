@@ -74,7 +74,7 @@ final class ArkAestheticReviewClientTests: XCTestCase {
 
         XCTAssertEqual(result.response.requestID, "ark-request-2")
         XCTAssertEqual(result.response.reviews.map(\.photoID), ["photo_001", "photo_002"])
-        XCTAssertEqual(result.response.reviews.map(\.score), [70, 92])
+        XCTAssertEqual(result.response.reviews.map { $0.total(with: .balanced) }, [70, 92])
         XCTAssertEqual(result.response.reviews[1].dimensions.moment, 95)
         XCTAssertEqual(
             result.response.reviews[1].summary,
@@ -98,7 +98,7 @@ final class ArkAestheticReviewClientTests: XCTestCase {
             data,
             request: request
         )
-        XCTAssertEqual(result.response.reviews.map(\.score), [80, 70])
+        XCTAssertEqual(result.response.reviews.map { $0.total(with: .balanced) }, [80, 70])
     }
 
     func testDecodesValidatedJSONObjectWrappedInProviderText() throws {
@@ -123,7 +123,9 @@ final class ArkAestheticReviewClientTests: XCTestCase {
         let result = try ArkAestheticReviewClient().decodeResponse(data, request: request)
 
         XCTAssertEqual(
-            result.response.reviews.max(by: { $0.score < $1.score })?.photoID,
+            result.response.reviews.max(by: {
+                $0.total(with: .balanced) < $1.total(with: .balanced)
+            })?.photoID,
             "photo_002"
         )
     }
@@ -148,7 +150,9 @@ final class ArkAestheticReviewClientTests: XCTestCase {
         let result = try ArkAestheticReviewClient().decodeResponse(data, request: request)
 
         XCTAssertEqual(
-            result.response.reviews.max(by: { $0.score < $1.score })?.photoID,
+            result.response.reviews.max(by: {
+                $0.total(with: .balanced) < $1.total(with: .balanced)
+            })?.photoID,
             "photo_002"
         )
         XCTAssertEqual(result.usage.outputTokens, 100)

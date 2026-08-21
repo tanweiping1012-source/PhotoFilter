@@ -76,8 +76,11 @@ enum DemoModeLibrary {
         }
     }
 
+    /// 示例数据的排名必须和界面上显示的总分用同一套权重，否则用户会看到
+    /// "分数更低的那张反而入选"。权重由调用方传入，而不是在这里写死。
     static func makeSession(
         resourceDirectory: URL,
+        weights: AestheticScoreWeights = .balanced,
         fileManager: FileManager = .default
     ) throws -> DemoModeSession {
         let urls = filenames.map {
@@ -145,7 +148,6 @@ enum DemoModeLibrary {
                     let score = scores[photoIndex]
                     return AestheticReviewEntry(
                         photoID: input.photoID,
-                        score: score,
                         dimensions: AestheticScoreDimensions(
                             moment: min(100, score + 2),
                             composition: max(0, score - 1),
@@ -198,7 +200,6 @@ enum DemoModeLibrary {
                 }
                 return AIFinalSelectionScore(
                     photoID: photo.id,
-                    score: recommendation.score,
                     dimensions: recommendation.dimensions
                 )
             }
@@ -206,7 +207,8 @@ enum DemoModeLibrary {
                 try AIFinalSelectionRunValidator
                     .rankedCandidatePhotoIDs(
                         scores: scoredPhotos,
-                        candidatePhotoIDs: plan.coveredPhotoIDs
+                        candidatePhotoIDs: plan.coveredPhotoIDs,
+                        weights: weights
                     )
             rankedPhotoIDsByCategory[category] = rankedPhotoIDs
             finalSelectionPhotoIDsByCategory[category] =

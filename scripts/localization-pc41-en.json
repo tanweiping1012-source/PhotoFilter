@@ -1,0 +1,12 @@
+{
+  "评分权重": "Score Weights"
+  ,"调整权重只重新计算总分和排序，不会重新评分，也不产生任何费用。": "Adjusting weights only recalculates totals and ordering. It never re-scores photos and never costs anything."
+  ,"五项权重不能全为 0；当前按等权计算。": "All five weights cannot be 0. Equal weighting is being used instead."
+  ,"恢复等权": "Reset to Equal Weights"
+  ,"权重 %lld": "Weight %lld"
+  ,"%lld / 100，权重为 0，未计入总分": "%lld / 100, weight 0, not counted toward the total"
+  ,"每次请求只发送 1 张照片的匿名 JPEG 预览；最长边由你选择为小 512px、中 1024px 或大 1536px。始终不发送原图、文件名、本地路径或 EXIF/GPS。": "Each request sends one anonymous JPEG preview of a single photo. You choose the longest edge: Small 512px, Medium 1024px, or Large 1536px. Originals, filenames, local paths, and EXIF/GPS are never sent."
+  ,"已自定义": "Customized"
+  ,"五维等权": "All five dimensions weighted equally"
+  ,"总分按你设定的权重计算，可在侧栏「评分权重」调整。": "The total is calculated from the weights you set. Adjust them under Score Weights in the sidebar."
+}

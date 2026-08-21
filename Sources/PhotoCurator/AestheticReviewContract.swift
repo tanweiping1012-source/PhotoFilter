@@ -1,7 +1,7 @@
 import Foundation
 
 enum AestheticReviewContract {
-    static let version = "v3"
+    static let version = "v4"
 }
 
 /// 发送给视觉模型的照片批次标识。不包含本地绝对路径，也不包含原始文件名。
@@ -51,19 +51,23 @@ struct AestheticReviewResponse: Codable, Equatable {
     let reviews: [AestheticReviewEntry]
 }
 
+/// 模型只返回五个维度分。总分由 `AestheticScoreTotal` 在本地按用户权重算出，
+/// 不再是模型独立采样的第六个数字——那是同一张照片每次评分都得到不同总分的主要来源。
 struct AestheticReviewEntry: Codable, Equatable {
     let photoID: String
-    let score: Int
     let dimensions: AestheticScoreDimensions
     let reasons: [String]
     let summary: String
 
     enum CodingKeys: String, CodingKey {
         case photoID = "photo_id"
-        case score
         case dimensions
         case reasons
         case summary
+    }
+
+    func total(with weights: AestheticScoreWeights) -> Int {
+        AestheticScoreTotal.total(dimensions: dimensions, weights: weights)
     }
 }
 
@@ -112,13 +116,17 @@ enum AestheticScoreDimension: String, CaseIterable, Identifiable {
 /// 已通过契约校验、可以呈现在某一张照片上的 AI评分记录。
 struct AestheticRecommendation: Equatable, Identifiable {
     let scope: AestheticReviewScope
-    let score: Int
     let dimensions: AestheticScoreDimensions
     let reasons: [String]
     let summary: String
 
     var id: String {
         "\(scope.kind.rawValue)-\(scope.groupID)"
+    }
+
+    /// 总分是视图，不是数据。权重变了同一条记录就该给出不同的总分，所以不能存成属性。
+    func total(with weights: AestheticScoreWeights) -> Int {
+        AestheticScoreTotal.total(dimensions: dimensions, weights: weights)
     }
 
     var reasonsSummary: String {
@@ -133,7 +141,6 @@ enum AestheticReviewValidationError: LocalizedError, Equatable {
     case emptyRequest
     case duplicatePhotoID
     case photoIDMismatch
-    case invalidScore
     case invalidDimensions
     case invalidReasons
     case invalidSummary
@@ -147,7 +154,6 @@ enum AestheticReviewValidationError: LocalizedError, Equatable {
         case .emptyRequest: String(localized: "AI评分请求中没有候选照片。")
         case .duplicatePhotoID: String(localized: "AI评分结果包含重复照片。")
         case .photoIDMismatch: String(localized: "AI评分结果与当前候选照片不一致。")
-        case .invalidScore: String(localized: "AI评分结果的总分不在 0–100 范围内。")
         case .invalidDimensions: String(localized: "AI评分结果包含不合法的维度分数。")
         case .invalidReasons: String(localized: "AI评分结果缺少可读的具体评价。")
         case .invalidSummary: String(localized: "AI评分结果缺少可读的总结。")
@@ -190,9 +196,6 @@ enum AestheticReviewValidator {
             throw AestheticReviewValidationError.photoIDMismatch
         }
 
-        guard response.reviews.allSatisfy({ (0...100).contains($0.score) }) else {
-            throw AestheticReviewValidationError.invalidScore
-        }
         guard response.reviews.allSatisfy({
             $0.dimensions.scores.allSatisfy { (0...100).contains($0) }
         }) else {
@@ -283,7 +286,6 @@ enum AestheticReviewApplier {
             }
             let recommendation = AestheticRecommendation(
                 scope: response.scope,
-                score: entry.score,
                 dimensions: entry.dimensions,
                 reasons: entry.reasons,
                 summary: entry.summary

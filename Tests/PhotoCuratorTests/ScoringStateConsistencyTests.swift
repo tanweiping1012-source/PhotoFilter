@@ -73,18 +73,22 @@ final class ScoringStateConsistencyTests: XCTestCase {
             target.curationCategory == .people ? .scenery : .people
         library.setCurationCategory(newCategory, for: target.id)
 
-        XCTAssertFalse(
-            library.statusMessage.contains("评分结果"),
-            "没有任何评分时不应提及评分结果：\(library.statusMessage)"
+        // 没有评分可清时不该弹确认框——那一问是为了保护已经付费的结果，
+        // 本来就没有结果时它只是挡路。改分类本身屏幕上看得见：
+        // 单类型视图里照片会从当前视图消失，"全部"视图里类型徽章会变。
+        XCTAssertNil(
+            library.pendingCurationCategoryChange,
+            "没有评分要清除时，改分类不该弹确认框"
         )
-        XCTAssertTrue(
-            library.statusMessage.contains(newCategory.title),
-            "至少要说清楚归到了哪一类：\(library.statusMessage)"
+        XCTAssertEqual(
+            library.photos.first(where: { $0.id == target.id })?.curationCategory,
+            newCategory,
+            "没有评分可清时应当直接改好"
         )
     }
 
     /// 确实存在评分时，仍然必须如实告知需要重新确认。
-    func testCategoryChangeWithScoresStillWarnsAboutReset() {
+    func testCategoryChangeWithScoresStillWarnsAboutReset() throws {
         let library = makeLibrary()
         library.startDemoMode()
         library.completeDemoAnalysisImmediately()
@@ -97,9 +101,41 @@ final class ScoringStateConsistencyTests: XCTestCase {
             target.curationCategory == .people ? .scenery : .people
         library.setCurationCategory(newCategory, for: target.id)
 
+        // 有评分会被清掉时，必须先问再动手——这些结果是花过钱的，而且改分类不进撤销栈。
+        let pending = try XCTUnwrap(
+            library.pendingCurationCategoryChange,
+            "有评分要清除时必须先确认"
+        )
+        XCTAssertEqual(pending.category, newCategory)
+        XCTAssertEqual(
+            library.photos.first(where: { $0.id == target.id })?.curationCategory,
+            target.curationCategory,
+            "确认之前不得改动任何东西"
+        )
+        XCTAssertFalse(
+            library.photos.first(where: { $0.id == target.id })?
+                .aestheticRecommendations.isEmpty ?? true,
+            "确认之前评分必须原样保留"
+        )
+
+        library.cancelPendingCurationCategoryChange()
+        XCTAssertNil(library.pendingCurationCategoryChange)
+        XCTAssertEqual(
+            library.photos.first(where: { $0.id == target.id })?.curationCategory,
+            target.curationCategory,
+            "取消之后同样什么都不该发生"
+        )
+
+        library.setCurationCategory(newCategory, for: target.id)
+        library.confirmPendingCurationCategoryChange()
+        XCTAssertEqual(
+            library.photos.first(where: { $0.id == target.id })?.curationCategory,
+            newCategory
+        )
         XCTAssertTrue(
-            library.statusMessage.contains("评分"),
-            "有评分被清除时必须说明：\(library.statusMessage)"
+            library.photos.first(where: { $0.id == target.id })?
+                .aestheticRecommendations.isEmpty ?? false,
+            "确认之后该照片的评分才被清除"
         )
     }
 

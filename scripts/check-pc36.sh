@@ -55,8 +55,8 @@ rg -q 'categoryOverridesByRelativePath' \
   Sources/PhotoCurator/ProjectPersistence.swift "$view_model" ||
   fail "人工分类纠正没有按相对路径持久化"
 
-rg -q 'static let version = "v3"' "$contract" ||
-  fail "评分契约没有升级到 v3"
+rg -q 'static let version = "v4"' "$contract" ||
+  fail "评分契约没有升级到 v4"
 rg -q 'let category: PhotoCurationCategory\?' "$contract" ||
   fail "评分 scope 缺少照片类型"
 rg -q '表情、姿态、互动' "$prompt" "$photo_item" ||
