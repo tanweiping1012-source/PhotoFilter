@@ -104,7 +104,7 @@ enum PhotoAnalysisPipeline {
                 nextIndex += 1
                 group.addTask {
                     guard !Task.isCancelled else { return nil }
-                    return analyze(url)
+                    return await analyzeOffCooperativePool(url)
                 }
             }
 
@@ -129,6 +129,41 @@ enum PhotoAnalysisPipeline {
 
         guard !Task.isCancelled, !pending.isEmpty else { return }
         await onBatch(pending)
+    }
+
+    /// 阻塞工作专用的队列。
+    ///
+    /// `analyze(_:)` 内部走 Vision 的 `performRequests`，那是个会**阻塞调用线程**的
+    /// 同步调用——挂死时的堆栈是
+    /// `VNImageRequestHandler.performRequests → VNControlledCapacityTasksQueue
+    /// .dispatchGroupWait → __ulock_wait`。
+    ///
+    /// 这种调用绝不能放进 Swift 并发的协作线程池：池子宽度约等于核心数，阻塞掉
+    /// 几个线程，整个池子就再也调度不动。而 `defaultLaneCount` 在低核数机器上
+    /// 反而会保底开 2 条（`max(2, ...)`），3 核机器上正好把池子按死——CI 就是这么
+    /// 连挂三次的（6h / 3h / 30m 超时），双核 Mac 同样会中招，而且没有任何超时
+    /// 能把用户救回来。
+    ///
+    /// 放到自己的并发队列上，Vision 再怎么阻塞，占的都是这个队列的线程；
+    /// 协作池只是在 continuation 上挂起，不占线程。
+    private static let analysisQueue = DispatchQueue(
+        label: "com.photocurator.analysis",
+        qos: .userInitiated,
+        attributes: .concurrent
+    )
+
+    /// 在专用队列上完成一张照片的阻塞分析，再桥回 async。
+    ///
+    /// 并发度仍由调用方的 `lanes` 决定：同一时刻只有 `lanes` 个任务在等这个
+    /// continuation，所以队列上也只会有 `lanes` 个线程在跑。
+    private nonisolated static func analyzeOffCooperativePool(
+        _ url: URL
+    ) async -> PhotoAnalysisResult {
+        await withCheckedContinuation { continuation in
+            analysisQueue.async {
+                continuation.resume(returning: analyze(url))
+            }
+        }
     }
 
     static var defaultLaneCount: Int {

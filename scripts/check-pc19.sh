@@ -137,6 +137,21 @@ sidebar_entry_count="$(
 # 现在覆盖整个 Sources：字阶定义文件自己除外，其余任何地方都不准裸写字号。
 # 确实需要跳出字阶的地方（大图总分、场景首页、等宽 model ID、图标尺寸）
 # 都在 Typography 里单独命名，例外因此是被声明出来的，而不是又一次裸写。
+# 阻塞调用不得跑在 Swift 并发的协作线程池里。
+#
+# analyze(_:) 走 Vision 的同步 performRequests，会阻塞调用线程。放进 TaskGroup
+# 的 addTask 就等于占住协作池的线程；池子宽度约等于核心数，3 核机器上
+# defaultLaneCount 保底 2 条，正好把池子按死。CI 因此连挂三次（6h / 3h / 30m），
+# 低核数的 Mac 同样会中招，而且没有超时能救。
+rg -q 'private static let analysisQueue' Sources/PhotoCurator/PhotoAnalysisPipeline.swift ||
+  fail "分析管线缺少专用阻塞队列，Vision 会占死协作线程池"
+add_task_body="$(
+  awk '/func addTask\(\)/,/^            \}$/' \
+    Sources/PhotoCurator/PhotoAnalysisPipeline.swift
+)"
+printf '%s' "$add_task_body" | rg -q 'await analyzeOffCooperativePool' ||
+  fail "TaskGroup 仍在协作线程池上直接跑阻塞分析"
+
 rg -q 'enum Typography' Sources/PhotoCurator/Typography.swift ||
   fail "缺少全 App 字阶定义"
 if rg -q 'font\(\.' Sources/PhotoCurator -g '!Typography.swift'; then
