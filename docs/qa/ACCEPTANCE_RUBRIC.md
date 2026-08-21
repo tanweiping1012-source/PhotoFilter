@@ -1,4 +1,4 @@
-# 旅行照片筛选器 v0.8.0 · 验收 Rubric
+# 旅行照片筛选器 v0.8.1 · 验收 Rubric
 
 给独立测试者（人或 Agent）的一份可执行验收清单。目标不是复述功能列表，而是
 **在真实使用中找出问题**。
@@ -34,16 +34,16 @@
 ### 1.2 下载
 
 ```
-https://github.com/tanweiping1012-source/PhotoFilter/releases/tag/v0.8.0
+https://github.com/tanweiping1012-source/PhotoFilter/releases/tag/v0.8.1
 ```
 
-文件：`TravelPhotoFilter-0.8.0-macOS-universal.dmg`
-SHA-256：`9ee794853dd4582a936bb17b6862836188a015d437bdb1980bd43f445e5f84b9`
+文件：`TravelPhotoFilter-0.8.1-macOS-universal.dmg`
+SHA-256：`d600424349961e7811fa5952bd70769b91d0b78ed0c0338060ef49b6b5ae8e0c`
 
 下载后先校验：
 
 ```bash
-shasum -a 256 ~/Downloads/TravelPhotoFilter-0.8.0-macOS-universal.dmg
+shasum -a 256 ~/Downloads/TravelPhotoFilter-0.8.1-macOS-universal.dmg
 ```
 
 **校验不通过就停止测试并报告。**
@@ -207,6 +207,22 @@ rm -rf ~/Library/Containers/com.photocurator.local
 ---
 
 ## 4. 已知问题（**不要重复报告**）
+
+### 4.0 v0.8.1 修掉了什么（请重点复验）
+
+**停止后重新开始不再重发已评分照片。** v0.8.0 里，18 张候选跑到 `1/18` 时点"停止"，
+再点开始会把已经评过、已经付过费的第一张重新发送一遍。现在：
+
+- 按钮改说"继续人物 AI评分（还剩 17 张）"，发送确认框也只说 17 张，并注明
+  已评分的那张不会重新发送、不会再次计费。
+- 进度从 `1/18` 接着走，不回到 `0/17`；token 用量接着累加。
+- 整轮结束时仍对**全部 18 张**排名次——停止前和继续之后的分数合并后一起排。
+- 换过模型或预览尺寸的旧分数不复用，整池重评（两套标准的分数不能排进同一个名次）。
+- 候选全部评完后开始按钮置灰，不会再拿同一批照片花第二次钱。
+
+请复验：停止 → 继续，第一张是否只被发送过一次；最终名次是否覆盖全部候选。
+
+---
 
 以下已知且已被接受或排期，报告它们只会淹没真正的发现：
 
