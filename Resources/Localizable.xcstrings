@@ -207,6 +207,17 @@
         }
       }
     },
+    "%@的候选照片都已评分，先逐张看过并采纳。": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Every %@ candidate has been scored. Review them and accept first."
+          }
+        }
+      }
+    },
     "%@的照片都已保留或淘汰，没有需要评分的照片。": {
       "extractionState": "manual",
       "localizations": {
@@ -2168,6 +2179,17 @@
         }
       }
     },
+    "已完成全部 %lld 步": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All %lld steps complete"
+          }
+        }
+      }
+    },
     "已将 %1$@ 归为%2$@。": {
       "extractionState": "manual",
       "localizations": {
@@ -2237,6 +2259,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "An AI scoring task is already running."
+          }
+        }
+      }
+    },
+    "已经评过分的 %lld 张不会重新发送，也不会再次计费。": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The %lld already scored will not be resent and will not be billed again."
           }
         }
       }
@@ -3929,16 +3962,6 @@
         }
       }
     },
-    "第一次筛选已完成": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "First Curation Complete"
-          }
-        }
-      }
-    },
     "第三方处理方": {
       "localizations": {
         "en": {
@@ -3995,6 +4018,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Resume"
+          }
+        }
+      }
+    },
+    "继续%1$@ AI评分（还剩 %2$lld 张）": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Continue %1$@ AI Scoring (%2$lld left)"
           }
         }
       }

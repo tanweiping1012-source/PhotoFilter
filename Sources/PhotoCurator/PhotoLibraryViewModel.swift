@@ -136,12 +136,16 @@ final class PhotoLibraryViewModel: ObservableObject {
     /// 被供应商限流后临时抬高的请求间隔；一轮任务结束或成功若干次后回落到基础间隔。
     private var adaptiveReviewInterval = AIReviewConfiguration.minimumReviewInterval
     private var aiFinalSelectionRunContext: AIFinalSelectionRunContext?
+    /// 产生当前这批候选分数的模型与预览尺寸。分数存在照片自己身上，这个来源标记与它们同生共死。
+    private var aiFinalSelectionScoreOriginByCategory:
+        [PhotoCurationCategory: AIFinalSelectionScoreOrigin] = [:]
     private var aiFinalSelectionRunTask: Task<Void, Never>?
     private var aiFinalSelectionRunTaskID: UUID?
     private var pendingAIFinalSelectionModelSnapshot: AIModelDescriptor?
     private var pendingAIFinalSelectionPreviewSizeSnapshot: AIReviewPreviewSize?
     private var pendingAIFinalSelectionCategorySnapshot:
         PhotoCurationCategory?
+    private var pendingAIFinalSelectionResumedScoreCountSnapshot = 0
     private var demoModeSession: DemoModeSession?
     private var demoAIScoringTask: Task<Void, Never>?
     private var demoAnalysisTask: Task<Void, Never>?
@@ -174,6 +178,11 @@ final class PhotoLibraryViewModel: ObservableObject {
         let aiFinalSelectionRunProgress: AIFinalSelectionRunProgress
         let aiFinalSelectionRunProgressByCategory:
             [PhotoCurationCategory: AIFinalSelectionRunProgress]
+        /// 分数来源必须跟着项目走。它是按类型存的，而项目之间共用"人物/风景"这两个键——
+        /// 作为全局单值时，在另一个项目里换模型评一轮，切回来就会把这里的旧分数
+        /// 当成新模型的结果复用。
+        let aiFinalSelectionScoreOriginByCategory:
+            [PhotoCurationCategory: AIFinalSelectionScoreOrigin]
     }
 
     private struct AIFinalSelectionRunContext {
@@ -184,8 +193,26 @@ final class PhotoLibraryViewModel: ObservableObject {
         let category: PhotoCurationCategory
         let lockedKeeperPhotoIDs: [String]
         let targetSelectionCount: Int
+        /// 本轮开始前就已经评过分、也就是已经付过费的候选。
+        /// 它们不在 `plan` 里，本轮不会被再次发送，只在最后统一排序时并回来。
+        let resumedScores: [AIFinalSelectionScore]
         var nextBatchIndex = 0
         var scoredCandidates: [AIFinalSelectionScore] = []
+
+        /// 进度条的分母是整个候选池，不是本轮剩下的那一段——
+        /// 停止在 1/18 之后继续，用户要看到的是 1/18 接着往下走，而不是重新从 0/17 开始。
+        var totalPhotoCount: Int {
+            plan.candidatePhotoCount + resumedScores.count
+        }
+
+        /// 参与最终排序与最终选择的全部候选。
+        var rankedPhotoIDs: Set<String> {
+            plan.coveredPhotoIDs.union(resumedScores.map(\.photoID))
+        }
+
+        var allScores: [AIFinalSelectionScore] {
+            resumedScores + scoredCandidates
+        }
     }
 
     init(
@@ -533,7 +560,12 @@ final class PhotoLibraryViewModel: ObservableObject {
               ) else {
             return nil
         }
-        return photoRangeLabel(range)
+        // 计划里的序号是"本轮第几张"，用户看到的进度是"候选池第几张"。
+        // 继续评分时两者相差已复用的张数，不补上就会指着第 2 张说"第 1 张失败了"。
+        let offset = context.resumedScores.count
+        return photoRangeLabel(
+            (range.lowerBound + offset)...(range.upperBound + offset)
+        )
     }
 
     var analysisProgress: Double {
@@ -680,10 +712,62 @@ final class PhotoLibraryViewModel: ObservableObject {
             return nil
         }
         return try? AIFinalSelectionRunPlanner.makePlan(
-            candidateLocalPhotoIDs: candidatePlan.localPhotoIDs,
+            candidateLocalPhotoIDs: unscoredCandidatePhotoIDs(
+                for: category,
+                in: candidatePlan
+            ),
             targetWinnerCount: candidatePlan.remainingSelectionCount,
             category: category
         )
+    }
+
+    /// 候选池里已经评过分、可以直接复用的照片。
+    ///
+    /// 分数存在照片自己身上，停止、失败、切走再切回来都不会丢，所以"继续评分"不需要
+    /// 另外维护一份检查点：把已经有分的照片从本轮要发送的名单里去掉就够了。
+    /// 重发一张已经付过费的照片，既多收一次钱，又给同一张照片换了一个分数。
+    func reusableAIFinalSelectionScores(
+        for category: PhotoCurationCategory,
+        within candidatePhotoIDs: Set<String>
+    ) -> [AIFinalSelectionScore] {
+        guard !candidatePhotoIDs.isEmpty,
+              aiFinalSelectionScoreOriginByCategory[category]
+                == AIFinalSelectionScoreOrigin(
+                    modelID: selectedAIModelID,
+                    previewSize: selectedAIPreviewSize
+                ) else {
+            return []
+        }
+        return photos.compactMap { photo in
+            guard candidatePhotoIDs.contains(photo.id),
+                  let recommendation = photo.aestheticRecommendations.last(
+                      where: {
+                          $0.scope.kind == .finalSelection
+                              && $0.scope.category == category
+                      }
+                  ) else {
+                return nil
+            }
+            return AIFinalSelectionScore(
+                photoID: photo.id,
+                dimensions: recommendation.dimensions
+            )
+        }
+    }
+
+    /// 本轮真正需要发送的候选：候选池减去已经评过分的那些。
+    private func unscoredCandidatePhotoIDs(
+        for category: PhotoCurationCategory,
+        in candidatePlan: LocalAestheticCandidatePlan
+    ) -> [String] {
+        let reusableIDs = Set(
+            reusableAIFinalSelectionScores(
+                for: category,
+                within: candidatePlan.localPhotoIDSet
+            ).map(\.photoID)
+        )
+        guard !reusableIDs.isEmpty else { return candidatePlan.localPhotoIDs }
+        return candidatePlan.localPhotoIDs.filter { !reusableIDs.contains($0) }
     }
 
     /// AI评分入口的可用性与不可用原因。
@@ -692,7 +776,10 @@ final class PhotoLibraryViewModel: ObservableObject {
     /// 不能开始时按钮置灰，并在下方给出可执行的原因。
     struct AIFinalSelectionAvailability {
         let canStart: Bool
+        /// 本轮会发送、也就是会计费的张数。已经评过分的候选不算在内。
         let candidatePhotoCount: Int
+        /// 候选池里已经评过分、本轮不会再发送的张数。大于 0 时按钮说的是"继续"。
+        let alreadyScoredPhotoCount: Int
         /// 不能开始时的说明；能开始时为 nil。
         let blockedReason: String?
     }
@@ -700,12 +787,24 @@ final class PhotoLibraryViewModel: ObservableObject {
     func aiFinalSelectionAvailability(
         for category: PhotoCurationCategory
     ) -> AIFinalSelectionAvailability {
-        let candidateCount = localAestheticCandidatePlan(for: category)?.candidateCount ?? 0
+        let plannedCandidates = localAestheticCandidatePlan(for: category)
+        // 按钮上的张数是"这次要发送多少张"，所以必须先扣掉已经付过费的那些。
+        let alreadyScoredCount = plannedCandidates.map {
+            reusableAIFinalSelectionScores(
+                for: category,
+                within: $0.localPhotoIDSet
+            ).count
+        } ?? 0
+        let candidateCount = max(
+            0,
+            (plannedCandidates?.candidateCount ?? 0) - alreadyScoredCount
+        )
 
         func blocked(_ reason: String) -> AIFinalSelectionAvailability {
             AIFinalSelectionAvailability(
                 canStart: false,
                 candidatePhotoCount: candidateCount,
+                alreadyScoredPhotoCount: alreadyScoredCount,
                 blockedReason: reason
             )
         }
@@ -716,6 +815,7 @@ final class PhotoLibraryViewModel: ObservableObject {
             AIFinalSelectionAvailability(
                 canStart: false,
                 candidatePhotoCount: candidateCount,
+                alreadyScoredPhotoCount: alreadyScoredCount,
                 blockedReason: nil
             )
         }
@@ -730,6 +830,7 @@ final class PhotoLibraryViewModel: ObservableObject {
             return AIFinalSelectionAvailability(
                 canStart: true,
                 candidatePhotoCount: demoCandidatePhotoCount(for: category),
+                alreadyScoredPhotoCount: 0,
                 blockedReason: nil
             )
         }
@@ -769,9 +870,27 @@ final class PhotoLibraryViewModel: ObservableObject {
             return blockedWithoutExplanation()
         }
 
+        let unscoredPhotoIDs = unscoredCandidatePhotoIDs(
+            for: category,
+            in: candidatePlan
+        )
+        guard !unscoredPhotoIDs.isEmpty else {
+            // 候选都已经有分了。这一刻该做的是看结果、采纳，而不是花钱把同一批照片再评一遍。
+            //
+            // 刚跑完的那一类不再重复解释：完成回执已经说了去哪儿看、怎么采纳，
+            // 按钮上的"（0 张）"也已经把结论说完。但分类被改动过之后，
+            // 这一类的运行状态会被清空而分数还在，那时按钮为什么是灰的就只剩这句话能回答。
+            guard aiFinalSelectionRunProgress(for: category).phase != .completed else {
+                return blockedWithoutExplanation()
+            }
+            return blocked(
+                String(localized: "\(category.title)的候选照片都已评分，先逐张看过并采纳。")
+            )
+        }
+
         do {
             _ = try AIFinalSelectionRunPlanner.makePlan(
-                candidateLocalPhotoIDs: candidatePlan.localPhotoIDs,
+                candidateLocalPhotoIDs: unscoredPhotoIDs,
                 targetWinnerCount: remaining,
                 category: category
             )
@@ -781,7 +900,8 @@ final class PhotoLibraryViewModel: ObservableObject {
 
         return AIFinalSelectionAvailability(
             canStart: true,
-            candidatePhotoCount: candidatePlan.candidateCount,
+            candidatePhotoCount: unscoredPhotoIDs.count,
+            alreadyScoredPhotoCount: alreadyScoredCount,
             blockedReason: nil
         )
     }
@@ -874,6 +994,11 @@ final class PhotoLibraryViewModel: ObservableObject {
         pendingAIFinalSelectionPreviewSizeSnapshot ?? selectedAIPreviewSize
     }
 
+    /// 这一轮不会重发、也就不会再次计费的张数。确认弹窗用它说明"哪些不花钱"。
+    var pendingAIFinalSelectionResumedScoreCount: Int {
+        pendingAIFinalSelectionResumedScoreCountSnapshot
+    }
+
     var remainingAestheticReviewCooldown: Int {
         guard let lastAestheticReviewAt else { return 0 }
         let remaining = adaptiveReviewInterval - Date().timeIntervalSince(lastAestheticReviewAt)
@@ -944,6 +1069,7 @@ final class PhotoLibraryViewModel: ObservableObject {
         selectedPhotoID = session.startingPhotos.first?.id
         selectionTargets = session.selectionTargets
         aiFinalSelectionPhotoIDsByCategory = [:]
+        aiFinalSelectionScoreOriginByCategory = [:]
         aiFinalSelectionRunProgressByCategory = [:]
         aiFinalSelectionRunProgress = AIFinalSelectionRunProgress(
             totalBatchCount: session.runProgress.totalBatchCount,
@@ -1465,6 +1591,7 @@ final class PhotoLibraryViewModel: ObservableObject {
         pendingAIFinalSelectionRunPlan = nil
         pendingAIFinalSelectionModelSnapshot = nil
         pendingAIFinalSelectionPreviewSizeSnapshot = nil
+        pendingAIFinalSelectionResumedScoreCountSnapshot = 0
         showAIFinalSelectionRunConfirmation = false
         aiFinalSelectionRunProgress = AIFinalSelectionRunProgress()
         aiFinalSelectionRunProgressByCategory = [:]
@@ -1477,6 +1604,7 @@ final class PhotoLibraryViewModel: ObservableObject {
         selectedFolder = folder.standardizedFileURL
         replacePhotos([])
         aiFinalSelectionPhotoIDsByCategory = [:]
+        aiFinalSelectionScoreOriginByCategory = [:]
         selectedPhotoID = nil
         undoStack = []
         isScanning = true
@@ -1719,10 +1847,14 @@ final class PhotoLibraryViewModel: ObservableObject {
     }
 
     /// 未来的云端适配器调用此入口。它会在主线程再次校验契约，且永远不覆盖人工 keep/reject。
+    ///
+    /// 分数和它的来源必须在同一步写入。只要还剩一条"能写分数但不记来源"的路径，
+    /// "继续评分"就可能把两套标准的分数排进同一个名次里。
     func applyAestheticReview(
         _ response: AestheticReviewResponse,
         for request: AestheticReviewRequest,
-        localPhotoIDs: [String]
+        localPhotoIDs: [String],
+        origin: AIFinalSelectionScoreOrigin
     ) throws {
         let updated = try AestheticReviewApplier.applying(
             response,
@@ -1731,6 +1863,10 @@ final class PhotoLibraryViewModel: ObservableObject {
             to: photos
         )
         replacePhotos(updated)
+        if request.scope.kind == .finalSelection,
+           let category = request.scope.category {
+            aiFinalSelectionScoreOriginByCategory[category] = origin
+        }
     }
 
     func refreshAIConfiguration() {
@@ -1776,6 +1912,13 @@ final class PhotoLibraryViewModel: ObservableObject {
         guard let plan = aiFinalSelectionRunPlan(for: category) else {
             return
         }
+        pendingAIFinalSelectionResumedScoreCountSnapshot =
+            reusableAIFinalSelectionScores(
+                for: category,
+                within: (localAestheticCandidatePlan(for: category)?
+                    .localPhotoIDSet ?? [])
+                    .subtracting(plan.coveredPhotoIDs)
+            ).count
         pendingAIFinalSelectionRunPlan = plan
         pendingAIFinalSelectionModelSnapshot = selectedAIModel
         pendingAIFinalSelectionPreviewSizeSnapshot = selectedAIPreviewSize
@@ -1805,6 +1948,7 @@ final class PhotoLibraryViewModel: ObservableObject {
         ) else {
             return
         }
+        pendingAIFinalSelectionResumedScoreCountSnapshot = 0
         pendingAIFinalSelectionRunPlan = plan
         pendingAIFinalSelectionModelSnapshot = selectedAIModel
         pendingAIFinalSelectionPreviewSizeSnapshot = selectedAIPreviewSize
@@ -1827,6 +1971,7 @@ final class PhotoLibraryViewModel: ObservableObject {
         pendingAIFinalSelectionModelSnapshot = nil
         pendingAIFinalSelectionPreviewSizeSnapshot = nil
         pendingAIFinalSelectionCategorySnapshot = nil
+        pendingAIFinalSelectionResumedScoreCountSnapshot = 0
         if isDemoModeActive {
             startDemoAIScoring(for: category)
             return
@@ -1835,17 +1980,41 @@ final class PhotoLibraryViewModel: ObservableObject {
         guard let apiKey = readAPIKeyForReview(model: model) else { return }
 
         completionNotice = nil
+        // 候选池里已经评过分的那些不在 `plan` 里，也不会被下面的清除碰到：
+        // 用户为它们付过的钱一直有效，直到他自己改类型、改决定或换模型。
+        let candidatePlan = localAestheticCandidatePlan(for: category)
+        let resumedScores = reusableAIFinalSelectionScores(
+            for: category,
+            within: (candidatePlan?.localPhotoIDSet ?? [])
+                .subtracting(plan.coveredPhotoIDs)
+        )
+        let totalCandidatePhotoCount =
+            plan.candidatePhotoCount + resumedScores.count
         // 用量文案说的是"本轮"。不在这里清掉的话，新任务 0/N 期间会继续显示
         // 上一类的数字，等第一批返回再被本轮小计覆盖——看上去像是用量倒退了。
-        latestAIUsageMessage = nil
+        // 但"继续评分"是同一轮的后半段，之前那几张已经花掉的 token 必须接着累加，
+        // 否则账面上会比实际花的少。
+        let carriedProgress = resumedScores.isEmpty
+            ? nil
+            : aiFinalSelectionRunProgressByCategory[category]
+        latestAIUsageMessage = carriedProgress?.usageSummary
         aiFinalSelectionPhotoIDsByCategory[category] = []
         let candidatePhotoIDs = plan.coveredPhotoIDs
+        var didClearAnyScore = false
         for index in photos.indices
         where candidatePhotoIDs.contains(photos[index].id) {
+            let before = photos[index].aestheticRecommendations.count
             photos[index].aestheticRecommendations.removeAll {
                 $0.scope.kind == .finalSelection
                     && $0.scope.category == category
             }
+            didClearAnyScore = didClearAnyScore
+                || photos[index].aestheticRecommendations.count != before
+        }
+        // 换过模型时这里是真的会清掉分数（不换模型的话待发送名单里本来就没有分数）。
+        // "待评分"集合是按有没有分数算的，清完不作废缓存，侧栏会短暂少数几张。
+        if didClearAnyScore {
+            invalidateCandidatePlans()
         }
         aiFinalSelectionRunContext = AIFinalSelectionRunContext(
             runID: UUID(),
@@ -1854,17 +2023,22 @@ final class PhotoLibraryViewModel: ObservableObject {
             previewSize: previewSize,
             category: category,
             lockedKeeperPhotoIDs: keepers(in: category).map(\.id),
-            targetSelectionCount: selectionTargets[category]
+            targetSelectionCount: selectionTargets[category],
+            resumedScores: resumedScores
         )
         aiFinalSelectionRunProgress = AIFinalSelectionRunProgress(
             phase: .running,
             completedBatchCount: 0,
             totalBatchCount: plan.requestCount,
-            completedPhotoCount: 0,
-            candidatePhotoCount: plan.candidatePhotoCount,
-            targetWinnerCount: plan.targetWinnerCount,
-            inputTokens: 0,
-            outputTokens: 0,
+            completedPhotoCount: resumedScores.count,
+            candidatePhotoCount: totalCandidatePhotoCount,
+            targetWinnerCount: min(
+                candidatePlan?.remainingSelectionCount
+                    ?? plan.targetWinnerCount,
+                totalCandidatePhotoCount
+            ),
+            inputTokens: carriedProgress?.inputTokens ?? 0,
+            outputTokens: carriedProgress?.outputTokens ?? 0,
             waitingSeconds: 0,
             failureMessage: nil
         )
@@ -1985,7 +2159,11 @@ final class PhotoLibraryViewModel: ObservableObject {
                 try applyAestheticReview(
                     result.response,
                     for: request,
-                    localPhotoIDs: group.localPhotoIDs
+                    localPhotoIDs: group.localPhotoIDs,
+                    origin: AIFinalSelectionScoreOrigin(
+                        modelID: context.model.id,
+                        previewSize: context.previewSize
+                    )
                 )
                 let scoredPhotos = try AIFinalSelectionRunValidator.scoredPhotos(
                     from: result.response,
@@ -2005,7 +2183,7 @@ final class PhotoLibraryViewModel: ObservableObject {
                 aiFinalSelectionRunContext = updatedContext
                 aiFinalSelectionRunProgress.completedBatchCount = updatedContext.nextBatchIndex
                 aiFinalSelectionRunProgress.completedPhotoCount =
-                    photoRange.upperBound
+                    updatedContext.resumedScores.count + photoRange.upperBound
                 aiFinalSelectionRunProgress.inputTokens += result.usage.inputTokens ?? 0
                 aiFinalSelectionRunProgress.outputTokens += result.usage.outputTokens ?? 0
                 latestAIUsageMessage = aiFinalSelectionRunProgress.usageSummary
@@ -2123,16 +2301,17 @@ final class PhotoLibraryViewModel: ObservableObject {
               context.runID == runID else {
             throw CancellationError()
         }
+        // 排序的全集是整个候选池：本轮新评的，加上停止前就已经评过、这次没有重发的那些。
         let rankedCandidatePhotoIDs =
             try AIFinalSelectionRunValidator.rankedCandidatePhotoIDs(
-                scores: context.scoredCandidates,
-                candidatePhotoIDs: context.plan.coveredPhotoIDs,
+                scores: context.allScores,
+                candidatePhotoIDs: context.rankedPhotoIDs,
                 weights: aestheticScoreWeights
             )
         let finalSelectionPhotoIDs = try AIFinalSelectionRunValidator.finalSelectionIDs(
             rankedCandidatePhotoIDs: rankedCandidatePhotoIDs,
             lockedKeeperPhotoIDs: context.lockedKeeperPhotoIDs,
-            candidatePhotoIDs: context.plan.coveredPhotoIDs,
+            candidatePhotoIDs: context.rankedPhotoIDs,
             targetSelectionCount: context.targetSelectionCount
         )
         // 计划阶段已经保证每个相似家族只出一个代表，走到这里还冲突说明是内部错误。
@@ -2152,7 +2331,7 @@ final class PhotoLibraryViewModel: ObservableObject {
         aiFinalSelectionRunProgress.phase = .completed
         aiFinalSelectionRunProgress.activity = nil
         aiFinalSelectionRunProgress.completedPhotoCount =
-            context.plan.candidatePhotoCount
+            context.totalPhotoCount
         aiFinalSelectionRunProgress.waitingSeconds = 0
         aiFinalSelectionRunProgressByCategory[context.category] =
             aiFinalSelectionRunProgress
@@ -2167,11 +2346,11 @@ final class PhotoLibraryViewModel: ObservableObject {
             message: conflicts.isEmpty
                 ? String(
                     localized:
-                        "\(context.plan.candidatePhotoCount) 张已按分数排序，AI 推荐保留其中 \(acceptedPhotoIDs.count) 张。逐张看过后，用底部的“采纳”确认。"
+                        "\(context.totalPhotoCount) 张已按分数排序，AI 推荐保留其中 \(acceptedPhotoIDs.count) 张。逐张看过后，用底部的“采纳”确认。"
                 )
                 : String(
                     localized:
-                        "\(context.plan.candidatePhotoCount) 张已按分数排序，AI 推荐保留其中 \(acceptedPhotoIDs.count) 张；\(conflicts.count) 张同场景重复已顺延。逐张看过后，用底部的“采纳”确认。"
+                        "\(context.totalPhotoCount) 张已按分数排序，AI 推荐保留其中 \(acceptedPhotoIDs.count) 张；\(conflicts.count) 张同场景重复已顺延。逐张看过后，用底部的“采纳”确认。"
                 )
         )
     }
@@ -2410,7 +2589,9 @@ final class PhotoLibraryViewModel: ObservableObject {
                 aiFinalSelectionPhotoIDsByCategory,
             aiFinalSelectionRunProgress: aiFinalSelectionRunProgress,
             aiFinalSelectionRunProgressByCategory:
-                aiFinalSelectionRunProgressByCategory
+                aiFinalSelectionRunProgressByCategory,
+            aiFinalSelectionScoreOriginByCategory:
+                aiFinalSelectionScoreOriginByCategory
         )
     }
 
@@ -2428,6 +2609,8 @@ final class PhotoLibraryViewModel: ObservableObject {
         aiFinalSelectionRunProgress = snapshot.aiFinalSelectionRunProgress
         aiFinalSelectionRunProgressByCategory =
             snapshot.aiFinalSelectionRunProgressByCategory
+        aiFinalSelectionScoreOriginByCategory =
+            snapshot.aiFinalSelectionScoreOriginByCategory
         isScanning = false
         isAnalyzing = false
         isGroupingCandidates = false
@@ -2465,6 +2648,7 @@ final class PhotoLibraryViewModel: ObservableObject {
         pendingAIFinalSelectionModelSnapshot = nil
         pendingAIFinalSelectionPreviewSizeSnapshot = nil
         pendingAIFinalSelectionCategorySnapshot = nil
+        pendingAIFinalSelectionResumedScoreCountSnapshot = 0
         showAIFinalSelectionRunConfirmation = false
         isRunningDemoAIScoring = false
     }
@@ -2476,6 +2660,7 @@ final class PhotoLibraryViewModel: ObservableObject {
         curationScope = .all
         selectionTargets = .default
         aiFinalSelectionPhotoIDsByCategory = [:]
+        aiFinalSelectionScoreOriginByCategory = [:]
         aiFinalSelectionRunProgress = AIFinalSelectionRunProgress()
         aiFinalSelectionRunProgressByCategory = [:]
         firstCurationGuideStep = nil

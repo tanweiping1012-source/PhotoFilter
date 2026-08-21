@@ -68,7 +68,9 @@ enum FirstCurationGuideStep: Int, CaseIterable, Identifiable {
         case .switchSceneryAndScore: String(localized: "切换到风景并评分")
         case .acceptSceneryResults: String(localized: "采纳风景结果")
         case .exportCopies: String(localized: "导出保留照片的副本")
-        case .completed: String(localized: "第一次筛选已完成")
+        // 完成态不再重复流程的名字。任务条上"第一次筛选"这句话已经删掉了，
+        // 标题里再写一遍就是同一句话说两次，而用户此刻要看的是"走完了几步"。
+        case .completed: String(localized: "已完成全部 \(Self.taskCount) 步")
         }
     }
 

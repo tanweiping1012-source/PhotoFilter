@@ -637,8 +637,19 @@ struct ContentView: View {
     @ViewBuilder
     private func aiStartControl(for category: PhotoCurationCategory) -> some View {
         let availability = library.aiFinalSelectionAvailability(for: category)
+        // 停止之后按钮说"继续"而不是"开始"，张数也只算这次要发送的：
+        // 说"开始（18 张）"就是在告诉用户他要为已经付过费的那张再付一次。
+        let startTitle = availability.alreadyScoredPhotoCount > 0
+            ? String(
+                localized:
+                    "继续\(category.title) AI评分（还剩 \(availability.candidatePhotoCount) 张）"
+            )
+            : String(
+                localized:
+                    "开始\(category.title) AI评分（\(availability.candidatePhotoCount) 张）"
+            )
         VStack(alignment: .leading, spacing: 3) {
-            Button("开始\(category.title) AI评分（\(availability.candidatePhotoCount) 张）") {
+            Button(startTitle) {
                 library.prepareAIFinalSelectionRun(for: category)
             }
             .disabled(!availability.canStart)
@@ -1302,9 +1313,15 @@ struct ContentView: View {
                     "离线示例：用内置结果为 \(plan.candidatePhotoCount) 张\(library.pendingAIFinalSelectionCategory.title)照片打分，不联网、不读取 Keychain、不消耗额度。"
             )
         }
-        return String(
+        let base = String(
             localized:
                 "将使用\(library.pendingAIFinalSelectionModel.apiModelID)为 \(plan.candidatePhotoCount) 张\(library.pendingAIFinalSelectionCategory.title)照片打分。"
+        )
+        // 这是花钱前的最后一次确认，所以必须写清"哪些不会再花钱"。
+        let resumedCount = library.pendingAIFinalSelectionResumedScoreCount
+        guard resumedCount > 0 else { return base }
+        return base + String(
+            localized: "已经评过分的 \(resumedCount) 张不会重新发送，也不会再次计费。"
         )
     }
 

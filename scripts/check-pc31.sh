@@ -23,8 +23,11 @@ rg -q 'Double\(completedPhotoCount\) / Double\(candidatePhotoCount\)' \
 rg -q 'func photoRange\(forGroupAt index: Int\)' "$progress" ||
   fail "计划无法把内部请求映射为照片范围"
 
-rg -Uq 'completedPhotoCount =\s+photoRange\.upperBound' "$view_model" ||
-  fail "通过校验后没有累计照片进度"
+# 进度的分母是整个候选池，分子也必须是"候选池里第几张"：
+# 停止后继续时本轮计划只剩后半段，直接用计划内的序号会让 1/18 退回 0/17。
+rg -Uq 'completedPhotoCount =\s+updatedContext\.resumedScores\.count \+ photoRange\.upperBound' \
+  "$view_model" ||
+  fail "通过校验后没有按整个候选池累计照片进度"
 rg -q 'failedAIFinalSelectionPhotoRangeLabel' "$view_model" "$content" ||
   fail "失败恢复没有显示照片范围"
 rg -q 'demoAIScoringCompletedPhotoCount' "$view_model" "$preview" ||
@@ -119,14 +122,23 @@ demo_notice_cleared="$(
 [[ "${demo_notice_cleared:-0}" -ge 1 ]] ||
   fail "进入示例筛选时没有清空上一个项目的完成回执"
 
-# 用量文案只代表本轮。不在任务开始时清掉旧文案的话，新任务 0/N 期间会继续显示
+# 用量文案只代表本轮。不在任务开始时处理旧文案的话，新任务 0/N 期间会继续显示
 # 上一类的数字，等第一批返回再被本轮小计覆盖——用户看到的就是一次用量倒退。
-run_start_cleared="$(
+# 但"停止后继续"是同一轮的后半段：停止前已经花掉的 token 必须接着累加，
+# 否则账面比实际花的少。所以这里写成"从本类型自己的进度里接过来"，
+# 全新一轮时它本来就是 nil，等价于清空。
+run_start_usage="$(
   awk '/func submitConfirmedAIFinalSelectionRun/,/aiFinalSelectionRunContext = AIFinalSelectionRunContext/' \
-    "$view_model" | rg -c 'latestAIUsageMessage = nil' || true
+    "$view_model" | rg -c 'latestAIUsageMessage = carriedProgress\?\.usageSummary' || true
 )"
-[[ "${run_start_cleared:-0}" == "1" ]] ||
-  fail "新的 AI 任务开始时没有清空上一轮用量文案"
+[[ "${run_start_usage:-0}" == "1" ]] ||
+  fail "新的 AI 任务开始时没有接管上一轮用量文案"
+carried_usage_source="$(
+  awk '/func submitConfirmedAIFinalSelectionRun/,/aiFinalSelectionRunContext = AIFinalSelectionRunContext/' \
+    "$view_model" | rg -c 'aiFinalSelectionRunProgressByCategory\[category\]' || true
+)"
+[[ "${carried_usage_source:-0}" == "1" ]] ||
+  fail "继续评分时没有接续本类型自己的用量，费用会记少"
 rg -q '本轮：输入' "$progress" ||
   fail "用量文案没有说明这是本轮用量"
 if rg -q '累计：输入' "$progress"; then

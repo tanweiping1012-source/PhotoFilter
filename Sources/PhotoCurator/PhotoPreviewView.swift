@@ -374,10 +374,12 @@ struct FirstCurationGuideBar: View {
                     .frame(width: 28, height: 28)
 
                 VStack(alignment: .leading, spacing: 3) {
-                    HStack(spacing: 7) {
-                        Text("第一次筛选")
-                            .font(Typography.detailEmphasis)
-                            .foregroundStyle(.secondary)
+                    // 进度紧跟着这一步的标题。此前它单独占一行，前面还顶着一句
+                    // "第一次筛选"——那句话每一步都一样，既不告诉用户现在该做什么，
+                    // 也不告诉他走到哪儿了，只是把真正的标题往下压了一行。
+                    HStack(alignment: .firstTextBaseline, spacing: 8) {
+                        Text(step.title)
+                            .font(Typography.rowLabelActive)
                         if step != .completed {
                             Text(
                                 "\(step.taskPosition) / \(FirstCurationGuideStep.taskCount)"
@@ -386,8 +388,6 @@ struct FirstCurationGuideBar: View {
                             .foregroundStyle(Color.accentColor)
                         }
                     }
-                    Text(step.title)
-                        .font(Typography.rowLabelActive)
                     if !compact {
                         Text(step.detail)
                             .font(Typography.detail)

@@ -143,6 +143,16 @@ struct AIFinalSelectionScore: Equatable {
     let dimensions: AestheticScoreDimensions
 }
 
+/// 产生某一类候选分数的模型与预览尺寸。
+///
+/// "停止后继续"复用的是已经付过费的旧分数，前提是它们和新分数出自同一套标准。
+/// 换过模型或预览尺寸就不能再复用：把两套标准的分数排进同一个名次里，
+/// 省下的钱会变成一个错误的排序。这时整池重评才是对的。
+struct AIFinalSelectionScoreOrigin: Equatable {
+    let modelID: AIModelID
+    let previewSize: AIReviewPreviewSize
+}
+
 enum AestheticScoreRanking {
     static func precedes(
         dimensions lhs: AestheticScoreDimensions,
