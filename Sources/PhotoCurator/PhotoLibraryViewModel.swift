@@ -738,9 +738,12 @@ final class PhotoLibraryViewModel: ObservableObject {
                 ) else {
             return []
         }
-        return photos.compactMap { photo in
-            guard candidatePhotoIDs.contains(photo.id),
-                  let recommendation = photo.aestheticRecommendations.last(
+        // 遍历候选（最多 240 张）而不是整个照片数组：这个方法在侧栏每次刷新时都会被读到，
+        // 而真实项目动辄几百上千张。排序只为可复现——集合的迭代顺序每次运行都可能不同，
+        // 而这里的输出会直接进入最终排名。
+        return candidatePhotoIDs.sorted().compactMap { photoID in
+            guard let index = photoIndex(for: photoID),
+                  let recommendation = photos[index].aestheticRecommendations.last(
                       where: {
                           $0.scope.kind == .finalSelection
                               && $0.scope.category == category
@@ -749,7 +752,7 @@ final class PhotoLibraryViewModel: ObservableObject {
                 return nil
             }
             return AIFinalSelectionScore(
-                photoID: photo.id,
+                photoID: photoID,
                 dimensions: recommendation.dimensions
             )
         }
@@ -787,17 +790,16 @@ final class PhotoLibraryViewModel: ObservableObject {
     func aiFinalSelectionAvailability(
         for category: PhotoCurationCategory
     ) -> AIFinalSelectionAvailability {
-        let plannedCandidates = localAestheticCandidatePlan(for: category)
         // 按钮上的张数是"这次要发送多少张"，所以必须先扣掉已经付过费的那些。
-        let alreadyScoredCount = plannedCandidates.map {
-            reusableAIFinalSelectionScores(
-                for: category,
-                within: $0.localPhotoIDSet
-            ).count
-        } ?? 0
-        let candidateCount = max(
+        // 这个减法整个方法只做一次：侧栏每次刷新都会走到这里，人物和风景各一遍。
+        let plannedCandidates = localAestheticCandidatePlan(for: category)
+        let unscoredPhotoIDs = plannedCandidates.map {
+            unscoredCandidatePhotoIDs(for: category, in: $0)
+        } ?? []
+        let candidateCount = unscoredPhotoIDs.count
+        let alreadyScoredCount = max(
             0,
-            (plannedCandidates?.candidateCount ?? 0) - alreadyScoredCount
+            (plannedCandidates?.candidateCount ?? 0) - candidateCount
         )
 
         func blocked(_ reason: String) -> AIFinalSelectionAvailability {
@@ -870,10 +872,6 @@ final class PhotoLibraryViewModel: ObservableObject {
             return blockedWithoutExplanation()
         }
 
-        let unscoredPhotoIDs = unscoredCandidatePhotoIDs(
-            for: category,
-            in: candidatePlan
-        )
         guard !unscoredPhotoIDs.isEmpty else {
             // 候选都已经有分了。这一刻该做的是看结果、采纳，而不是花钱把同一批照片再评一遍。
             //
@@ -1299,6 +1297,9 @@ final class PhotoLibraryViewModel: ObservableObject {
                 $0.scope == recommendation.scope
             }
             photos[index].aestheticRecommendations.append(recommendation)
+            // 这里刻意不记录分数来源。来源是给"停止后继续要不要复用旧分数"用的，
+            // 而教学从不联网、也从不走那条路。留空的方向是安全的：来源为空时旧分数
+            // 一律不复用，最坏结果是重评，而教学重评不花钱。
         }
 
         demoAIScoringCompletedBatchCount = max(

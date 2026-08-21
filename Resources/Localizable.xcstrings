@@ -213,7 +213,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Every %@ candidate has been scored. Review them and accept first."
+            "value": "Every %@ candidate has already been scored. Review and accept them first."
           }
         }
       }
@@ -2269,7 +2269,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "The %lld already scored will not be resent and will not be billed again."
+            "value": "Already-scored photos (%lld) will not be resent or billed again."
           }
         }
       }
@@ -4022,7 +4022,7 @@
         }
       }
     },
-    "继续%1$@ AI评分（还剩 %2$lld 张）": {
+    "继续%@ AI评分（还剩 %lld 张）": {
       "extractionState": "manual",
       "localizations": {
         "en": {

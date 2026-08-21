@@ -1320,9 +1320,12 @@ struct ContentView: View {
         // 这是花钱前的最后一次确认，所以必须写清"哪些不会再花钱"。
         let resumedCount = library.pendingAIFinalSelectionResumedScoreCount
         guard resumedCount > 0 else { return base }
-        return base + String(
-            localized: "已经评过分的 \(resumedCount) 张不会重新发送，也不会再次计费。"
-        )
+        // 换行而不是直接拼接：中文句号后面不留空格，英文句号后面必须留，
+        // 直接相加会在英文界面上得到 "…MiniMax-M3.The 1 already scored…"。
+        return """
+        \(base)
+        \(String(localized: "已经评过分的 \(resumedCount) 张不会重新发送，也不会再次计费。"))
+        """
     }
 
 
