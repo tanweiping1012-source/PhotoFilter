@@ -10,6 +10,11 @@ name: Diagnose test hang
 #   2. 若仍然挂死，用 sample 抓 xctest 的完整堆栈——不用再猜。
 on:
   workflow_dispatch:
+    inputs:
+      filter:
+        description: "swift test --filter 参数；留空跑全量"
+        required: false
+        default: ""
 
 jobs:
   diagnose:
@@ -28,7 +33,13 @@ jobs:
         timeout-minutes: 20
         run: |
           set +e
-          swift test > test-output.log 2>&1 &
+          if [ -n "${{ inputs.filter }}" ]; then
+            echo "只跑: ${{ inputs.filter }}"
+            swift test --filter "${{ inputs.filter }}" > test-output.log 2>&1 &
+          else
+            echo "跑全量"
+            swift test > test-output.log 2>&1 &
+          fi
           TEST_PID=$!
           for i in $(seq 1 40); do
             sleep 15
