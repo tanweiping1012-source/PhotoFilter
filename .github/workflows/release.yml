@@ -14,6 +14,9 @@ permissions:
 jobs:
   dmg:
     runs-on: macos-15
+    # 和 CI 同样的理由：scripts/check.sh 在 runner 上会挂死，没有超时就要烧到
+    # GitHub 的 6 小时上限。根因未定位前，先让它快速失败。
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
 
@@ -29,6 +32,7 @@ jobs:
 
       # 发布前必须先过完整门禁：没跑过 check.sh 的构建不允许出现在 Release 页。
       - name: scripts/check.sh
+        timeout-minutes: 30
         run: bash scripts/check.sh
 
       - name: Archive
